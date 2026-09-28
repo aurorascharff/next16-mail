@@ -18,36 +18,36 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
 
   return (
     <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
-        <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
-          {query.then(q =>
-            q ? (
-              <SelectionProvider key={q}>
-                <ThreadListHeaderFor page={1} q={q} title="Search" />
-                <NavBack>
-                  <div className="thread-results">
-                    <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
-                      <ThreadList page={1} q={q} />
-                    </Suspense>
-                  </div>
-                </NavBack>
-              </SelectionProvider>
-            ) : (
-              <>
-                <ThreadListHeader
-                  leading={
-                    <>
-                      <SelectAll />
-                      <ListTitle>Search</ListTitle>
-                    </>
-                  }
-                />
+      <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
+        {query.then(q =>
+          q ? (
+            <SelectionProvider key={q}>
+              <ThreadListHeaderFor page={1} q={q} title="Search" />
+              <NavBack>
                 <div className="thread-results">
-                  <EmptyState className="m-3" title="Search your mail" />
+                  <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
+                    <ThreadList page={1} q={q} />
+                  </Suspense>
                 </div>
-              </>
-            ),
-          )}
-        </Suspense>
-      </div>
+              </NavBack>
+            </SelectionProvider>
+          ) : (
+            <>
+              <ThreadListHeader
+                leading={
+                  <>
+                    <SelectAll />
+                    <ListTitle>Search</ListTitle>
+                  </>
+                }
+              />
+              <div className="thread-results">
+                <EmptyState className="m-3" title="Search your mail" />
+              </div>
+            </>
+          ),
+        )}
+      </Suspense>
+    </div>
   );
 }
