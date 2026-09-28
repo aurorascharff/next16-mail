@@ -210,33 +210,35 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
   animation: none;
 }
 
-/* Directional navigation between a list and a thread. */
-::view-transition-new(.nav-forward) {
-  --slide-offset: 60px;
-  animation:
-    var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
-    var(--duration-move) ease-in-out both slide;
-}
+/* Directional navigation between a list and a thread, on phones only. */
+@media (max-width: 767px) {
+  ::view-transition-new(.nav-forward) {
+    --slide-offset: 60px;
+    animation:
+      var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
+      var(--duration-move) ease-in-out both slide;
+  }
 
-::view-transition-old(.nav-forward) {
-  --slide-offset: -60px;
-  animation:
-    var(--duration-exit) ease-in both opacity-fade reverse,
-    var(--duration-move) ease-in-out both slide reverse;
-}
+  ::view-transition-old(.nav-forward) {
+    --slide-offset: -60px;
+    animation:
+      var(--duration-exit) ease-in both opacity-fade reverse,
+      var(--duration-move) ease-in-out both slide reverse;
+  }
 
-::view-transition-new(.nav-back) {
-  --slide-offset: -60px;
-  animation:
-    var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
-    var(--duration-move) ease-in-out both slide;
-}
+  ::view-transition-new(.nav-back) {
+    --slide-offset: -60px;
+    animation:
+      var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
+      var(--duration-move) ease-in-out both slide;
+  }
 
-::view-transition-old(.nav-back) {
-  --slide-offset: 60px;
-  animation:
-    var(--duration-exit) ease-in both opacity-fade reverse,
-    var(--duration-move) ease-in-out both slide reverse;
+  ::view-transition-old(.nav-back) {
+    --slide-offset: 60px;
+    animation:
+      var(--duration-exit) ease-in both opacity-fade reverse,
+      var(--duration-move) ease-in-out both slide reverse;
+  }
 }
 
 @keyframes slide {
