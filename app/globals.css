@@ -223,6 +223,22 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
   }
 }
 
+/* The sticky thread toolbar is pinned for Suspense reveals, but moves with its page on a push or pop. */
+@media (max-width: 767px) {
+  html:active-view-transition-type(nav-forward)::view-transition-new(thread-toolbar) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-push-in;
+  }
+  html:active-view-transition-type(nav-forward)::view-transition-old(thread-toolbar) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-push-out;
+  }
+  html:active-view-transition-type(nav-back)::view-transition-old(thread-toolbar) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-pop-out;
+  }
+  html:active-view-transition-type(nav-back)::view-transition-new(thread-toolbar) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-pop-in;
+  }
+}
+
 @media (min-width: 768px) {
   ::view-transition-old(.nav-forward),
   ::view-transition-new(.nav-forward),
