@@ -52,7 +52,7 @@ pnpm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser. You can browse the data with `pnpm run prisma.studio`, or wipe and re-seed the database with `pnpm run prisma.reset`.
 
-Use the toolbar in the top right to turn **Prefetch** off and compare, and turn **Delays** on to watch the latest message arrive from the prefetch and the earlier ones arrive on the navigation. Set `VERCEL_AI_GATEWAY_TOKEN` to screen replies and new messages for spam and profanity; without it, everything goes through. Two demo accounts share the seeded threads; switch between them from the sidebar.
+Use the toolbar in the bottom right to turn **Prefetch** off and compare, and turn **Delays** on to watch the latest message arrive from the prefetch and the earlier ones arrive on the navigation. Set `VERCEL_AI_GATEWAY_TOKEN` to screen replies and new messages for spam and profanity; without it, everything goes through. Two demo accounts share the seeded threads; switch between them from the sidebar.
 
 The driver follows `DATABASE_URL`: a `file:` URL uses SQLite through `@prisma/adapter-better-sqlite3`, and a `postgresql://` URL uses Postgres through `@prisma/adapter-pg`. `prisma.config.ts` swaps the schema provider to match, so `prisma generate`, `db push` and `db seed` work against either. Point `DATABASE_URL` at your Postgres database to seed production data.
 

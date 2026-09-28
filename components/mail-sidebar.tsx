@@ -24,9 +24,12 @@ export function MailSidebar() {
           <BrandMark className="text-accent size-7" />
           Stamp
         </PrefetchLink>
-        <IconButton external href="https://github.com/aurorascharff/next16-mail" label="View source on GitHub">
-          <GitHubIcon className="size-4" />
-        </IconButton>
+        <div className="flex items-center gap-1">
+          <ThemeToggle variant="inline" />
+          <IconButton external href="https://github.com/aurorascharff/next16-mail" label="View source on GitHub">
+            <GitHubIcon className="size-4" />
+          </IconButton>
+        </div>
       </div>
       <Suspense fallback={<CurrentUserCardSkeleton />}>
         <CurrentUserCard />
@@ -37,9 +40,6 @@ export function MailSidebar() {
         </Suspense>
       </ErrorBoundary>
       <ComposeButton />
-      <div className="mt-auto px-2">
-        <ThemeToggle variant="inline" />
-      </div>
     </aside>
   );
 }

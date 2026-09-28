@@ -55,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <ThemeProvider>
           <BoundaryProvider>
             {children}
-            <div className="demo-toggles fixed top-4 right-4 z-50 hidden items-start md:flex">
+            <div className="demo-toggles fixed right-4 bottom-4 z-50 hidden items-end md:flex">
               <Suspense>
                 <DemoToolbar />
               </Suspense>

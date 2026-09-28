@@ -12,7 +12,7 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
   }));
 
   return (
-    <article className="mx-auto w-full max-w-3xl px-5 pb-10 sm:px-8" data-reading-pane>
+    <article className="mx-auto w-full max-w-3xl px-5 pb-24 sm:px-8" data-reading-pane>
       <Suspense fallback={<ThreadHeaderSkeleton />}>
         {query.then(({ mailbox, threadId }) => (
           <AnimatedSuspense fallback={<ThreadHeaderSkeleton />} key={threadId}>
