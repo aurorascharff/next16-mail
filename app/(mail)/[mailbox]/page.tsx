@@ -17,14 +17,16 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   });
 
   return (
-    <div className="thread-results h-full overflow-y-auto overscroll-y-contain" data-thread-list>
+    <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton />}>
         {query.then(({ mailbox, page }) => (
           <SelectionProvider key={`${mailbox}:${page}`}>
             <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
-            <AnimatedSuspense fallback={<ThreadRowsSkeleton />}>
-              <ThreadList mailbox={mailbox} page={page} />
-            </AnimatedSuspense>
+            <div className="thread-results">
+              <AnimatedSuspense fallback={<ThreadRowsSkeleton />}>
+                <ThreadList mailbox={mailbox} page={page} />
+              </AnimatedSuspense>
+            </div>
           </SelectionProvider>
         ))}
       </Suspense>

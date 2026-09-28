@@ -16,15 +16,17 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
   const query = searchParams.then(params => (typeof params.q === 'string' ? params.q.trim() : ''));
 
   return (
-    <div className="thread-results h-full overflow-y-auto overscroll-y-contain" data-thread-list>
+    <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
         {query.then(q =>
           q ? (
             <SelectionProvider key={q}>
               <ThreadListHeaderFor page={1} q={q} title="Search" />
-              <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
-                <ThreadList page={1} q={q} />
-              </Suspense>
+              <div className="thread-results">
+                <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
+                  <ThreadList page={1} q={q} />
+                </Suspense>
+              </div>
             </SelectionProvider>
           ) : (
             <>
@@ -36,7 +38,9 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
                   </>
                 }
               />
-              <EmptyState className="m-3" title="Search your mail" />
+              <div className="thread-results">
+                <EmptyState className="m-3" title="Search your mail" />
+              </div>
             </>
           ),
         )}

@@ -94,9 +94,17 @@
   }
 }
 
+.thread-results,
+[data-mail-main] {
+  transition: opacity 200ms ease-out;
+}
+
 body:has(form[role='search'][data-pending]) .thread-results {
   opacity: 0.6;
-  transition: opacity 200ms ease-out;
+}
+
+body:has([data-account-switch][data-pending]) [data-mail-main] {
+  opacity: 0.5;
 }
 
 .skeleton-animation {

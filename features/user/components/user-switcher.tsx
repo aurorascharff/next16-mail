@@ -32,6 +32,7 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
       <div
         className="min-w-0"
         data-account={selected.email}
+        data-account-switch
         data-pending={isPending ? '' : undefined}
         data-testid="current-user"
       >

@@ -16,27 +16,27 @@ The architecture follows the [Next.js App Architecture](https://github.com/auror
 
 ## Features
 
-- **[Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)** with `'use cache'`, `cacheTag`, and `cacheLife`; the signed-in account comes from [`'use cache: private'`](https://nextjs.org/docs/app/api-reference/directives/use-cache-private).
-- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** with one shared App Shell per route and `prefetch={true}` on mailbox links, pager links, and the rows in view.
-- **[`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation)** awaited in the message components, so message bodies are produced only on the navigation.
-- **[Server Functions](https://nextjs.org/docs/app/getting-started/mutating-data)** for star, archive, read state, reply, compose, and unsend, invalidating only their own tags with [`updateTag`](https://nextjs.org/docs/app/api-reference/functions/updateTag). New text is screened through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
-- **[React Compiler](https://react.dev/learn/react-compiler)**, so there is no manual `useMemo` or `useCallback`.
-- **[View Transitions](https://nextjs.org/docs/app/guides/view-transitions)** on Suspense reveals, with the persistent chrome pinned.
-- **[Async React](https://github.com/rickhanlonii/async-react)**: nested `Suspense`, `useOptimistic`, form actions with Undo toasts, and transitions for search and bulk actions.
+- **[Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)** cache each query with `'use cache'`, name the data with `cacheTag`, and set its lifetime with `cacheLife`. The signed-in account is read with [`'use cache: private'`](https://nextjs.org/docs/app/api-reference/directives/use-cache-private) and passed into each cached query.
+- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** prefetches one shared App Shell per route. Mailbox links, pager links, and the thread rows in view use `prefetch={true}`, which also resolves each thread's header. Labels in the sidebar prefetch on hover.
+- **[`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation)** is awaited in the message components before they query, which keeps message bodies out of every prefetch while their cached results still serve later visits.
+- **[Server Functions](https://nextjs.org/docs/app/getting-started/mutating-data)** star, archive, mark read, reply, compose, and undo a send on the server, and invalidate only the tags they change with [`updateTag`](https://nextjs.org/docs/app/api-reference/functions/updateTag). New text is screened through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
+- **[React Compiler](https://react.dev/learn/react-compiler)** memoizes components and hooks automatically, so the code needs no manual `useMemo` or `useCallback`.
+- **[View Transitions](https://nextjs.org/docs/app/guides/view-transitions)** animate content as it streams in from Suspense.
+- **[Async React](https://github.com/rickhanlonii/async-react)** keeps the UI interactive during server work with `Suspense`, `useOptimistic`, `useTransition`, and `use`.
 
-## Purpose of this demo
+## How the data loads
 
-An inbox is a list of links to expensive pages. Prefetching every row in full renders every thread for a screen where the user opens two. Prefetching nothing leaves a blank page on every click. Stamp splits a thread into a summary and its messages and lets Next.js 16 deliver each part at the right moment.
+Each read is cached and arrives at a different stage of a navigation.
 
-| Read                                  | How it is cached                                         | When it arrives                                |
-| ------------------------------------- | -------------------------------------------------------- | ---------------------------------------------- |
-| Mailbox links and unread counts       | `'use cache'` per account                                | In the App Shell                               |
-| One page of a mailbox                 | `'use cache'` per account, mailbox, and page             | With a mailbox or pager link's prefetch        |
-| Subject, sender, labels, and toolbar  | `'use cache'` per thread and account                     | With a row's prefetch, as it scrolls into view |
-| The latest message and the reply form | `'use cache'` per thread, behind `unstable_navigation()` | On the navigation only                         |
-| Earlier messages in the thread        | `'use cache'` per thread, behind `unstable_navigation()` | On the navigation, in their own boundary       |
+| Read                                  | How it is cached                                        | When it arrives                         |
+| ------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
+| Mailbox links and unread counts       | `'use cache'` per account                               | In the App Shell                        |
+| One page of a mailbox                 | `'use cache'` per account, mailbox, and page            | With a mailbox or pager link's prefetch |
+| Subject, sender, labels, and toolbar  | `'use cache'` per thread and account                    | With a row's prefetch                   |
+| The latest message and the reply form | `'use cache'` per thread, after `unstable_navigation()` | On the navigation                       |
+| Earlier messages in the thread        | `'use cache'` per thread, after `unstable_navigation()` | On the navigation, below the latest one |
 
-Opening a thread shows its header at once. The newest message and the reply form reveal together, and the earlier messages stream in below them without moving anything above. Because the bodies are cached, the next visitor gets them without anyone having prefetched them.
+Opening a thread shows its header first. The latest message and the reply form appear together, and earlier messages stream in below them.
 
 ## Getting started
 
