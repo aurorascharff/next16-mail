@@ -5,12 +5,12 @@ export function AnimatedSuspense({ children, fallback }: { children: ReactNode; 
   return (
     <Suspense
       fallback={
-        <ViewTransition default="none" exit="auto">
+        <ViewTransition default="none" exit="fade-out">
           {fallback}
         </ViewTransition>
       }
     >
-      <ViewTransition enter="auto" default="none">
+      <ViewTransition default="none" enter="fade-in">
         {children}
       </ViewTransition>
     </Suspense>
