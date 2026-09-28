@@ -181,9 +181,6 @@ body:has(form[role='search'][data-pending]) .thread-results {
   animation: none;
 }
 
-::view-transition-group(thread-list-header),
-::view-transition-old(thread-list-header),
-::view-transition-new(thread-list-header),
 ::view-transition-group(thread-toolbar),
 ::view-transition-old(thread-toolbar),
 ::view-transition-new(thread-toolbar) {
