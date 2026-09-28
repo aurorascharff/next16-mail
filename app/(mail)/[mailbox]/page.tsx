@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { NavBack } from '@/components/animations';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
-import { DirectionalTransition } from '@/components/ui/directional-transition';
 import { SelectionProvider } from '@/features/thread/components/selection';
 import {
   ThreadList,
@@ -18,7 +18,7 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   });
 
   return (
-    <DirectionalTransition>
+    <NavBack>
       <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
         <Suspense fallback={<ThreadListSkeleton />}>
           {query.then(({ mailbox, page }) => (
@@ -33,6 +33,6 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
           ))}
         </Suspense>
       </div>
-    </DirectionalTransition>
+    </NavBack>
   );
 }

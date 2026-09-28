@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
+import { NavForward } from '@/components/animations';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
-import { DirectionalTransition } from '@/components/ui/directional-transition';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { ThreadHeader, ThreadHeaderSkeleton } from '@/features/thread/components/thread-header';
 import {
@@ -20,7 +20,7 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
   }));
 
   return (
-    <DirectionalTransition>
+    <NavForward>
       <article className="mx-auto w-full max-w-4xl px-5 pb-24 sm:px-8">
         <Suspense fallback={<ThreadHeaderSkeleton />}>
           {query.then(({ backHref, threadId }) => (
@@ -39,6 +39,6 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
           ))}
         </Suspense>
       </article>
-    </DirectionalTransition>
+    </NavForward>
   );
 }

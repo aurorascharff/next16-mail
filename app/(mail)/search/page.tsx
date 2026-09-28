@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { DirectionalTransition } from '@/components/ui/directional-transition';
+import { NavBack } from '@/components/animations';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SelectAll, SelectionProvider } from '@/features/thread/components/selection';
 import {
@@ -17,7 +17,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
   const query = searchParams.then(params => (typeof params.q === 'string' ? params.q.trim() : ''));
 
   return (
-    <DirectionalTransition>
+    <NavBack>
       <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
         <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
           {query.then(q =>
@@ -48,6 +48,6 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
           )}
         </Suspense>
       </div>
-    </DirectionalTransition>
+    </NavBack>
   );
 }
