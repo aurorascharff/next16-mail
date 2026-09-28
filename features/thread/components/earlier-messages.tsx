@@ -25,20 +25,13 @@ export async function EarlierMessages({ threadId }: { threadId: string }) {
   );
 }
 
-export function EarlierMessagesSkeleton({ count = 2 }: { count?: number }) {
+export function EarlierMessagesSkeleton() {
   return (
-    <div aria-hidden className="flex flex-col gap-8">
-      {Array.from({ length: count }).map((_, index) => (
-        <div
-          className="border-divider/70 dark:border-divider-dark/70 border-b pb-8 last:border-b-0 last:pb-0"
-          key={index}
-        >
-          <SenderRowSkeleton />
-          <div className="mt-4">
-            <MessageTextSkeleton animate={index === 0} lines={3} />
-          </div>
-        </div>
-      ))}
+    <div aria-hidden>
+      <SenderRowSkeleton />
+      <div className="mt-4">
+        <MessageTextSkeleton />
+      </div>
     </div>
   );
 }

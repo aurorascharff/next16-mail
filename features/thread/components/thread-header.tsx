@@ -63,16 +63,15 @@ export function ThreadHeaderSkeleton() {
         <Skeleton className="skeleton-subtle size-8 rounded-full lg:hidden" />
         <Skeleton className="skeleton-subtle size-8 rounded-full" />
         <Skeleton className="skeleton-subtle size-8 rounded-full" />
-        <Skeleton className="skeleton-subtle ml-2 h-3 w-16" />
       </div>
       <div className="mt-6 flex h-7 items-center sm:h-8">
-        <Skeleton className="h-5 w-2/3 max-w-md" />
+        <Skeleton className="h-5 w-1/2 max-w-sm" />
       </div>
       <div className="mt-6">
         <SenderRowSkeleton />
       </div>
       <div className="mt-5">
-        <MessageTextSkeleton lines={6} />
+        <MessageTextSkeleton lines={4} />
       </div>
     </div>
   );

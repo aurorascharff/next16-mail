@@ -78,29 +78,21 @@ export function SenderRowSkeleton() {
   return (
     <div className="flex h-11 items-center gap-3">
       <Skeleton className="skeleton-subtle size-10 rounded-full" />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="flex h-5 items-center gap-2">
-          <Skeleton className="h-3.5 w-28" />
-          <Skeleton className="skeleton-subtle hidden h-3 w-36 sm:block" />
-        </span>
-        <span className="flex h-5 items-center">
-          <Skeleton className="skeleton-subtle h-3 w-24" />
-        </span>
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="skeleton-subtle h-3 w-20" />
       </div>
-      <Skeleton className="skeleton-subtle h-3 w-28" />
     </div>
   );
 }
 
-export function MessageTextSkeleton({ animate = true, lines = 4 }: { animate?: boolean; lines?: number }) {
-  const widths = ['w-full', 'w-11/12', 'w-full', 'w-3/4', 'w-5/6'];
+export function MessageTextSkeleton({ lines = 3 }: { lines?: number }) {
+  const widths = ['w-full', 'w-11/12', 'w-2/3'];
   return (
     <div className="flex max-w-[68ch] flex-col">
       {Array.from({ length: lines }).map((_, index) => (
         <span className="flex h-6 items-center" key={index}>
-          <Skeleton
-            className={`${widths[index % widths.length]} h-3.5 ${animate && index < 2 ? '' : 'skeleton-subtle'}`}
-          />
+          <Skeleton className={`skeleton-subtle h-3 ${widths[index % widths.length]}`} />
         </span>
       ))}
     </div>

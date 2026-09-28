@@ -9,17 +9,12 @@ export async function CurrentUserCard() {
 
 export function CurrentUserCardSkeleton() {
   return (
-    <div className="flex h-12 items-center gap-2.5 rounded-lg px-2">
-      <Skeleton className="size-8 shrink-0 rounded-full" />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <span className="flex h-5 items-center">
-          <Skeleton className="h-3.5 w-24" />
-        </span>
-        <span className="flex h-4 items-center">
-          <Skeleton className="h-3 w-32" />
-        </span>
+    <div aria-hidden className="flex h-12 items-center gap-2.5 px-2">
+      <Skeleton className="skeleton-subtle size-8 shrink-0 rounded-full" />
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="skeleton-subtle h-3 w-32" />
       </div>
-      <Skeleton className="skeleton-subtle size-3.5 rounded" />
     </div>
   );
 }

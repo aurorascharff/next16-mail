@@ -1,6 +1,5 @@
 import { Archive, Inbox, Send, Star, type LucideIcon } from 'lucide-react';
 import { NavLink } from '@/components/ui/nav-link';
-import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { MAILBOX_LABELS, MAILBOXES, type Mailbox } from '../thread-mailboxes';
 import { getMailboxCounts } from '../thread-queries';
@@ -30,11 +29,7 @@ function MailboxNavShell({ counts }: { counts: MailboxCounts | null }) {
           <NavLink className={linkClass} href={`/${mailbox}`} key={mailbox} prefetch={true}>
             <Icon aria-hidden className="size-5 shrink-0" />
             <span className="flex-1">{MAILBOX_LABELS[mailbox]}</span>
-            {counts === null ? (
-              mailbox === 'archive' ? null : (
-                <Skeleton className="skeleton-subtle h-5 w-7 rounded-full" />
-              )
-            ) : count > 0 ? (
+            {count > 0 ? (
               <span
                 className={cn('text-gray group-aria-[current=page]:text-accent text-xs font-medium tabular-nums')}
                 data-testid={`unread-${mailbox}`}

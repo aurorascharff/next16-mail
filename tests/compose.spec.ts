@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 const visible = { visible: true };
 
 test.describe('Compose and accounts', () => {
-  test('a new message lands in Sent and in the other account’s inbox', async ({ page }) => {
+  test('a new message lands in Sent and in the other mailbox', async ({ page }) => {
     await page.goto('/inbox');
     await page.getByTestId('compose').filter(visible).click();
     await page.waitForURL(url => url.pathname === '/compose');
@@ -11,7 +11,7 @@ test.describe('Compose and accounts', () => {
     await expect(form).toBeVisible();
 
     const subject = `Stamp compose test ${Date.now()}`;
-    await form.getByLabel('To').selectOption({ label: 'Jonas Berg · jonas@stamp.dev' });
+    await form.getByLabel('To').selectOption({ label: 'Mara Lindqvist · mara@lindqvist.no' });
     await form.getByLabel('Subject').fill(subject);
     await form.getByLabel('Message').fill('Sent from the end-to-end suite.\n\nSecond paragraph, further down.');
     await form.getByLabel('Message').press('Meta+Enter');
@@ -22,18 +22,18 @@ test.describe('Compose and accounts', () => {
 
     await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
     await page
-      .getByRole('button', { name: /Jonas Berg/ })
+      .getByRole('button', { name: /mara@lindqvist\.no/ })
       .last()
       .click();
     await page.waitForURL(url => url.pathname === '/inbox');
-    await expect(page.getByTestId('current-user').filter(visible)).toContainText('Jonas Berg');
+    await expect(page.getByTestId('current-user').filter(visible)).toContainText('mara@lindqvist.no');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: subject })).toBeVisible();
 
     await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
     await page
-      .getByRole('button', { name: /Mara Lindqvist/ })
+      .getByRole('button', { name: /mara@stamp\.dev/ })
       .last()
       .click();
-    await expect(page.getByTestId('current-user').filter(visible)).toContainText('Mara Lindqvist');
+    await expect(page.getByTestId('current-user').filter(visible)).toContainText('mara@stamp.dev');
   });
 });

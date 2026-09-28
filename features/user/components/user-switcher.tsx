@@ -66,7 +66,7 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
               >
                 <UserAvatar name={account.name} size="sm" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium">{account.name}</span>
+                  <span className="block truncate text-sm font-medium">{account.title}</span>
                   <span className="text-gray block truncate text-xs">{account.email}</span>
                 </span>
                 {account.id === optimisticId ? <Check className="text-accent size-4 shrink-0" /> : null}

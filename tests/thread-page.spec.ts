@@ -106,7 +106,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
   });
 
   test('a thread from another account is not found', async ({ page }) => {
-    await page.goto('/inbox/thr-jonas-research');
+    await page.goto('/inbox/thr-home-cabin');
     await expect(page.getByText('Conversation not found.')).toBeVisible();
   });
 });
