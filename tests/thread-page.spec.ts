@@ -54,8 +54,9 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
   test('starring from the toolbar shows up in Starred', async ({ page }) => {
     await page.goto('/inbox/thr-typography');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
-    await page.getByRole('button', { exact: true, name: 'Star' }).first().click();
-    await expect(page.getByRole('button', { name: 'Remove star' }).first()).toBeVisible();
+    const toolbar = page.getByTestId('thread-header').filter(visible);
+    await toolbar.getByRole('button', { exact: true, name: 'Star' }).click();
+    await expect(toolbar.getByRole('button', { name: 'Remove star' })).toBeVisible();
 
     await page
       .getByRole('navigation', { name: 'Mailboxes' })
@@ -67,19 +68,24 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     ).toBeVisible();
 
     await page.goto('/starred/thr-typography');
-    await page.getByRole('button', { name: 'Remove star' }).first().click();
-    await expect(page.getByRole('button', { exact: true, name: 'Star' }).first()).toBeVisible();
+    const starredToolbar = page.getByTestId('thread-header').filter(visible);
+    await starredToolbar.getByRole('button', { name: 'Remove star' }).click();
+    await expect(starredToolbar.getByRole('button', { exact: true, name: 'Star' })).toBeVisible();
   });
 
   test('archiving removes the row and returns to the list', async ({ page }) => {
     await page.goto('/inbox/thr-lunch');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
-    await page.getByRole('button', { exact: true, name: 'Archive' }).first().click();
+    await page
+      .getByTestId('thread-header')
+      .filter(visible)
+      .getByRole('button', { exact: true, name: 'Archive' })
+      .click();
     await page.waitForURL(url => url.pathname === '/inbox');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
 
     await page.goto('/archive/thr-lunch');
-    await page.getByRole('button', { name: 'Move to inbox' }).first().click();
+    await page.getByTestId('thread-header').filter(visible).getByRole('button', { name: 'Move to inbox' }).click();
     await page.waitForURL(url => url.pathname === '/archive');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
   });

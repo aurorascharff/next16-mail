@@ -1,7 +1,6 @@
 import { Suspense } from 'react';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { BrandMark } from '@/components/ui/brand-mark';
-import ErrorBoundary from '@/components/ui/error-boundary';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
@@ -28,11 +27,9 @@ export function MailSidebar() {
       <Suspense fallback={<CurrentUserCardSkeleton />}>
         <CurrentUserCard />
       </Suspense>
-      <ErrorBoundary className="min-h-0 py-6" title="Mailboxes unavailable">
-        <Suspense fallback={<MailboxNavSkeleton />}>
-          <MailboxNav />
-        </Suspense>
-      </ErrorBoundary>
+      <Suspense fallback={<MailboxNavSkeleton />}>
+        <MailboxNav />
+      </Suspense>
       <ComposeButton />
       <div className="mt-auto px-2">
         <ThemeToggle variant="inline" />
