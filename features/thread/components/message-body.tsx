@@ -100,13 +100,13 @@ export function SenderRowSkeleton() {
   );
 }
 
-export function MessageTextSkeleton({ lines = 3 }: { lines?: number }) {
-  const widths = ['w-full', 'w-11/12', 'w-2/3'];
+export function MessageTextSkeleton({ lines = 6 }: { lines?: number }) {
+  const widths = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
   return (
     <div className="flex max-w-[68ch] flex-col">
       {Array.from({ length: lines }).map((_, index) => (
         <span className="flex h-6 items-center" key={index}>
-          <Skeleton className={`skeleton-subtle h-3 ${widths[index % widths.length]}`} />
+          <Skeleton className={`${index === 0 ? '' : 'skeleton-subtle'} h-3.5 ${widths[index % widths.length]}`} />
         </span>
       ))}
     </div>

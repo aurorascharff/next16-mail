@@ -17,7 +17,7 @@ export function AddressFields({
   const [showCc, setShowCc] = useState(false);
   const [showBcc, setShowBcc] = useState(false);
   const toggles = (
-    <span className="text-gray flex shrink-0 gap-2 text-xs">
+    <span className="text-gray flex shrink-0 gap-2 pr-1 text-xs">
       {!showCc ? (
         <button className="hover:text-black dark:hover:text-white" onClick={() => setShowCc(true)} type="button">
           Cc
@@ -34,59 +34,42 @@ export function AddressFields({
   return (
     <>
       {showTo ? (
-        <AddressRow id={`${idPrefix}-to`} label="To" trailing={toggles}>
-          <RecipientPicker contacts={contacts} id={`${idPrefix}-to`} name="to" />
-        </AddressRow>
+        <RecipientPicker contacts={contacts} id={`${idPrefix}-to`} name="to" prefix="To" trailing={toggles} />
       ) : (
         <div className="flex justify-end">{toggles}</div>
       )}
       {showCc ? (
-        <AddressRow id={`${idPrefix}-cc`} label="Cc" onClose={() => setShowCc(false)}>
-          <RecipientPicker contacts={contacts} id={`${idPrefix}-cc`} name="cc" />
-        </AddressRow>
+        <RecipientPicker
+          contacts={contacts}
+          id={`${idPrefix}-cc`}
+          name="cc"
+          prefix="Cc"
+          trailing={<CloseRow label="Remove Cc" onClick={() => setShowCc(false)} />}
+        />
       ) : null}
       {showBcc ? (
-        <AddressRow id={`${idPrefix}-bcc`} label="Bcc" onClose={() => setShowBcc(false)}>
-          <RecipientPicker contacts={contacts} id={`${idPrefix}-bcc`} name="bcc" />
-        </AddressRow>
+        <RecipientPicker
+          contacts={contacts}
+          id={`${idPrefix}-bcc`}
+          name="bcc"
+          prefix="Bcc"
+          trailing={<CloseRow label="Remove Bcc" onClick={() => setShowBcc(false)} />}
+        />
       ) : null}
     </>
   );
 }
 
-function AddressRow({
-  children,
-  id,
-  label,
-  onClose,
-  trailing,
-}: {
-  children: React.ReactNode;
-  id: string;
-  label: string;
-  onClose?: () => void;
-  trailing?: React.ReactNode;
-}) {
+function CloseRow({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <div className="flex items-start gap-3">
-      <label className="text-gray flex h-10 w-8 shrink-0 items-center text-xs font-semibold" htmlFor={id}>
-        {label}
-      </label>
-      <div className="min-w-0 flex-1">{children}</div>
-      <span className="flex h-10 shrink-0 items-center">
-        {trailing}
-        {onClose ? (
-          <button
-            aria-label={`Remove ${label}`}
-            className="text-gray inline-flex size-6 items-center justify-center rounded-full hover:text-black dark:hover:text-white"
-            onClick={onClose}
-            type="button"
-          >
-            <X className="size-3.5" />
-          </button>
-        ) : null}
-      </span>
-    </div>
+    <button
+      aria-label={label}
+      className="text-gray inline-flex size-6 shrink-0 items-center justify-center rounded-full hover:text-black dark:hover:text-white"
+      onClick={onClick}
+      type="button"
+    >
+      <X className="size-3.5" />
+    </button>
   );
 }
 

@@ -1,5 +1,6 @@
-import { Archive, Inbox, PenLine, Search, Send, Star } from 'lucide-react';
+import { Archive, Inbox, Search, Send, Star } from 'lucide-react';
 import { NavLink } from '@/components/ui/nav-link';
+import { ComposeButton } from '@/features/thread/components/compose-button';
 
 const items = [
   { href: '/inbox', icon: Inbox, label: 'Inbox' },
@@ -7,7 +8,6 @@ const items = [
   { href: '/sent', icon: Send, label: 'Sent' },
   { href: '/archive', icon: Archive, label: 'Archive' },
   { href: '/search', icon: Search, label: 'Search' },
-  { href: '/compose', icon: PenLine, label: 'Compose' },
 ] as const;
 
 export function MobileTabBar() {
@@ -27,6 +27,10 @@ export function MobileTabBar() {
           {label}
         </NavLink>
       ))}
+      <ComposeButton
+        className="text-muted flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[0.625rem] font-medium transition-colors"
+        variant="tab"
+      />
     </nav>
   );
 }

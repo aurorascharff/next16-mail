@@ -19,7 +19,7 @@ export async function ThreadList({ mailbox }: { mailbox: Mailbox }) {
   if (threads.length === 0) {
     return (
       <>
-        <ThreadListHeader leading={<ListTitle>{MAILBOX_LABELS[mailbox]}</ListTitle>} />
+        <ThreadListHeader leading={<ListTitle spaced>{MAILBOX_LABELS[mailbox]}</ListTitle>} />
         <EmptyState body={emptyCopy[mailbox].body} className="m-3" title={emptyCopy[mailbox].title} />
       </>
     );
@@ -34,19 +34,19 @@ export async function SearchResults({ query }: { query: string }) {
   if (threads.length === 0) {
     return (
       <>
-        <ThreadListHeader leading={<ListTitle>Search</ListTitle>} />
+        <ThreadListHeader leading={<ListTitle spaced>Search</ListTitle>} />
         <EmptyState className="m-3" title="No results" />
       </>
     );
   }
 
-  return <ThreadRows threads={threads} title="Search" />;
+  return <ThreadRows search={query} threads={threads} title="Search" />;
 }
 
 export function ThreadListSkeleton({ count = 6, title = '' }: { count?: number; title?: string }) {
   return (
     <div aria-hidden>
-      <ThreadListHeader leading={<ListTitle>{title}</ListTitle>} />
+      <ThreadListHeader leading={<ListTitle spaced>{title}</ListTitle>} />
       <ul className="flex flex-col">
         {Array.from({ length: count }).map((_, index) => (
           <li

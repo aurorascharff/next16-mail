@@ -7,6 +7,11 @@ export function ThreadListHeader({ leading, trailing }: { leading: React.ReactNo
   );
 }
 
-export function ListTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="truncate text-sm font-semibold tracking-tight">{children}</h2>;
+export function ListTitle({ children, spaced = false }: { children: React.ReactNode; spaced?: boolean }) {
+  return (
+    <>
+      {spaced ? <span aria-hidden className="ml-2 size-5 shrink-0" /> : null}
+      <h2 className="truncate text-sm font-semibold tracking-tight">{children}</h2>
+    </>
+  );
 }

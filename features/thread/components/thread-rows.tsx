@@ -42,10 +42,12 @@ const PAGE_SIZE = 10;
 
 export function ThreadRows({
   mailbox,
+  search,
   threads,
   title,
 }: {
   mailbox?: Mailbox;
+  search?: string;
   threads: ThreadListItem[];
   title: string;
 }) {
@@ -142,7 +144,7 @@ export function ThreadRows({
           <>
             <RowCheckbox
               checked={chosen.length > 0 && chosen.length === visible.length}
-              className="ml-1"
+              className="ml-2 size-5"
               label={chosen.length === visible.length ? 'Clear selection' : 'Select all on this page'}
               onChange={() =>
                 setSelected(chosen.length === visible.length ? new Set() : new Set(visible.map(t => t.id)))
@@ -190,7 +192,11 @@ export function ThreadRows({
       />
       <ul aria-label="Conversations" className="flex flex-col" data-testid="thread-rows">
         {visible.map(thread => {
-          const href = `/${mailbox ?? thread.mailbox}/${thread.id}` as Route;
+          const href = (
+            search === undefined
+              ? `/${mailbox ?? thread.mailbox}/${thread.id}`
+              : `/search/${thread.id}?q=${encodeURIComponent(search)}`
+          ) as Route;
           const active = pathname === href;
           const isSelected = selected.has(thread.id);
           const sender = thread.participants.at(-1) ?? '';
@@ -318,7 +324,7 @@ function RowCheckbox({
       role="checkbox"
       type="button"
     >
-      <Check className="size-3.5" strokeWidth={3} />
+      <Check className="size-3" strokeWidth={3} />
     </button>
   );
 }

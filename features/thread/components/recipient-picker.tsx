@@ -12,11 +12,15 @@ export function RecipientPicker({
   id,
   name,
   placeholder = 'Add people',
+  prefix,
+  trailing,
 }: {
   contacts: Participant[];
   id: string;
   name: string;
   placeholder?: string;
+  prefix?: string;
+  trailing?: React.ReactNode;
 }) {
   const [selected, setSelected] = useState<Participant[]>([]);
   const [query, setQuery] = useState('');
@@ -44,6 +48,11 @@ export function RecipientPicker({
   return (
     <div className="relative">
       <div className="border-divider focus-within:border-accent focus-within:ring-accent/25 dark:border-divider-dark dark:bg-card-dark flex min-h-10 flex-wrap items-center gap-1 rounded-md border bg-white px-2 py-1 transition-colors focus-within:ring-2">
+        {prefix ? (
+          <label className="text-gray w-8 shrink-0 pl-1 text-xs font-semibold" htmlFor={id}>
+            {prefix}
+          </label>
+        ) : null}
         {selected.map(contact => (
           <span
             className="bg-card flex h-7 items-center gap-1.5 rounded-full pr-1 pl-1 text-xs font-medium dark:bg-black"
@@ -75,6 +84,7 @@ export function RecipientPicker({
           store={combobox}
         />
         <input name={name} type="hidden" value={selected.map(contact => contact.email).join(',')} />
+        {trailing}
       </div>
       <Ariakit.ComboboxPopover
         className="border-divider dark:border-divider-dark z-50 max-h-64 overflow-auto rounded-xl border bg-white py-1 shadow-xl dark:bg-black"
@@ -93,12 +103,12 @@ export function RecipientPicker({
             <UserAvatar name={typedEmail} size="sm" />
             <span className="min-w-0 flex-1">
               <span className="block truncate font-medium">{typedEmail}</span>
-              <span className="text-gray block truncate text-xs">Add as a new contact</span>
+              <span className="text-gray block truncate text-xs">Send to this address</span>
             </span>
           </Ariakit.ComboboxItem>
         ) : null}
         {matches.length === 0 && !typedEmail ? (
-          <p className="text-gray px-3 py-2 text-sm">Type an address to add someone new</p>
+          <p className="text-gray px-3 py-2 text-sm">No contacts match, type a full address to use it</p>
         ) : (
           matches.map(contact => (
             <Ariakit.ComboboxItem

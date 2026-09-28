@@ -3,12 +3,13 @@ import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { ThreadHeader, ThreadHeaderSkeleton } from '@/features/thread/components/thread-header';
 import { ThreadMessages, ThreadMessagesSkeleton } from '@/features/thread/components/thread-messages';
-import { isMailbox } from '@/features/thread/thread-mailboxes';
 import type { Route } from 'next';
 
-export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'>) {
-  const query = params.then(({ mailbox, threadId }) => ({
-    backHref: `/${isMailbox(mailbox) ? mailbox : 'inbox'}` as Route,
+export default function SearchThreadPage({ params, searchParams }: PageProps<'/search/[threadId]'>) {
+  const query = Promise.all([params, searchParams]).then(([{ threadId }, values]) => ({
+    backHref: (typeof values.q === 'string' && values.q
+      ? `/search?q=${encodeURIComponent(values.q)}`
+      : '/search') as Route,
     threadId,
   }));
 

@@ -1,12 +1,24 @@
-import { BrandMark } from '@/components/ui/brand-mark';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import { AnimatedSuspense } from '@/components/ui/animated-suspense';
+import { ThreadList, ThreadListSkeleton } from '@/features/thread/components/thread-list';
+import { isMailbox, MAILBOX_LABELS } from '@/features/thread/thread-mailboxes';
 
-export default function MailboxPage() {
+export default function MailboxPage({ params }: PageProps<'/[mailbox]'>) {
+  const mailbox = params.then(({ mailbox }) => {
+    if (!isMailbox(mailbox)) notFound();
+    return mailbox;
+  });
+
   return (
-    <div className="hidden h-full place-items-center px-6 text-center lg:grid" data-testid="empty-pane">
-      <div className="flex max-w-xs flex-col items-center gap-3">
-        <BrandMark className="text-divider dark:text-divider-dark size-10" />
-        <p className="text-sm font-medium">Select a conversation</p>
-      </div>
+    <div className="thread-results h-full overflow-y-auto overscroll-contain" data-thread-list>
+      <Suspense fallback={<ThreadListSkeleton />}>
+        {mailbox.then(value => (
+          <AnimatedSuspense fallback={<ThreadListSkeleton title={MAILBOX_LABELS[value]} />}>
+            <ThreadList mailbox={value} />
+          </AnimatedSuspense>
+        ))}
+      </Suspense>
     </div>
   );
 }

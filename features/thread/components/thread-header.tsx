@@ -4,15 +4,15 @@ import { LabelChip } from './label-chip';
 import { MarkThreadRead } from './mark-thread-read';
 import { SenderRow, SenderRowSkeleton } from './message-body';
 import { ArchiveButton, BackToList, StarButton } from './thread-toolbar';
-import type { Mailbox } from '../thread-mailboxes';
+import type { Route } from 'next';
 
 export async function ThreadHeader({
+  backHref,
   children,
-  mailbox,
   threadId,
 }: {
+  backHref: Route;
   children: React.ReactNode;
-  mailbox: Mailbox;
   threadId: string;
 }) {
   const thread = await getThreadSummary(threadId);
@@ -21,26 +21,23 @@ export async function ThreadHeader({
     <>
       <header data-testid="thread-header">
         {!thread.read ? <MarkThreadRead threadId={threadId} /> : null}
-        <div className="flex items-start gap-2 pt-6">
-          <BackToList mailbox={mailbox} />
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-2">
-            <h1 className="text-xl leading-7 sm:text-2xl sm:leading-8">{thread.subject}</h1>
-            {thread.labels.map(label => (
-              <LabelChip key={label.id} label={label} size="md" />
-            ))}
-          </div>
-          <span className="text-gray flex h-7 shrink-0 items-center text-xs tabular-nums sm:h-8">
+        <div className="-mx-5 flex h-14 items-center gap-1 px-3 sm:-mx-8 sm:px-6">
+          <BackToList href={backHref} />
+          <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
+          <ArchiveButton backHref={backHref} threadId={thread.id} threadMailbox={thread.mailbox} />
+          <StarButton starred={thread.starred} threadId={thread.id} />
+          <span className="text-gray ml-auto text-xs tabular-nums">
             {thread.messageCount === 1 ? '1 message' : `${thread.messageCount} messages`}
           </span>
         </div>
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <h1 className="text-xl leading-7 font-semibold sm:text-2xl sm:leading-8">{thread.subject}</h1>
+          {thread.labels.map(label => (
+            <LabelChip key={label.id} label={label} size="md" />
+          ))}
+        </div>
         <div className="mt-6">
           <SenderRow
-            actions={
-              <>
-                <ArchiveButton mailbox={mailbox} threadId={thread.id} threadMailbox={thread.mailbox} />
-                <StarButton starred={thread.starred} threadId={thread.id} />
-              </>
-            }
             cc={thread.latest.cc}
             date={thread.latest.sentAt}
             from={thread.latest.from}
@@ -56,8 +53,15 @@ export async function ThreadHeader({
 export function ThreadHeaderSkeleton() {
   return (
     <div aria-hidden>
-      <div className="flex h-7 items-center pt-6 sm:h-8">
-        <Skeleton className="h-5 w-1/2 max-w-sm" />
+      <div className="-mx-5 flex h-14 items-center gap-1 px-3 sm:-mx-8 sm:px-6">
+        <Skeleton className="skeleton-subtle size-9 rounded-full" />
+        <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
+        <Skeleton className="skeleton-subtle size-9 rounded-full" />
+        <Skeleton className="skeleton-subtle size-9 rounded-full" />
+        <Skeleton className="skeleton-subtle ml-auto h-3 w-16" />
+      </div>
+      <div className="mt-4 flex h-7 items-center sm:h-8">
+        <Skeleton className="h-6 w-3/5 max-w-xl" />
       </div>
       <div className="mt-6">
         <SenderRowSkeleton />

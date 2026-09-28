@@ -94,16 +94,9 @@
   }
 }
 
-[data-thread-list]:has(form[data-pending]) .thread-results {
+body:has(form[role='search'][data-pending]) .thread-results {
   opacity: 0.6;
   transition: opacity 200ms ease-out;
-}
-
-/* Reading pane open on a small screen: hide the list, the pane takes the column. */
-@media (width < 64rem) {
-  .mail-split:has([data-reading-pane]) > [data-thread-list] {
-    display: none;
-  }
 }
 
 .skeleton-animation {

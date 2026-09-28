@@ -10,7 +10,6 @@ import { IconButton } from '@/components/ui/icon-button';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { cn } from '@/lib/utils';
 import { moveThread, toggleStar } from '../thread-actions';
-import type { Mailbox } from '../thread-mailboxes';
 import type { Route } from 'next';
 
 export function StarButton({ starred, threadId }: { starred: boolean; threadId: string }) {
@@ -35,11 +34,11 @@ export function StarButton({ starred, threadId }: { starred: boolean; threadId: 
 }
 
 export function ArchiveButton({
-  mailbox,
+  backHref,
   threadId,
   threadMailbox,
 }: {
-  mailbox: Mailbox;
+  backHref: Route;
   threadId: string;
   threadMailbox: string;
 }) {
@@ -59,7 +58,7 @@ export function ArchiveButton({
             toast.error(result.error);
             return;
           }
-          router.push(`/${mailbox}` as Route);
+          router.push(backHref);
           actionToast(archived ? 'Conversation moved to inbox' : 'Conversation archived', {
             label: 'Undo',
             run: () => moveThread(threadId, archived ? 'archive' : 'inbox'),
@@ -72,15 +71,15 @@ export function ArchiveButton({
   );
 }
 
-export function BackToList({ mailbox }: { mailbox: Mailbox }) {
+export function BackToList({ href }: { href: Route }) {
   return (
     <Boundary label="BackToList" asChild>
       <PrefetchLink
         aria-label="Back to list"
-        className="text-muted hover:bg-card dark:hover:bg-card-dark mt-0.5 inline-flex size-7 items-center justify-center rounded-full transition-colors hover:text-black lg:hidden dark:hover:text-white"
-        href={`/${mailbox}`}
+        className="text-gray hover:bg-card dark:hover:bg-card-dark inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:text-black dark:hover:text-white"
+        href={href}
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft className="size-5" />
       </PrefetchLink>
     </Boundary>
   );

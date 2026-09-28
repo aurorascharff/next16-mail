@@ -34,7 +34,11 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await row.getByRole('link').click();
     await page.waitForURL(url => url.pathname === '/inbox/thr-hover-hook');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
-    await expect(row).toHaveAttribute('data-read', '');
+    await page.getByRole('link', { name: 'Back to list' }).click();
+    await page.waitForURL(url => url.pathname === '/inbox');
+    await expect(
+      page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' }),
+    ).toHaveAttribute('data-read', '');
   });
 
   test('a reply becomes the latest message and the previous one moves down', async ({ page }) => {

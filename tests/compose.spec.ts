@@ -6,7 +6,6 @@ test.describe('Compose and accounts', () => {
   test('a new message lands in Sent and in the other mailbox', async ({ page }) => {
     await page.goto('/inbox');
     await page.getByTestId('compose').filter(visible).click();
-    await page.waitForURL(url => url.pathname === '/compose');
     const form = page.getByTestId('compose-form').filter(visible);
     await expect(form).toBeVisible();
 
@@ -21,6 +20,7 @@ test.describe('Compose and accounts', () => {
     await form.getByLabel('Message').press('Meta+Enter');
 
     await page.waitForURL(url => url.pathname.startsWith('/sent/thr-'));
+    await expect(page.getByTestId('compose-panel')).toHaveCount(0);
     await expect(page.getByRole('heading', { exact: true, level: 1, name: subject }).filter(visible)).toBeVisible();
     await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Second paragraph, further down.');
 
