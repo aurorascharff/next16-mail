@@ -18,21 +18,21 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   });
 
   return (
-    <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
-      <Suspense fallback={<ThreadListSkeleton />}>
-        {query.then(({ mailbox, page }) => (
-          <SelectionProvider key={`${mailbox}:${page}`}>
-            <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
-            <NavBack>
+    <NavBack>
+      <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
+        <Suspense fallback={<ThreadListSkeleton />}>
+          {query.then(({ mailbox, page }) => (
+            <SelectionProvider key={`${mailbox}:${page}`}>
+              <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
               <div className="thread-results">
                 <AnimatedSuspense fallback={<ThreadRowsSkeleton />}>
                   <ThreadList mailbox={mailbox} page={page} />
                 </AnimatedSuspense>
               </div>
-            </NavBack>
-          </SelectionProvider>
-        ))}
-      </Suspense>
-    </div>
+            </SelectionProvider>
+          ))}
+        </Suspense>
+      </div>
+    </NavBack>
   );
 }

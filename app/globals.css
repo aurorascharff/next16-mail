@@ -170,6 +170,7 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(thread-toolbar),
+::view-transition-group(thread-list-header),
 ::view-transition-group(dialog),
 ::view-transition-group(dialog-backdrop),
 ::view-transition-group(toaster) {
@@ -188,6 +189,7 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
 ::view-transition-old(demo-toolbar),
 ::view-transition-old(theme-toggle),
 ::view-transition-old(thread-toolbar),
+::view-transition-old(thread-list-header),
 ::view-transition-old(dialog),
 ::view-transition-old(dialog-backdrop),
 ::view-transition-old(toaster) {
@@ -201,6 +203,7 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
 ::view-transition-new(demo-toolbar),
 ::view-transition-new(theme-toggle),
 ::view-transition-new(thread-toolbar),
+::view-transition-new(thread-list-header),
 ::view-transition-new(dialog),
 ::view-transition-new(dialog-backdrop),
 ::view-transition-new(toaster) {
