@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { cacheLife, cacheTag, unstable_navigation } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { isSlowEnabled } from '@/features/demo/demo-queries';
 import { verifyUser } from '@/features/user/user-queries';
@@ -239,19 +239,10 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   };
 }
 
-// Message content waits for `unstable_navigation()`, which keeps it out of the App Shell and every prefetch,
-// so prefetching a page of rows never downloads bodies, while the cached result still serves the next visitor.
+// Message content. The components await `unstable_navigation()` before calling these, which keeps bodies out of
+// the App Shell and every prefetch.
 export async function getLatestMessage(threadId: string): Promise<ThreadMessage | null> {
-  await unstable_navigation();
-  return getLatestMessageCached(threadId, await isSlowEnabled());
-}
-
-async function getLatestMessageCached(threadId: string, slow: boolean): Promise<ThreadMessage | null> {
-  'use cache';
-  cacheLife('hours');
-  cacheTag(threadTags.detail(threadId));
-
-  await delay(1000, slow);
+  await delay(1000, await isSlowEnabled());
   const message = await prisma.message.findFirst({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
@@ -261,16 +252,7 @@ async function getLatestMessageCached(threadId: string, slow: boolean): Promise<
 }
 
 export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
-  await unstable_navigation();
-  return getEarlierMessagesCached(threadId, await isSlowEnabled());
-}
-
-async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
-  'use cache';
-  cacheLife('hours');
-  cacheTag(threadTags.detail(threadId));
-
-  await delay(1800, slow);
+  await delay(1800, await isSlowEnabled());
   const messages = await prisma.message.findMany({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
