@@ -16,13 +16,13 @@ The architecture follows the [Next.js App Architecture](https://github.com/auror
 
 ## Features
 
-- **[Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)** cache mailbox pages, thread summaries, and message bodies with `'use cache'`, name them with `cacheTag`, and set their lifetime with `cacheLife`. The signed-in account is resolved with [`'use cache: private'`](https://nextjs.org/docs/app/api-reference/directives/use-cache-private) and passed into every cached read.
-- **[`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation)** is awaited in the message components, right before their queries, so message bodies stay out of the App Shell and out of every per-link prefetch while remaining cached. A prefetched row only ever carries the thread's summary.
-- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** prefetches one shared App Shell per route. Mailbox links, pager links, and every row in view use `prefetch={true}`; labels prefetch on hover intent.
-- **[Server Functions](https://nextjs.org/docs/app/getting-started/mutating-data)** star, archive, mark read, reply, compose, and unsend on the server. New text is screened through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), and each mutation invalidates only the tags it changes with [`updateTag`](https://nextjs.org/docs/app/api-reference/functions/updateTag). Sending and archiving stay in place and offer Undo from a toast.
-- **[React Compiler](https://react.dev/learn/react-compiler)** memoizes components and hooks automatically, so the code needs no manual `useMemo` or `useCallback`.
-- **[View Transitions](https://nextjs.org/docs/app/guides/view-transitions)** cross-fade content as it streams in from Suspense, while the search field, the docked compose panel, toolbars, and toasts stay pinned.
-- **[Async React](https://github.com/rickhanlonii/async-react)** keeps the UI interactive with nested `Suspense`, `useOptimistic` for stars, archiving, and read state, form actions for reply and compose, and transitions for search and bulk actions.
+- **[Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents)** with `'use cache'`, `cacheTag`, and `cacheLife`; the signed-in account comes from [`'use cache: private'`](https://nextjs.org/docs/app/api-reference/directives/use-cache-private).
+- **[Partial Prefetching](https://nextjs.org/docs/app/guides/adopting-partial-prefetching)** with one shared App Shell per route and `prefetch={true}` on mailbox links, pager links, and the rows in view.
+- **[`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation)** awaited in the message components, so message bodies are produced only on the navigation.
+- **[Server Functions](https://nextjs.org/docs/app/getting-started/mutating-data)** for star, archive, read state, reply, compose, and unsend, invalidating only their own tags with [`updateTag`](https://nextjs.org/docs/app/api-reference/functions/updateTag). New text is screened through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway).
+- **[React Compiler](https://react.dev/learn/react-compiler)**, so there is no manual `useMemo` or `useCallback`.
+- **[View Transitions](https://nextjs.org/docs/app/guides/view-transitions)** on Suspense reveals, with the persistent chrome pinned.
+- **[Async React](https://github.com/rickhanlonii/async-react)**: nested `Suspense`, `useOptimistic`, form actions with Undo toasts, and transitions for search and bulk actions.
 
 ## Purpose of this demo
 
