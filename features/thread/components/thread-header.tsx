@@ -6,34 +6,44 @@ import { SenderRow, SenderRowSkeleton } from './message-body';
 import { ArchiveButton, BackToList, StarButton } from './thread-toolbar';
 import type { Route } from 'next';
 
-export async function ThreadHeader({
-  backHref,
-  children,
-  threadId,
-}: {
-  backHref: Route;
-  children: React.ReactNode;
-  threadId: string;
-}) {
+const toolbarClass =
+  'border-divider/70 dark:border-divider-dark/70 sticky top-0 z-30 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90';
+
+export async function ThreadToolbar({ backHref, threadId }: { backHref: Route; threadId: string }) {
+  const thread = await getThreadSummary(threadId);
+
+  return (
+    <div className={toolbarClass} data-testid="thread-toolbar" style={{ viewTransitionName: 'thread-toolbar' }}>
+      {!thread.read ? <MarkThreadRead threadId={threadId} /> : null}
+      <BackToList href={backHref} />
+      <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
+      <ArchiveButton backHref={backHref} threadId={thread.id} threadMailbox={thread.mailbox} />
+      <StarButton starred={thread.starred} threadId={thread.id} />
+      <span className="text-gray ml-auto text-xs tabular-nums">
+        {thread.messageCount === 1 ? '1 message' : `${thread.messageCount} messages`}
+      </span>
+    </div>
+  );
+}
+
+export function ThreadToolbarSkeleton() {
+  return (
+    <div aria-hidden className={toolbarClass} style={{ viewTransitionName: 'thread-toolbar' }}>
+      <Skeleton className="size-9 rounded-full" />
+      <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
+      <Skeleton className="size-9 rounded-full" />
+      <Skeleton className="size-9 rounded-full" />
+    </div>
+  );
+}
+
+export async function ThreadHeader({ children, threadId }: { children: React.ReactNode; threadId: string }) {
   const thread = await getThreadSummary(threadId);
 
   return (
     <>
       <header data-testid="thread-header">
-        {!thread.read ? <MarkThreadRead threadId={threadId} /> : null}
-        <div
-          className="border-divider/70 dark:border-divider-dark/70 sticky top-0 z-30 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90"
-          style={{ viewTransitionName: 'thread-toolbar' }}
-        >
-          <BackToList href={backHref} />
-          <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
-          <ArchiveButton backHref={backHref} threadId={thread.id} threadMailbox={thread.mailbox} />
-          <StarButton starred={thread.starred} threadId={thread.id} />
-          <span className="text-gray ml-auto text-xs tabular-nums">
-            {thread.messageCount === 1 ? '1 message' : `${thread.messageCount} messages`}
-          </span>
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
           <h1 className="text-xl leading-7 font-semibold sm:text-2xl sm:leading-8">{thread.subject}</h1>
           {thread.labels.map(label => (
             <LabelChip key={label.id} label={label} size="md" />
@@ -56,16 +66,7 @@ export async function ThreadHeader({
 export function ThreadHeaderSkeleton() {
   return (
     <div aria-hidden>
-      <div
-        className="border-divider/70 dark:border-divider-dark/70 sticky top-0 z-30 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90"
-        style={{ viewTransitionName: 'thread-toolbar' }}
-      >
-        <Skeleton className="size-9 rounded-full" />
-        <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
-        <Skeleton className="size-9 rounded-full" />
-        <Skeleton className="size-9 rounded-full" />
-      </div>
-      <div className="mt-4 flex h-7 items-center sm:h-8">
+      <div className="flex h-7 items-center pt-4 sm:h-8">
         <Skeleton className="h-6 w-3/5 max-w-xl" />
       </div>
       <div className="mt-6">

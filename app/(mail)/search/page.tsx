@@ -17,18 +17,19 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
   const query = searchParams.then(params => (typeof params.q === 'string' ? params.q.trim() : ''));
 
   return (
-    <NavBack>
-      <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
+    <div className="h-full overflow-y-auto overscroll-y-contain" data-thread-list>
         <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
           {query.then(q =>
             q ? (
               <SelectionProvider key={q}>
                 <ThreadListHeaderFor page={1} q={q} title="Search" />
-                <div className="thread-results">
-                  <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
-                    <ThreadList page={1} q={q} />
-                  </Suspense>
-                </div>
+                <NavBack>
+                  <div className="thread-results">
+                    <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
+                      <ThreadList page={1} q={q} />
+                    </Suspense>
+                  </div>
+                </NavBack>
               </SelectionProvider>
             ) : (
               <>
@@ -48,6 +49,5 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
           )}
         </Suspense>
       </div>
-    </NavBack>
   );
 }
