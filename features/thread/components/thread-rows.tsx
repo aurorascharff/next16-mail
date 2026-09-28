@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
+import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { markThreadsRead, moveThread, moveThreads, starThreads, toggleStar } from '../thread-actions';
@@ -38,28 +39,28 @@ function threadReducer(threads: ThreadListItem[], action: RowAction) {
   });
 }
 
-const PAGE_SIZE = 10;
+type Pager = { base: string; page: number; pageSize: number; total: number };
 
 export function ThreadRows({
   mailbox,
+  pager,
   search,
   threads,
   title,
 }: {
   mailbox?: Mailbox;
+  pager: Pager;
   search?: string;
   threads: ThreadListItem[];
   title: string;
 }) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, threadReducer);
-  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const router = useRouter();
-  const pageCount = Math.max(1, Math.ceil(optimisticThreads.length / PAGE_SIZE));
-  const current = Math.min(page, pageCount - 1);
-  const start = current * PAGE_SIZE;
-  const visible = optimisticThreads.slice(start, start + PAGE_SIZE);
+  const visible = optimisticThreads;
+  const start = (pager.page - 1) * pager.pageSize;
+  const pageCount = Math.max(1, Math.ceil(pager.total / pager.pageSize));
   const chosen = visible.filter(thread => selected.has(thread.id));
   const canMove = mailbox === 'inbox' || mailbox === 'archive';
 
@@ -178,14 +179,14 @@ export function ThreadRows({
           ) : (
             <>
               <span className="text-gray mr-1 text-xs tabular-nums">
-                {start + 1}–{start + visible.length} of {optimisticThreads.length}
+                {start + 1}–{start + visible.length} of {pager.total}
               </span>
-              <RowButton disabled={current === 0} label="Newer" onClick={() => setPage(current - 1)}>
+              <PagerLink disabled={pager.page <= 1} href={pageHref(pager, pager.page - 1)} label="Newer">
                 <ChevronLeft className="size-4" />
-              </RowButton>
-              <RowButton disabled={current >= pageCount - 1} label="Older" onClick={() => setPage(current + 1)}>
+              </PagerLink>
+              <PagerLink disabled={pager.page >= pageCount} href={pageHref(pager, pager.page + 1)} label="Older">
                 <ChevronRight className="size-4" />
-              </RowButton>
+              </PagerLink>
             </>
           )
         }
@@ -205,7 +206,11 @@ export function ThreadRows({
             <li
               className={cn(
                 'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
-                active || isSelected ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
+                active || isSelected
+                  ? 'bg-accent/10 dark:bg-accent/15'
+                  : thread.read
+                    ? 'bg-card/60 hover:bg-card dark:bg-card-dark/70 dark:hover:bg-card-dark'
+                    : 'hover:bg-card/40 dark:hover:bg-card-dark/40',
               )}
               data-read={thread.read ? '' : undefined}
               data-removing={leaving ? '' : undefined}
@@ -227,13 +232,12 @@ export function ThreadRows({
               />
               <div className="flex min-w-0 flex-col">
                 <div className="flex h-5 items-center gap-1.5">
-                  {!thread.read ? (
-                    <span aria-label="Unread" className="bg-accent size-1.5 shrink-0 rounded-full" />
-                  ) : null}
                   <span
                     className={cn(
                       'truncate text-sm',
-                      thread.read ? 'text-gray' : 'font-semibold tracking-tight text-black dark:text-white',
+                      thread.read
+                        ? 'text-black/70 dark:text-white/70'
+                        : 'font-bold tracking-tight text-black dark:text-white',
                     )}
                   >
                     {thread.participants.join(', ')}
@@ -244,7 +248,7 @@ export function ThreadRows({
                   <ThreadTime
                     className={cn(
                       'ml-auto shrink-0 text-xs tabular-nums',
-                      thread.read ? 'text-gray' : 'text-accent font-semibold',
+                      thread.read ? 'text-gray' : 'font-bold text-black dark:text-white',
                     )}
                     iso={thread.updatedAt}
                   />
@@ -252,7 +256,7 @@ export function ThreadRows({
                 <div
                   className={cn(
                     'h-5 truncate text-sm leading-5',
-                    thread.read ? 'text-black/80 dark:text-white/80' : 'font-medium text-black dark:text-white',
+                    thread.read ? 'text-black/70 dark:text-white/70' : 'font-bold text-black dark:text-white',
                   )}
                 >
                   {thread.subject}
@@ -295,6 +299,37 @@ export function ThreadRows({
         })}
       </ul>
     </Boundary>
+  );
+}
+
+function pageHref(pager: Pager, page: number) {
+  return (page <= 1 ? pager.base : `${pager.base}?page=${page}`) as Route;
+}
+
+function PagerLink({
+  children,
+  disabled,
+  href,
+  label,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  href: Route;
+  label: string;
+}) {
+  const className =
+    'text-gray inline-flex size-6 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white';
+  if (disabled) {
+    return (
+      <span aria-disabled className={cn(className, 'cursor-default opacity-40 hover:bg-transparent')}>
+        {children}
+      </span>
+    );
+  }
+  return (
+    <PrefetchLink aria-label={label} className={className} href={href} title={label}>
+      {children}
+    </PrefetchLink>
   );
 }
 
