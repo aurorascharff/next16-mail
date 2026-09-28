@@ -140,7 +140,7 @@ export async function sendReply(formData: FormData): Promise<ReplyResult> {
   return { messageId, ok: true };
 }
 
-export type ComposeResult = { ok: true; threadId: string } | { ok: false; error: string };
+export type ComposeResult = { ok: true; messageId: string } | { ok: false; error: string };
 
 const composeSchema = z.object({
   bcc: z.string().optional(),
@@ -170,6 +170,7 @@ export async function composeMessage(formData: FormData): Promise<ComposeResult>
 
   const sentAt = new Date();
   const threadId = `thr-${crypto.randomUUID().slice(0, 8)}`;
+  const messageId = `msg-${crypto.randomUUID().slice(0, 8)}`;
   await prisma.thread.create({
     data: {
       id: threadId,
@@ -177,7 +178,7 @@ export async function composeMessage(formData: FormData): Promise<ComposeResult>
         create: {
           body,
           fromId: user.id,
-          id: `msg-${crypto.randomUUID().slice(0, 8)}`,
+          id: messageId,
           recipients: {
             create: resolved.recipients.map(recipient => ({ kind: recipient.kind, userId: recipient.userId })),
           },
@@ -199,7 +200,7 @@ export async function composeMessage(formData: FormData): Promise<ComposeResult>
 
   updateTag(threadTags.list(user.id));
   for (const recipient of resolved.recipients) if (recipient.account) updateTag(threadTags.list(recipient.userId));
-  return { ok: true, threadId };
+  return { messageId, ok: true };
 }
 
 // Undo for a message you just sent: only your own message goes, and the thread with it when nothing else remains.
