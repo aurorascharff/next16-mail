@@ -90,6 +90,21 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
   });
 
+  test('archiving from a row fades it out until the server confirms', async ({ page }) => {
+    await page.goto('/inbox');
+    const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'On-call rotation for October' });
+    await row.hover();
+    await row.getByRole('button', { exact: true, name: 'Archive' }).click();
+    await expect(row).toHaveCount(0);
+
+    await page.goto('/archive');
+    const archived = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'On-call rotation for October' });
+    await expect(archived).toBeVisible();
+    await archived.hover();
+    await archived.getByRole('button', { name: 'Move to inbox' }).click();
+    await expect(archived).toHaveCount(0);
+  });
+
   test('a thread from another account is not found', async ({ page }) => {
     await page.goto('/inbox/thr-jonas-research');
     await expect(page.getByText('Conversation not found.')).toBeVisible();

@@ -15,14 +15,14 @@ import type { Mailbox } from '../thread-mailboxes';
 import type { ThreadListItem } from '../types/thread';
 import type { Route } from 'next';
 
-type RowAction = { type: 'star'; id: string; starred: boolean } | { type: 'move'; id: string };
+type RowAction = { type: 'star'; id: string; starred: boolean } | { type: 'move'; id: string; mailbox: string };
 
 function threadReducer(threads: ThreadListItem[], action: RowAction) {
   switch (action.type) {
     case 'star':
       return threads.map(thread => (thread.id === action.id ? { ...thread, starred: action.starred } : thread));
     case 'move':
-      return threads.filter(thread => thread.id !== action.id);
+      return threads.map(thread => (thread.id === action.id ? { ...thread, mailbox: action.mailbox } : thread));
   }
 }
 
@@ -42,13 +42,14 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
   function move(thread: ThreadListItem, href: string) {
     const target = thread.mailbox === 'archive' ? 'inbox' : 'archive';
     startTransition(async () => {
-      if (mailbox === 'inbox' || mailbox === 'archive') dispatch({ id: thread.id, type: 'move' });
+      dispatch({ id: thread.id, mailbox: target, type: 'move' });
       const result = await moveThread(thread.id, target);
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
-      if (pathname === href && mailbox) router.push(`/${mailbox}` as Route);
+      if (pathname === href && mailbox && mailbox !== 'starred' && mailbox !== 'sent')
+        router.push(`/${mailbox}` as Route);
     });
   }
 
@@ -59,13 +60,15 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
           const href = `/${mailbox ?? thread.mailbox}/${thread.id}` as Route;
           const active = pathname === href;
           const sender = thread.participants.at(-1) ?? '';
+          const leaving = (mailbox === 'inbox' || mailbox === 'archive') && thread.mailbox !== mailbox;
           return (
             <li
               className={cn(
-                'group border-divider/70 dark:border-divider-dark/70 relative border-b transition-colors',
+                'group border-divider/70 dark:border-divider-dark/70 relative border-b transition-[background-color,opacity] duration-200 data-removing:opacity-40',
                 active ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
               )}
               data-read={thread.read ? '' : undefined}
+              data-removing={leaving ? '' : undefined}
               data-testid="thread-row"
               key={thread.id}
             >
