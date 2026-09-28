@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserAvatar } from '@/features/user/components/user-avatar';
-import { formatBytes, formatFullDate } from '@/lib/utils';
+import { cn, formatBytes, formatFullDate } from '@/lib/utils';
 import type { Attachment, Participant } from '../types/thread';
 
 export function SenderRow({
@@ -91,24 +91,15 @@ export function Attachments({ attachments }: { attachments: Attachment[] }) {
 export function SenderRowSkeleton() {
   return (
     <div className="flex h-11 items-center gap-3">
-      <Skeleton className="skeleton-subtle size-10 rounded-full" />
+      <Skeleton className="size-10 rounded-full" />
       <div className="flex flex-col gap-2">
-        <Skeleton className="h-3 w-28" />
-        <Skeleton className="skeleton-subtle h-3 w-20" />
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-3.5 w-24" />
       </div>
     </div>
   );
 }
 
-export function MessageTextSkeleton({ lines = 6 }: { lines?: number }) {
-  const widths = ['w-full', 'w-11/12', 'w-full', 'w-4/5', 'w-full', 'w-2/3'];
-  return (
-    <div className="flex max-w-[68ch] flex-col">
-      {Array.from({ length: lines }).map((_, index) => (
-        <span className="flex h-6 items-center" key={index}>
-          <Skeleton className={`${index === 0 ? '' : 'skeleton-subtle'} h-3.5 ${widths[index % widths.length]}`} />
-        </span>
-      ))}
-    </div>
-  );
+export function MessageTextSkeleton({ className }: { className?: string }) {
+  return <Skeleton className={cn('h-40 max-w-[68ch] rounded-lg', className)} />;
 }

@@ -65,4 +65,20 @@ test.describe('Inbox (/inbox)', () => {
     await page.getByRole('button', { exact: true, name: 'Move to inbox' }).first().click();
     await expect(archived.filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
   });
+
+  test('the pager moves through the inbox in pages of ten', async ({ page }) => {
+    await page.goto('/inbox');
+    const rows = page.getByTestId('thread-row').filter({ visible: true });
+    await expect(rows).toHaveCount(10);
+    await expect(page.getByText(/^1–10 of \d+$/)).toBeVisible();
+
+    await page.getByRole('link', { name: 'Older' }).click();
+    await page.waitForURL(url => url.pathname === '/inbox' && url.searchParams.get('page') === '2');
+    await expect(page.getByText(/^11–\d+ of \d+$/)).toBeVisible();
+    await expect(rows.first()).toBeVisible();
+
+    await page.getByRole('link', { name: 'Newer' }).click();
+    await page.waitForURL(url => url.pathname === '/inbox' && url.searchParams.get('page') === null);
+    await expect(rows).toHaveCount(10);
+  });
 });

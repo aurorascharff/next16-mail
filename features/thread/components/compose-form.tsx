@@ -33,7 +33,7 @@ export function ComposeForm({
         <Input autoComplete="off" id="compose-subject" maxLength={120} name="subject" placeholder="Subject" required />
         <Textarea
           aria-label="Message"
-          className="min-h-40"
+          className="min-h-56"
           id="compose-body"
           maxLength={4000}
           name="body"

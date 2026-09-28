@@ -1,7 +1,7 @@
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { MAILBOX_LABELS, type Mailbox } from '../thread-mailboxes';
+import { MAILBOX_LABELS, PAGE_SIZE, type Mailbox } from '../thread-mailboxes';
 import { getThreads, searchThreads } from '../thread-queries';
 import { ListTitle, ThreadListHeader } from './thread-list-header';
 import { ThreadRows } from './thread-rows';
@@ -13,10 +13,10 @@ const emptyCopy: Record<Mailbox, { body: string; title: string }> = {
   starred: { body: 'Star a conversation to keep it close.', title: 'No starred conversations' },
 };
 
-export async function ThreadList({ mailbox }: { mailbox: Mailbox }) {
-  const threads = await getThreads(mailbox);
+export async function ThreadList({ mailbox, page }: { mailbox: Mailbox; page: number }) {
+  const { threads, total } = await getThreads(mailbox, page);
 
-  if (threads.length === 0) {
+  if (total === 0) {
     return (
       <>
         <ThreadListHeader leading={<ListTitle spaced>{MAILBOX_LABELS[mailbox]}</ListTitle>} />
@@ -25,7 +25,14 @@ export async function ThreadList({ mailbox }: { mailbox: Mailbox }) {
     );
   }
 
-  return <ThreadRows mailbox={mailbox} threads={threads} title={MAILBOX_LABELS[mailbox]} />;
+  return (
+    <ThreadRows
+      mailbox={mailbox}
+      pager={{ base: `/${mailbox}`, page, pageSize: PAGE_SIZE, total }}
+      threads={threads}
+      title={MAILBOX_LABELS[mailbox]}
+    />
+  );
 }
 
 export async function SearchResults({ query }: { query: string }) {
@@ -40,7 +47,14 @@ export async function SearchResults({ query }: { query: string }) {
     );
   }
 
-  return <ThreadRows search={query} threads={threads} title="Search" />;
+  return (
+    <ThreadRows
+      pager={{ base: '/search', page: 1, pageSize: Math.max(threads.length, 1), total: threads.length }}
+      search={query}
+      threads={threads}
+      title="Search"
+    />
+  );
 }
 
 export function ThreadListSkeleton({ count = 6, title = '' }: { count?: number; title?: string }) {
@@ -50,13 +64,13 @@ export function ThreadListSkeleton({ count = 6, title = '' }: { count?: number; 
       <ul className="flex flex-col">
         {Array.from({ length: count }).map((_, index) => (
           <li
-            className="border-divider/70 dark:border-divider-dark/70 grid h-[3.75rem] grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 sm:px-5"
+            className="border-divider/70 dark:border-divider-dark/70 grid h-21 grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 sm:px-5"
             key={index}
           >
-            <Skeleton className="skeleton-subtle size-9 rounded-full" />
-            <div className="flex flex-col gap-2">
-              <Skeleton className={cn('h-3', index % 2 === 0 ? 'w-32' : 'w-24')} />
-              <Skeleton className={cn('skeleton-subtle h-3', index % 3 === 0 ? 'w-3/5' : 'w-4/5')} />
+            <Skeleton className="size-9 rounded-full" />
+            <div className="flex flex-col gap-3">
+              <Skeleton className={cn('h-4', index % 2 === 0 ? 'w-40' : 'w-32')} />
+              <Skeleton className={cn('h-4', index % 3 === 0 ? 'w-1/2' : 'w-2/3')} />
             </div>
           </li>
         ))}

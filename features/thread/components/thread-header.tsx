@@ -54,11 +54,10 @@ export function ThreadHeaderSkeleton() {
   return (
     <div aria-hidden>
       <div className="-mx-5 flex h-14 items-center gap-1 px-3 sm:-mx-8 sm:px-6">
-        <Skeleton className="skeleton-subtle size-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
         <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
-        <Skeleton className="skeleton-subtle size-9 rounded-full" />
-        <Skeleton className="skeleton-subtle size-9 rounded-full" />
-        <Skeleton className="skeleton-subtle ml-auto h-3 w-16" />
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
       </div>
       <div className="mt-4 flex h-7 items-center sm:h-8">
         <Skeleton className="h-6 w-3/5 max-w-xl" />

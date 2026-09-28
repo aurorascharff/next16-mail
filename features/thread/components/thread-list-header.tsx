@@ -10,7 +10,16 @@ export function ThreadListHeader({ leading, trailing }: { leading: React.ReactNo
 export function ListTitle({ children, spaced = false }: { children: React.ReactNode; spaced?: boolean }) {
   return (
     <>
-      {spaced ? <span aria-hidden className="ml-2 size-5 shrink-0" /> : null}
+      {spaced ? (
+        <button
+          aria-checked={false}
+          aria-label="Select all on this page"
+          className="border-gray/50 bg-card dark:bg-card-dark ml-2 size-5 shrink-0 rounded-full border opacity-50"
+          disabled
+          role="checkbox"
+          type="button"
+        />
+      ) : null}
       <h2 className="truncate text-sm font-semibold tracking-tight">{children}</h2>
     </>
   );

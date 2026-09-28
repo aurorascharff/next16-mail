@@ -7,7 +7,7 @@ import { verifyUser } from '@/features/user/user-queries';
 import { prisma, usesSqlite } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { threadTags } from './thread-cache';
-import { MAILBOXES, type Mailbox } from './thread-mailboxes';
+import { MAILBOXES, PAGE_SIZE, type Mailbox } from './thread-mailboxes';
 import type { Label, MailboxCounts, Participant, ThreadListItem, ThreadMessage, ThreadSummary } from './types/thread';
 
 const participantSelect = { email: true, id: true, name: true } as const;
@@ -65,30 +65,38 @@ async function getMailboxCountsForUser(userId: string, slow: boolean): Promise<M
 }
 
 /** The rows of one mailbox. Keyed on the URL, so a mailbox link resolves it in a per-link prefetch. */
-export async function getThreads(mailbox: Mailbox): Promise<ThreadListItem[]> {
+export type ThreadPage = { threads: ThreadListItem[]; total: number };
+
+export async function getThreads(mailbox: Mailbox, page: number): Promise<ThreadPage> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
-  return getThreadsForUser(user.id, mailbox, slow);
+  return getThreadsForUser(user.id, mailbox, page, slow);
 }
 
-async function getThreadsForUser(userId: string, mailbox: Mailbox, slow: boolean): Promise<ThreadListItem[]> {
+async function getThreadsForUser(userId: string, mailbox: Mailbox, page: number, slow: boolean): Promise<ThreadPage> {
   'use cache';
   cacheLife('hours');
   cacheTag(threadTags.list(userId));
 
   await delay(700, slow);
-  const threads = await prisma.thread.findMany({
-    include: {
-      labels: true,
-      messages: {
-        include: { attachments: { select: { id: true } }, from: { select: participantSelect } },
-        orderBy: { sentAt: 'asc' },
+  const where = mailboxWhere(userId, mailbox);
+  const [threads, total] = await Promise.all([
+    prisma.thread.findMany({
+      include: {
+        labels: true,
+        messages: {
+          include: { attachments: { select: { id: true } }, from: { select: participantSelect } },
+          orderBy: { sentAt: 'asc' },
+        },
+        states: { where: { userId } },
       },
-      states: { where: { userId } },
-    },
-    orderBy: { updatedAt: 'desc' },
-    where: mailboxWhere(userId, mailbox),
-  });
-  return threads.map(thread => toListItem(thread, userId));
+      orderBy: { updatedAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      where,
+    }),
+    prisma.thread.count({ where }),
+  ]);
+  return { threads: threads.map(thread => toListItem(thread, userId)), total };
 }
 
 export async function searchThreads(query: string): Promise<ThreadListItem[]> {

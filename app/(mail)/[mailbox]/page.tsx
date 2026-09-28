@@ -2,20 +2,20 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import { ThreadList, ThreadListSkeleton } from '@/features/thread/components/thread-list';
-import { isMailbox, MAILBOX_LABELS } from '@/features/thread/thread-mailboxes';
+import { isMailbox, MAILBOX_LABELS, parsePage } from '@/features/thread/thread-mailboxes';
 
-export default function MailboxPage({ params }: PageProps<'/[mailbox]'>) {
-  const mailbox = params.then(({ mailbox }) => {
+export default function MailboxPage({ params, searchParams }: PageProps<'/[mailbox]'>) {
+  const query = Promise.all([params, searchParams]).then(([{ mailbox }, values]) => {
     if (!isMailbox(mailbox)) notFound();
-    return mailbox;
+    return { mailbox, page: parsePage(values.page) };
   });
 
   return (
     <div className="thread-results h-full overflow-y-auto overscroll-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton />}>
-        {mailbox.then(value => (
-          <AnimatedSuspense fallback={<ThreadListSkeleton title={MAILBOX_LABELS[value]} />}>
-            <ThreadList mailbox={value} />
+        {query.then(({ mailbox, page }) => (
+          <AnimatedSuspense fallback={<ThreadListSkeleton title={MAILBOX_LABELS[mailbox]} />}>
+            <ThreadList mailbox={mailbox} page={page} />
           </AnimatedSuspense>
         ))}
       </Suspense>

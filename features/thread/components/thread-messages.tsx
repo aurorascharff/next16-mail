@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { getContacts, getThreadMessages } from '../thread-queries';
-import { Attachments, MessageText, MessageTextSkeleton, SenderRow, SenderRowSkeleton } from './message-body';
+import { Attachments, MessageText, MessageTextSkeleton, SenderRow } from './message-body';
 import { ReplyForm } from './reply-form';
 
 export async function ThreadMessages({ threadId }: { threadId: string }) {
@@ -44,14 +44,8 @@ export async function ThreadMessages({ threadId }: { threadId: string }) {
 export function ThreadMessagesSkeleton() {
   return (
     <div aria-hidden>
-      <MessageTextSkeleton lines={9} />
-      <Skeleton className="skeleton-subtle mt-8 h-24 rounded-md" />
-      <div className="border-divider/70 dark:border-divider-dark/70 mt-10 border-t pt-8">
-        <SenderRowSkeleton />
-        <div className="mt-4">
-          <MessageTextSkeleton lines={4} />
-        </div>
-      </div>
+      <MessageTextSkeleton className="h-48" />
+      <Skeleton className="mt-8 h-24 rounded-md" />
     </div>
   );
 }

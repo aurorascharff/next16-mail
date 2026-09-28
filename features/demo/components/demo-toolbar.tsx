@@ -8,5 +8,5 @@ export async function DemoToolbar() {
 }
 
 export function DemoToolbarSkeleton() {
-  return <Skeleton className="skeleton-subtle h-8 w-72 rounded-full" />;
+  return <Skeleton className="h-8 w-72 rounded-full" />;
 }
