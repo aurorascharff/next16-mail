@@ -75,8 +75,7 @@ export function ThreadListToolbar({
   );
 }
 
-const selectAllClass =
-  'border-gray/50 bg-card dark:bg-card-dark ml-1 flex size-7 shrink-0 items-center justify-center rounded-full border text-transparent transition-colors';
+const selectAllClass = 'ml-2 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors';
 
 // Without ids the control is disabled but still drawn, so the header keeps its shape while rows load.
 export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
@@ -86,13 +85,18 @@ export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
     <button
       aria-checked={all}
       aria-label={all ? 'Clear selection' : 'Select all on this page'}
-      className={cn(selectAllClass, all ? 'border-accent bg-accent text-white' : 'enabled:hover:border-gray')}
+      className={cn(
+        selectAllClass,
+        all
+          ? 'border-accent bg-accent text-white'
+          : 'border-gray/50 bg-card dark:bg-card-dark enabled:hover:border-gray text-transparent',
+      )}
       disabled={!threads || threads.length === 0}
       onClick={() => setSelected(all ? new Map() : new Map(threads?.map(thread => [thread.id, thread])))}
       role="checkbox"
       type="button"
     >
-      <Check className="size-3.5" strokeWidth={3} />
+      <Check className="size-3" strokeWidth={3} />
     </button>
   );
 }

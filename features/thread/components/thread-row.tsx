@@ -65,8 +65,8 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
           selected
             ? 'bg-accent/10 dark:bg-accent/15'
             : state.read
-              ? 'bg-card/60 hover:bg-card dark:bg-card-dark/70 dark:hover:bg-card-dark'
-              : 'hover:bg-card/40 dark:hover:bg-card-dark/40',
+              ? 'bg-card/60 hover:bg-card dark:hover:bg-card-dark/40 dark:bg-black'
+              : 'hover:bg-card/40 dark:bg-card-dark/60 dark:hover:bg-card-dark',
         )}
         data-read={state.read ? '' : undefined}
         data-removing={leaving ? '' : undefined}
