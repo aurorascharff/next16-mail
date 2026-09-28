@@ -140,10 +140,10 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
 
   return (
     <Boundary label="ThreadRows">
-      <div className="text-gray flex h-10 items-center gap-1 px-4 text-xs tabular-nums sm:px-5">
+      <div className="text-gray flex h-10 items-center gap-1 pr-4 pl-3 text-xs tabular-nums sm:pr-5 sm:pl-4">
         <RowCheckbox
           checked={chosen.length > 0 && chosen.length === visible.length}
-          className="mr-3"
+          className="mr-2"
           label={chosen.length === visible.length ? 'Clear selection' : 'Select all on this page'}
           onChange={() => setSelected(chosen.length === visible.length ? new Set() : new Set(visible.map(t => t.id)))}
         />
@@ -189,7 +189,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
           return (
             <li
               className={cn(
-                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
+                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-2 border-b py-3 pr-4 pl-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:pr-5 sm:pl-4',
                 active || isSelected ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
               )}
               data-read={thread.read ? '' : undefined}
@@ -206,12 +206,12 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
               />
               <RowCheckbox
                 checked={isSelected}
-                className={cn(!isSelected && 'invisible group-focus-within:visible group-hover:visible')}
+                className={cn(!isSelected && 'invisible group-hover:visible focus-visible:visible')}
                 label={`Select ${thread.subject}`}
                 onChange={() => toggleSelected(thread.id)}
               />
               <UserAvatar name={sender === 'me' ? 'Me' : sender} />
-              <div className="flex min-w-0 flex-col">
+              <div className="flex min-w-0 flex-col pl-1">
                 <div className="flex h-5 items-center gap-1.5">
                   {!thread.read ? (
                     <span aria-label="Unread" className="bg-accent size-1.5 shrink-0 rounded-full" />

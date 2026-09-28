@@ -1,6 +1,6 @@
-import type { CSSProperties } from 'react';
 import { cn } from '@/lib/utils';
 import type { Label } from '../types/thread';
+import type { CSSProperties } from 'react';
 
 export function LabelChip({ className, label, size = 'sm' }: { className?: string; label: Label; size?: 'sm' | 'md' }) {
   return (

@@ -37,7 +37,7 @@ export function ThreadListSkeleton({ count = 6 }: { count?: number }) {
     <ul aria-hidden className="flex flex-col">
       {Array.from({ length: count }).map((_, index) => (
         <li
-          className="border-divider/70 dark:border-divider-dark/70 grid h-[3.75rem] grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 sm:px-5"
+          className="border-divider/70 dark:border-divider-dark/70 grid h-[3.75rem] grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-2 border-b py-3 pr-4 pl-3 sm:pr-5 sm:pl-4"
           key={index}
         >
           <span />
