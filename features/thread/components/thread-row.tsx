@@ -111,7 +111,7 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
             <ThreadTime
               className={cn(
                 'ml-auto shrink-0 text-xs tabular-nums',
-                thread.read ? 'text-gray' : 'font-bold text-black dark:text-white',
+                state.read ? 'text-gray' : 'font-bold text-black dark:text-white',
               )}
               iso={thread.updatedAt}
             />
