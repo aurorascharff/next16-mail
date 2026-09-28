@@ -207,6 +207,57 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
   animation: none;
 }
 
+/* iOS-style push and pop between the list and a thread, phones only, on a tight curve. */
+@media (max-width: 767px) {
+  ::view-transition-old(.nav-forward) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-push-out;
+  }
+  ::view-transition-new(.nav-forward) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-push-in;
+  }
+  ::view-transition-old(.nav-back) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-pop-out;
+  }
+  ::view-transition-new(.nav-back) {
+    animation: 260ms cubic-bezier(0.32, 0.72, 0, 1) both nav-pop-in;
+  }
+}
+
+@media (min-width: 768px) {
+  ::view-transition-old(.nav-forward),
+  ::view-transition-new(.nav-forward),
+  ::view-transition-old(.nav-back),
+  ::view-transition-new(.nav-back) {
+    animation: none;
+  }
+}
+
+@keyframes nav-push-out {
+  to {
+    translate: -30% 0;
+    opacity: 0.6;
+  }
+}
+
+@keyframes nav-push-in {
+  from {
+    translate: 100% 0;
+  }
+}
+
+@keyframes nav-pop-out {
+  to {
+    translate: 100% 0;
+  }
+}
+
+@keyframes nav-pop-in {
+  from {
+    translate: -30% 0;
+    opacity: 0.6;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),
