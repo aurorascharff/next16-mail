@@ -2,8 +2,22 @@
   "name": "relay",
   "version": "0.1.0",
   "private": true,
-  "description": "A Next.js 16.4 mail client demonstrating navigation() and prefetch() with Cache Components and Partial Prefetching.",
+  "description": "A Gmail-style mail client demo exploring Async React, Cache Components, Partial Prefetching, and navigation() with Next.js 16.4, React 19, Tailwind CSS v4, and Prisma.",
   "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "nextjs-16",
+    "cache-components",
+    "partial-prefetching",
+    "instant-navigation",
+    "navigation",
+    "prefetch",
+    "react-19",
+    "prisma",
+    "tailwindcss",
+    "email",
+    "mail-client"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/aurorascharff/next16-mail.git"
