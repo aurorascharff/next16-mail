@@ -76,7 +76,7 @@ export function ThreadListToolbar({
 }
 
 const selectAllClass =
-  'border-gray/50 bg-card dark:bg-card-dark ml-2 flex size-5 shrink-0 items-center justify-center rounded-full border text-transparent transition-colors';
+  'border-gray/50 bg-card dark:bg-card-dark ml-1 flex size-7 shrink-0 items-center justify-center rounded-full border text-transparent transition-colors';
 
 // Without ids the control is disabled but still drawn, so the header keeps its shape while rows load.
 export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
@@ -92,7 +92,7 @@ export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
       role="checkbox"
       type="button"
     >
-      <Check className="size-3" strokeWidth={3} />
+      <Check className="size-3.5" strokeWidth={3} />
     </button>
   );
 }

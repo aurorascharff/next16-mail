@@ -1,6 +1,6 @@
 'use client';
 
-import { Archive, ArchiveRestore, Check, Paperclip, Star } from 'lucide-react';
+import { Archive, ArchiveRestore, Check, Mail, MailOpen, Paperclip, Star } from 'lucide-react';
 import { startTransition, useOptimistic } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
@@ -8,7 +8,7 @@ import { actionToast } from '@/components/ui/action-toast';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
-import { moveThread, toggleStar } from '../thread-actions';
+import { markThreadsRead, moveThread, toggleStar } from '../thread-actions';
 import { LabelChip } from './label-chip';
 import { RowButton } from './row-button';
 import { useRowSelection } from './selection';
@@ -18,17 +18,25 @@ import type { ThreadListItem } from '../types/thread';
 import type { Route } from 'next';
 
 export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Mailbox; thread: ThreadListItem }) {
-  const [state, setState] = useOptimistic({ mailbox: thread.mailbox, starred: thread.starred });
-  const { selected, toggle } = useRowSelection({ id: thread.id, read: thread.read, starred: state.starred });
+  const [state, setState] = useOptimistic({ mailbox: thread.mailbox, read: thread.read, starred: thread.starred });
+  const { selected, toggle } = useRowSelection({ id: thread.id, read: state.read, starred: state.starred });
   const canMove = mailbox === 'inbox' || mailbox === 'archive';
   const leaving = canMove && state.mailbox !== mailbox;
   const sender = thread.participants.at(-1) ?? '';
-  const emphasis = thread.read ? 'text-black/70 dark:text-white/70' : 'font-bold text-black dark:text-white';
+  const emphasis = state.read ? 'text-black/70 dark:text-white/70' : 'font-bold text-black dark:text-white';
 
   function star() {
     startTransition(async () => {
       setState({ ...state, starred: !state.starred });
       const result = await toggleStar(thread.id, !state.starred);
+      if (!result.ok) toast.error(result.error);
+    });
+  }
+
+  function toggleRead() {
+    startTransition(async () => {
+      setState({ ...state, read: !state.read });
+      const result = await markThreadsRead([thread.id], !state.read);
       if (!result.ok) toast.error(result.error);
     });
   }
@@ -56,11 +64,11 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
           'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
           selected
             ? 'bg-accent/10 dark:bg-accent/15'
-            : thread.read
+            : state.read
               ? 'bg-card/60 hover:bg-card dark:bg-card-dark/70 dark:hover:bg-card-dark'
               : 'hover:bg-card/40 dark:hover:bg-card-dark/40',
         )}
-        data-read={thread.read ? '' : undefined}
+        data-read={state.read ? '' : undefined}
         data-removing={leaving ? '' : undefined}
         data-selected={selected ? '' : undefined}
         data-testid="thread-row"
@@ -94,7 +102,7 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
         </button>
         <div className="flex min-w-0 flex-col">
           <div className="flex h-5 items-center gap-1.5">
-            <span className={cn('truncate text-sm', emphasis, !thread.read && 'tracking-tight')}>
+            <span className={cn('truncate text-sm', emphasis, !state.read && 'tracking-tight')}>
               {thread.participants.join(', ')}
             </span>
             {thread.messageCount > 1 ? (
@@ -120,20 +128,31 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
             <span className="relative z-20 flex shrink-0 items-center gap-1">
               {state.mailbox === 'sent' ? null : (
                 <RowButton
-                  className="invisible group-focus-within:visible group-hover:visible"
+                  className="invisible size-8 group-focus-within:visible group-hover:visible"
                   label={state.mailbox === 'archive' ? 'Move to inbox' : 'Archive'}
                   onClick={move}
                 >
-                  {state.mailbox === 'archive' ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
+                  {state.mailbox === 'archive' ? (
+                    <ArchiveRestore className="size-[18px]" />
+                  ) : (
+                    <Archive className="size-[18px]" />
+                  )}
                 </RowButton>
               )}
               <RowButton
+                className="invisible size-8 group-focus-within:visible group-hover:visible"
+                label={state.read ? 'Mark as unread' : 'Mark as read'}
+                onClick={toggleRead}
+              >
+                {state.read ? <Mail className="size-[18px]" /> : <MailOpen className="size-[18px]" />}
+              </RowButton>
+              <RowButton
                 active={state.starred}
-                className={cn(!state.starred && 'invisible group-focus-within:visible group-hover:visible')}
+                className={cn('size-8', !state.starred && 'invisible group-focus-within:visible group-hover:visible')}
                 label={state.starred ? 'Remove star' : 'Star'}
                 onClick={star}
               >
-                <Star className={cn('size-4', state.starred && 'fill-current')} strokeWidth={1.5} />
+                <Star className={cn('size-[18px]', state.starred && 'fill-current')} strokeWidth={1.5} />
               </RowButton>
             </span>
           </div>
