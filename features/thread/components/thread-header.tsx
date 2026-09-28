@@ -21,7 +21,10 @@ export async function ThreadHeader({
     <>
       <header data-testid="thread-header">
         {!thread.read ? <MarkThreadRead threadId={threadId} /> : null}
-        <div className="-mx-5 flex h-14 items-center gap-1 px-3 sm:-mx-8 sm:px-6">
+        <div
+          className="border-divider/70 dark:border-divider-dark/70 sticky top-0 z-10 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90"
+          style={{ viewTransitionName: 'thread-toolbar' }}
+        >
           <BackToList href={backHref} />
           <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
           <ArchiveButton backHref={backHref} threadId={thread.id} threadMailbox={thread.mailbox} />
@@ -53,7 +56,10 @@ export async function ThreadHeader({
 export function ThreadHeaderSkeleton() {
   return (
     <div aria-hidden>
-      <div className="-mx-5 flex h-14 items-center gap-1 px-3 sm:-mx-8 sm:px-6">
+      <div
+        className="border-divider/70 dark:border-divider-dark/70 sticky top-0 z-10 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90"
+        style={{ viewTransitionName: 'thread-toolbar' }}
+      >
         <Skeleton className="size-9 rounded-full" />
         <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
         <Skeleton className="size-9 rounded-full" />

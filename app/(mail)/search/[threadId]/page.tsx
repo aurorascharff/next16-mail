@@ -2,7 +2,14 @@ import { Suspense } from 'react';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
 import { ThreadHeader, ThreadHeaderSkeleton } from '@/features/thread/components/thread-header';
-import { ThreadMessages, ThreadMessagesSkeleton } from '@/features/thread/components/thread-messages';
+import {
+  EarlierMessages,
+  EarlierMessagesSkeleton,
+  LatestMessage,
+  LatestMessageSkeleton,
+  ThreadReply,
+  ThreadReplySkeleton,
+} from '@/features/thread/components/thread-messages';
 import type { Route } from 'next';
 
 export default function SearchThreadPage({ params, searchParams }: PageProps<'/search/[threadId]'>) {
@@ -20,8 +27,15 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
           <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
             <ThreadHeader backHref={backHref} threadId={threadId}>
               <ErrorBoundary title="This conversation could not be loaded">
-                <AnimatedSuspense fallback={<ThreadMessagesSkeleton />}>
-                  <ThreadMessages threadId={threadId} />
+                <AnimatedSuspense fallback={<LatestMessageSkeleton />}>
+                  <LatestMessage threadId={threadId}>
+                    <Suspense fallback={<ThreadReplySkeleton />}>
+                      <ThreadReply threadId={threadId} />
+                    </Suspense>
+                    <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
+                      <EarlierMessages threadId={threadId} />
+                    </AnimatedSuspense>
+                  </LatestMessage>
                 </AnimatedSuspense>
               </ErrorBoundary>
             </ThreadHeader>

@@ -189,7 +189,7 @@ function toMessage(message: MessageRow): ThreadMessage {
   };
 }
 
-// Everything about a thread except message content. A hovered row resolves this in its per-link prefetch.
+// Everything about a thread except message content. Every row in view resolves this in its per-link prefetch.
 export async function getThreadSummary(threadId: string): Promise<ThreadSummary> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
   return getThreadSummaryForUser(threadId, user.id, slow);
@@ -239,22 +239,42 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   };
 }
 
-// Message content, newest first. `unstable_navigation()` keeps it out of the App Shell and every prefetch,
-// so hovering rows never downloads bodies, while the cached result still serves the next visitor.
-export async function getThreadMessages(threadId: string): Promise<ThreadMessage[]> {
+// Message content waits for `unstable_navigation()`, which keeps it out of the App Shell and every prefetch,
+// so prefetching a page of rows never downloads bodies, while the cached result still serves the next visitor.
+export async function getLatestMessage(threadId: string): Promise<ThreadMessage | null> {
   await unstable_navigation();
-  return getThreadMessagesCached(threadId, await isSlowEnabled());
+  return getLatestMessageCached(threadId, await isSlowEnabled());
 }
 
-async function getThreadMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+async function getLatestMessageCached(threadId: string, slow: boolean): Promise<ThreadMessage | null> {
   'use cache';
   cacheLife('hours');
   cacheTag(threadTags.detail(threadId));
 
-  await delay(1400, slow);
+  await delay(1000, slow);
+  const message = await prisma.message.findFirst({
+    include: messageInclude,
+    orderBy: { sentAt: 'desc' },
+    where: { threadId },
+  });
+  return message ? toMessage(message) : null;
+}
+
+export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
+  await unstable_navigation();
+  return getEarlierMessagesCached(threadId, await isSlowEnabled());
+}
+
+async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(threadTags.detail(threadId));
+
+  await delay(1800, slow);
   const messages = await prisma.message.findMany({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
+    skip: 1,
     where: { threadId },
   });
   return messages.map(toMessage);

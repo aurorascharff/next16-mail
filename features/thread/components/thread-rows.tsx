@@ -7,7 +7,6 @@ import { startTransition, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
-import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
@@ -218,7 +217,7 @@ export function ThreadRows({
               data-testid="thread-row"
               key={thread.id}
             >
-              <HoverPrefetchLink
+              <PrefetchLink
                 aria-current={active ? 'page' : undefined}
                 aria-label={thread.subject}
                 className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
