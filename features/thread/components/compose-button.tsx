@@ -21,6 +21,7 @@ export function ComposeButton({ className, variant = 'sidebar' }: { className?: 
           )}
           data-testid="compose-fab"
           onClick={open}
+          style={{ viewTransitionName: 'compose-fab' }}
           type="button"
         >
           <PenLine aria-hidden className="size-5" />
