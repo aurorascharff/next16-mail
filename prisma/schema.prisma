@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Everyone who appears in a mailbox: the switchable demo accounts and the people who write to them.
+model User {
+  id     String  @id
+  handle String  @unique
+  name   String
+  email  String  @unique
+  title  String
+  account Boolean @default(false)
+
+  messages   Message[]
+  recipients Recipient[]
+  states     ThreadState[]
+}
+
+model Label {
+  id    String @id
+  name  String @unique
+  color String
+
+  threads Thread[]
+}
+
+model Thread {
+  id        String   @id
+  subject   String
+  updatedAt DateTime
+
+  messages Message[]
+  states   ThreadState[]
+  labels   Label[]
+
+  @@index([updatedAt])
+}
+
+model Message {
+  id       String   @id
+  threadId String
+  fromId   String
+  body     String
+  sentAt   DateTime
+
+  thread      Thread       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  from        User         @relation(fields: [fromId], references: [id])
+  recipients  Recipient[]
+  attachments Attachment[]
+
+  @@index([threadId, sentAt])
+}
+
+model Recipient {
+  messageId String
+  userId    String
+  kind      String @default("to")
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@id([messageId, userId])
+}
+
+model Attachment {
+  id        String @id
+  messageId String
+  name      String
+  size      Int
+  type      String
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+}
+
+// Where a thread sits for one account, and whether that account has read or starred it.
+model ThreadState {
+  userId   String
+  threadId String
+  mailbox  String  @default("inbox")
+  read     Boolean @default(false)
+  starred  Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@id([userId, threadId])
+  @@index([userId, mailbox])
+}

@@ -1,0 +1,5 @@
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+# Next canaries are published daily, so the global release-age guard would refuse them.
+minimumReleaseAge: 0

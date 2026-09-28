@@ -1,0 +1,75 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A Next.js 16.4 mail client demonstrating navigation() and prefetch() with Cache Components and Partial Prefetching.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aurorascharff/next16-mail.git"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "prisma.push": "prisma db push",
+    "prisma.seed": "prisma db seed",
+    "prisma.studio": "prisma studio",
+    "prisma.reset": "prisma db push --force-reset && pnpm prisma.seed"
+  },
+  "dependencies": {
+    "@ariakit/react": "^0.4.40",
+    "@prisma/adapter-better-sqlite3": "^7.10.0",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
+    "better-sqlite3": "^13.0.3",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "geist": "^1.7.2",
+    "lucide-react": "^1.48.0",
+    "next": "16.4.0-canary.51",
+    "next-themes": "^0.4.6",
+    "pg": "^8.23.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "sonner": "^2.0.8",
+    "tailwind-merge": "^3.7.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@next/playwright": "16.4.0-canary.51",
+    "@playwright/test": "^1.63.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0-canary.51",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-autofix": "^2.2.0",
+    "eslint-plugin-sort-keys-fix": "^1.1.2",
+    "prettier": "^3.9.9",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.34.3",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
+  }
+}
