@@ -101,5 +101,12 @@ export function SenderRowSkeleton() {
 }
 
 export function MessageTextSkeleton({ className }: { className?: string }) {
-  return <Skeleton className={cn('h-40 max-w-[68ch] rounded-lg', className)} />;
+  return (
+    <div className={cn('flex max-w-[68ch] flex-col gap-3 pt-1', className)}>
+      <Skeleton className="h-4 w-full" />
+      <Skeleton className="h-4 w-11/12" />
+      <Skeleton className="h-4 w-4/5" />
+      <Skeleton className="h-4 w-2/3" />
+    </div>
+  );
 }

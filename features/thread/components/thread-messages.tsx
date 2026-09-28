@@ -21,11 +21,9 @@ export async function LatestMessage({ threadId }: { threadId: string }) {
 export function LatestMessageSkeleton() {
   return (
     <div aria-hidden>
-      <MessageTextSkeleton className="h-48" />
-      <div className="mt-8 flex flex-col gap-3">
+      <MessageTextSkeleton className="min-h-48" />
+      <div className="mt-8 h-43">
         <Skeleton className="h-24 rounded-md" />
-        <Skeleton className="h-4 w-24 self-end" />
-        <Skeleton className="h-9 w-24 self-end rounded-md" />
       </div>
     </div>
   );
