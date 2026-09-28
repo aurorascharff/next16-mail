@@ -181,10 +181,7 @@ function toMessage(message: MessageRow): ThreadMessage {
   };
 }
 
-/**
- * The part of a thread that is worth having before the click: subject, labels, and the latest message in full.
- * A hovered row resolves this in its per-link prefetch, so opening the thread shows it at once.
- */
+// Everything about a thread except message content. A hovered row resolves this in its per-link prefetch.
 export async function getThreadSummary(threadId: string): Promise<ThreadSummary> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
   return getThreadSummaryForUser(threadId, user.id, slow);
@@ -200,7 +197,14 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
     include: {
       _count: { select: { messages: true } },
       labels: true,
-      messages: { include: messageInclude, orderBy: { sentAt: 'desc' }, take: 1 },
+      messages: {
+        include: {
+          from: { select: participantSelect },
+          recipients: { include: { user: { select: participantSelect } }, where: { kind: { not: 'bcc' } } },
+        },
+        orderBy: { sentAt: 'desc' },
+        take: 1,
+      },
       states: { where: { userId } },
     },
     where: { id: threadId },
@@ -212,7 +216,13 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   return {
     id: thread.id,
     labels: thread.labels,
-    latest: toMessage(latest),
+    latest: {
+      cc: latest.recipients.filter(recipient => recipient.kind === 'cc').map(recipient => recipient.user),
+      from: latest.from,
+      id: latest.id,
+      sentAt: latest.sentAt.toISOString(),
+      to: latest.recipients.filter(recipient => recipient.kind === 'to').map(recipient => recipient.user),
+    },
     mailbox: state.mailbox,
     messageCount: thread._count.messages,
     read: state.read,
@@ -221,17 +231,14 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   };
 }
 
-/**
- * Every message before the latest one, newest first. `await unstable_navigation()` keeps this out of the App Shell
- * and out of every per-link prefetch: hovering rows never downloads the history, and the cached result is only
- * produced once someone actually opens the thread.
- */
-export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
+// Message content, newest first. `unstable_navigation()` keeps it out of the App Shell and every prefetch,
+// so hovering rows never downloads bodies, while the cached result still serves the next visitor.
+export async function getThreadMessages(threadId: string): Promise<ThreadMessage[]> {
   await unstable_navigation();
-  return getEarlierMessagesCached(threadId, await isSlowEnabled());
+  return getThreadMessagesCached(threadId, await isSlowEnabled());
 }
 
-async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+async function getThreadMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(threadTags.detail(threadId));
@@ -240,7 +247,6 @@ async function getEarlierMessagesCached(threadId: string, slow: boolean): Promis
   const messages = await prisma.message.findMany({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
-    skip: 1,
     where: { threadId },
   });
   return messages.map(toMessage);
@@ -260,7 +266,11 @@ async function getContactsForUser(userId: string): Promise<Participant[]> {
     orderBy: { name: 'asc' },
     select: participantSelect,
     where: {
-      OR: [{ account: true }, { messages: { some: { thread: { states: { some: { userId } } } } } }],
+      OR: [
+        { account: true },
+        { messages: { some: { thread: { states: { some: { userId } } } } } },
+        { recipients: { some: { message: { fromId: userId } } } },
+      ],
       id: { not: userId },
     },
   });

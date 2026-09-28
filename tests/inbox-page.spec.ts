@@ -51,8 +51,7 @@ test.describe('Inbox (/inbox)', () => {
     await page.goto('/inbox');
     const rows = page.getByTestId('thread-row').filter({ visible: true });
     for (const subject of ['Ramen at 12?', 'Deployment failed: stamp-web@7f3a2c1']) {
-      await rows.filter({ hasText: subject }).hover();
-      await rows.filter({ hasText: subject }).getByRole('checkbox').check();
+      await rows.filter({ hasText: subject }).getByRole('checkbox').click();
     }
     await expect(page.getByText('2 selected')).toBeVisible();
     await page.getByRole('button', { exact: true, name: 'Archive' }).first().click();
@@ -62,8 +61,7 @@ test.describe('Inbox (/inbox)', () => {
     await page.goto('/archive');
     const archived = page.getByTestId('thread-row').filter({ visible: true });
     for (const subject of ['Ramen at 12?', 'Deployment failed: stamp-web@7f3a2c1']) {
-      await archived.filter({ hasText: subject }).hover();
-      await archived.filter({ hasText: subject }).getByRole('checkbox').check();
+      await archived.filter({ hasText: subject }).getByRole('checkbox').click();
     }
     await page.getByRole('button', { exact: true, name: 'Move to inbox' }).first().click();
     await expect(archived.filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);

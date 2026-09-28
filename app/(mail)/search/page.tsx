@@ -4,7 +4,7 @@ import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SearchResults, ThreadListSkeleton } from '@/features/thread/components/thread-list';
-import { ThreadListHeader } from '@/features/thread/components/thread-list-header';
+import { ListTitle, ThreadListHeader } from '@/features/thread/components/thread-list-header';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Search' };
@@ -16,16 +16,18 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
     <MailSplit
       list={
         <>
-          <ThreadListHeader title="Search" />
           <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            <Suspense fallback={<ThreadListSkeleton count={4} />}>
+            <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
               {query.then(value =>
                 value ? (
-                  <AnimatedSuspense fallback={<ThreadListSkeleton count={4} />}>
+                  <AnimatedSuspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
                     <SearchResults query={value} />
                   </AnimatedSuspense>
                 ) : (
-                  <EmptyState className="m-3" title="Search your mail" />
+                  <>
+                    <ThreadListHeader leading={<ListTitle>Search</ListTitle>} />
+                    <EmptyState className="m-3" title="Search your mail" />
+                  </>
                 ),
               )}
             </Suspense>

@@ -17,11 +17,13 @@ export function MailSidebar() {
       <Suspense fallback={<LabelNavSkeleton />}>
         <LabelNav />
       </Suspense>
-      <div className="mt-auto flex items-center gap-1">
+      <div className="mt-auto flex flex-col gap-2">
+        <div className="px-2">
+          <ThemeToggle variant="inline" />
+        </div>
         <Suspense fallback={<CurrentUserCardSkeleton />}>
           <CurrentUserCard />
         </Suspense>
-        <ThemeToggle variant="inline" />
       </div>
     </aside>
   );

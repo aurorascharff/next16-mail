@@ -4,9 +4,7 @@ import { expect, test } from '@playwright/test';
 const visible = { visible: true };
 
 test.describe('Thread (/[mailbox]/[threadId])', () => {
-  test('a hovered row prefetches the latest message, and earlier messages wait for the navigation', async ({
-    page,
-  }) => {
+  test('a hovered row prefetches the thread header, and message content waits for the navigation', async ({ page }) => {
     await page.goto('/inbox');
     const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Reading pane explorations' });
     await expect(row).toBeVisible();
@@ -20,11 +18,11 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
           .getByRole('heading', { exact: true, level: 1, name: 'Reading pane explorations, header first' })
           .filter(visible),
       ).toBeVisible();
-      await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Agreed on both.');
-      await expect(page.getByTestId('reply-form').filter(visible)).toBeVisible();
-      await expect(page.getByTestId('thread-earlier').filter(visible)).toHaveCount(0);
+      await expect(page.getByTestId('thread-header').filter(visible)).toContainText('Jonas Berg');
+      await expect(page.getByTestId('thread-messages').filter(visible)).toHaveCount(0);
     });
 
+    await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Agreed on both.');
     await expect(page.getByTestId('earlier-message').filter(visible)).toHaveCount(2);
     await expect(page.getByRole('list', { name: 'Attachments' }).filter(visible)).toContainText('reading-pane-c.png');
   });

@@ -30,7 +30,7 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
   return (
     <Boundary label="UserSwitcher">
       <div
-        className="min-w-0 flex-1"
+        className="min-w-0"
         data-account={selected.email}
         data-pending={isPending ? '' : undefined}
         data-testid="current-user"

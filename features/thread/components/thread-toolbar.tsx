@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { startTransition, useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
+import { actionToast } from '@/components/ui/action-toast';
 import { IconButton } from '@/components/ui/icon-button';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { cn } from '@/lib/utils';
@@ -59,14 +60,9 @@ export function ArchiveButton({
             return;
           }
           router.push(`/${mailbox}` as Route);
-          toast(archived ? 'Conversation moved to inbox' : 'Conversation archived', {
-            action: {
-              label: 'Undo',
-              onClick: () =>
-                startArchive(async () => {
-                  await moveThread(threadId, archived ? 'archive' : 'inbox');
-                }),
-            },
+          actionToast(archived ? 'Conversation moved to inbox' : 'Conversation archived', {
+            label: 'Undo',
+            run: () => moveThread(threadId, archived ? 'archive' : 'inbox'),
           });
         })
       }
@@ -81,7 +77,7 @@ export function BackToList({ mailbox }: { mailbox: Mailbox }) {
     <Boundary label="BackToList" asChild>
       <PrefetchLink
         aria-label="Back to list"
-        className="text-muted hover:bg-card dark:hover:bg-card-dark inline-flex size-8 items-center justify-center rounded-full transition-colors hover:text-black lg:hidden dark:hover:text-white"
+        className="text-muted hover:bg-card dark:hover:bg-card-dark mt-0.5 inline-flex size-7 items-center justify-center rounded-full transition-colors hover:text-black lg:hidden dark:hover:text-white"
         href={`/${mailbox}`}
       >
         <ArrowLeft className="size-4" />

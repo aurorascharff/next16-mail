@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
-import { EarlierMessages, EarlierMessagesSkeleton } from '@/features/thread/components/earlier-messages';
 import { ThreadHeader, ThreadHeaderSkeleton } from '@/features/thread/components/thread-header';
+import { ThreadMessages, ThreadMessagesSkeleton } from '@/features/thread/components/thread-messages';
 import { isMailbox, type Mailbox } from '@/features/thread/thread-mailboxes';
 
 export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'>) {
@@ -17,9 +17,9 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
         {query.then(({ mailbox, threadId }) => (
           <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
             <ThreadHeader mailbox={mailbox} threadId={threadId}>
-              <ErrorBoundary title="Earlier messages could not be loaded">
-                <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
-                  <EarlierMessages threadId={threadId} />
+              <ErrorBoundary title="This conversation could not be loaded">
+                <AnimatedSuspense fallback={<ThreadMessagesSkeleton />}>
+                  <ThreadMessages threadId={threadId} />
                 </AnimatedSuspense>
               </ErrorBoundary>
             </ThreadHeader>

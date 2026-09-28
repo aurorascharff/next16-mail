@@ -1,7 +1,8 @@
 'use client';
 
-import { useId, useState } from 'react';
-import { Input } from '@/components/ui/input';
+import { X } from 'lucide-react';
+import { useState } from 'react';
+import { RecipientPicker } from './recipient-picker';
 import type { Participant } from '../types/thread';
 
 export function AddressFields({
@@ -13,77 +14,79 @@ export function AddressFields({
   idPrefix: string;
   showTo?: boolean;
 }) {
-  const listId = useId();
   const [showCc, setShowCc] = useState(false);
   const [showBcc, setShowBcc] = useState(false);
+  const toggles = (
+    <span className="text-gray flex shrink-0 gap-2 text-xs">
+      {!showCc ? (
+        <button className="hover:text-black dark:hover:text-white" onClick={() => setShowCc(true)} type="button">
+          Cc
+        </button>
+      ) : null}
+      {!showBcc ? (
+        <button className="hover:text-black dark:hover:text-white" onClick={() => setShowBcc(true)} type="button">
+          Bcc
+        </button>
+      ) : null}
+    </span>
+  );
 
   return (
     <>
-      <datalist id={listId}>
-        {contacts.map(contact => (
-          <option key={contact.id} value={contact.email}>
-            {contact.name}
-          </option>
-        ))}
-      </datalist>
       {showTo ? (
-        <Field id={`${idPrefix}-to`} label="To">
-          <div className="flex items-center gap-2">
-            <Input
-              autoComplete="off"
-              id={`${idPrefix}-to`}
-              list={listId}
-              name="to"
-              placeholder="name@example.com"
-              required
-            />
-            <div className="text-gray flex shrink-0 gap-1 text-xs">
-              {!showCc ? (
-                <button
-                  className="hover:text-black dark:hover:text-white"
-                  onClick={() => setShowCc(true)}
-                  type="button"
-                >
-                  Cc
-                </button>
-              ) : null}
-              {!showBcc ? (
-                <button
-                  className="hover:text-black dark:hover:text-white"
-                  onClick={() => setShowBcc(true)}
-                  type="button"
-                >
-                  Bcc
-                </button>
-              ) : null}
-            </div>
-          </div>
-        </Field>
+        <AddressRow id={`${idPrefix}-to`} label="To" trailing={toggles}>
+          <RecipientPicker contacts={contacts} id={`${idPrefix}-to`} name="to" />
+        </AddressRow>
       ) : (
-        <div className="text-gray flex gap-2 text-xs">
-          {!showCc ? (
-            <button className="hover:text-black dark:hover:text-white" onClick={() => setShowCc(true)} type="button">
-              Add Cc
-            </button>
-          ) : null}
-          {!showBcc ? (
-            <button className="hover:text-black dark:hover:text-white" onClick={() => setShowBcc(true)} type="button">
-              Add Bcc
-            </button>
-          ) : null}
-        </div>
+        <div className="flex justify-end">{toggles}</div>
       )}
       {showCc ? (
-        <Field id={`${idPrefix}-cc`} label="Cc">
-          <Input autoComplete="off" id={`${idPrefix}-cc`} list={listId} name="cc" placeholder="name@example.com" />
-        </Field>
+        <AddressRow id={`${idPrefix}-cc`} label="Cc" onClose={() => setShowCc(false)}>
+          <RecipientPicker contacts={contacts} id={`${idPrefix}-cc`} name="cc" />
+        </AddressRow>
       ) : null}
       {showBcc ? (
-        <Field id={`${idPrefix}-bcc`} label="Bcc">
-          <Input autoComplete="off" id={`${idPrefix}-bcc`} list={listId} name="bcc" placeholder="name@example.com" />
-        </Field>
+        <AddressRow id={`${idPrefix}-bcc`} label="Bcc" onClose={() => setShowBcc(false)}>
+          <RecipientPicker contacts={contacts} id={`${idPrefix}-bcc`} name="bcc" />
+        </AddressRow>
       ) : null}
     </>
+  );
+}
+
+function AddressRow({
+  children,
+  id,
+  label,
+  onClose,
+  trailing,
+}: {
+  children: React.ReactNode;
+  id: string;
+  label: string;
+  onClose?: () => void;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <label className="text-gray flex h-10 w-8 shrink-0 items-center text-xs font-semibold" htmlFor={id}>
+        {label}
+      </label>
+      <div className="min-w-0 flex-1">{children}</div>
+      <span className="flex h-10 shrink-0 items-center">
+        {trailing}
+        {onClose ? (
+          <button
+            aria-label={`Remove ${label}`}
+            className="text-gray inline-flex size-6 items-center justify-center rounded-full hover:text-black dark:hover:text-white"
+            onClick={onClose}
+            type="button"
+          >
+            <X className="size-3.5" />
+          </button>
+        ) : null}
+      </span>
+    </div>
   );
 }
 

@@ -11,9 +11,11 @@ test.describe('Compose and accounts', () => {
     await expect(form).toBeVisible();
 
     const subject = `Stamp compose test ${Date.now()}`;
-    await form.getByLabel('To').fill('mara@lindqvist.no');
+    await form.getByRole('combobox', { name: 'To' }).fill('lindqvist');
+    await page.getByRole('option', { name: /mara@lindqvist\.no/ }).click();
     await form.getByRole('button', { exact: true, name: 'Bcc' }).click();
-    await form.getByLabel('Bcc').fill('jonas@stamp.dev');
+    await form.getByRole('combobox', { name: 'Bcc' }).fill('jonas');
+    await page.getByRole('option', { name: /jonas@stamp\.dev/ }).click();
     await form.getByLabel('Subject').fill(subject);
     await form.getByLabel('Message').fill('Sent from the end-to-end suite.\n\nSecond paragraph, further down.');
     await form.getByLabel('Message').press('Meta+Enter');

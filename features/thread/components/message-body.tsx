@@ -13,11 +13,13 @@ import { formatBytes, formatFullDate } from '@/lib/utils';
 import type { Attachment, Participant } from '../types/thread';
 
 export function SenderRow({
+  actions,
   cc = [],
   date,
   from,
   to,
 }: {
+  actions?: React.ReactNode;
   cc?: Participant[];
   date: string;
   from: Participant;
@@ -39,6 +41,7 @@ export function SenderRow({
       <time className="text-gray shrink-0 text-xs tabular-nums" dateTime={date}>
         {formatFullDate(new Date(date))}
       </time>
+      {actions ? <span className="flex shrink-0 items-center gap-0.5">{actions}</span> : null}
     </div>
   );
 }

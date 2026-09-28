@@ -6,11 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { startTransition, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
+import { actionToast } from '@/components/ui/action-toast';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
 import { markThreadsRead, moveThread, moveThreads, starThreads, toggleStar } from '../thread-actions';
 import { LabelChip } from './label-chip';
+import { ListTitle, ThreadListHeader } from './thread-list-header';
 import { ThreadTime } from './thread-time';
 import type { Mailbox } from '../thread-mailboxes';
 import type { ThreadListItem } from '../types/thread';
@@ -38,7 +40,15 @@ function threadReducer(threads: ThreadListItem[], action: RowAction) {
 
 const PAGE_SIZE = 10;
 
-export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: ThreadListItem[] }) {
+export function ThreadRows({
+  mailbox,
+  threads,
+  title,
+}: {
+  mailbox?: Mailbox;
+  threads: ThreadListItem[];
+  title: string;
+}) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, threadReducer);
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -78,14 +88,9 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
         return;
       }
       if (pathname === href && canMove) router.push(`/${mailbox}` as Route);
-      toast(target === 'archive' ? 'Conversation archived' : 'Conversation moved to inbox', {
-        action: {
-          label: 'Undo',
-          onClick: () =>
-            startTransition(async () => {
-              await moveThread(thread.id, thread.mailbox === 'archive' ? 'archive' : 'inbox');
-            }),
-        },
+      actionToast(target === 'archive' ? 'Conversation archived' : 'Conversation moved to inbox', {
+        label: 'Undo',
+        run: () => moveThread(thread.id, thread.mailbox === 'archive' ? 'archive' : 'inbox'),
       });
     });
   }
@@ -101,17 +106,9 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
         toast.error(result.error);
         return;
       }
-      toast(
+      actionToast(
         `${ids.length} ${ids.length === 1 ? 'conversation' : 'conversations'} ${target === 'archive' ? 'archived' : 'moved to inbox'}`,
-        {
-          action: {
-            label: 'Undo',
-            onClick: () =>
-              startTransition(async () => {
-                await moveThreads(ids, target === 'archive' ? 'inbox' : 'archive');
-              }),
-          },
-        },
+        { label: 'Undo', run: () => moveThreads(ids, target === 'archive' ? 'inbox' : 'archive') },
       );
     });
   }
@@ -140,45 +137,57 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
 
   return (
     <Boundary label="ThreadRows">
-      <div className="text-gray flex h-10 items-center gap-1 pr-4 pl-3 text-xs tabular-nums sm:pr-5 sm:pl-4">
-        <RowCheckbox
-          checked={chosen.length > 0 && chosen.length === visible.length}
-          className="mr-2"
-          label={chosen.length === visible.length ? 'Clear selection' : 'Select all on this page'}
-          onChange={() => setSelected(chosen.length === visible.length ? new Set() : new Set(visible.map(t => t.id)))}
-        />
-        {chosen.length > 0 ? (
+      <ThreadListHeader
+        leading={
           <>
-            <span className="mr-1 text-black dark:text-white">{chosen.length} selected</span>
-            {canMove ? (
-              <RowButton label={mailbox === 'archive' ? 'Move to inbox' : 'Archive'} onClick={moveChosen}>
-                {mailbox === 'archive' ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
-              </RowButton>
-            ) : null}
-            <RowButton label={chosen.some(t => !t.starred) ? 'Star' : 'Remove star'} onClick={starChosen}>
-              <Star className="size-4" strokeWidth={1.5} />
-            </RowButton>
-            <RowButton label={chosen.some(t => !t.read) ? 'Mark as read' : 'Mark as unread'} onClick={markChosen}>
-              <MailOpen className="size-4" />
-            </RowButton>
-            <RowButton className="ml-auto" label="Clear selection" onClick={() => setSelected(new Set())}>
+            <RowCheckbox
+              checked={chosen.length > 0 && chosen.length === visible.length}
+              className="ml-1"
+              label={chosen.length === visible.length ? 'Clear selection' : 'Select all on this page'}
+              onChange={() =>
+                setSelected(chosen.length === visible.length ? new Set() : new Set(visible.map(t => t.id)))
+              }
+            />
+            {chosen.length > 0 ? (
+              <>
+                <span className="text-sm font-semibold tabular-nums">{chosen.length} selected</span>
+                {canMove ? (
+                  <RowButton label={mailbox === 'archive' ? 'Move to inbox' : 'Archive'} onClick={moveChosen}>
+                    {mailbox === 'archive' ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
+                  </RowButton>
+                ) : null}
+                <RowButton label={chosen.some(t => !t.starred) ? 'Star' : 'Remove star'} onClick={starChosen}>
+                  <Star className="size-4" strokeWidth={1.5} />
+                </RowButton>
+                <RowButton label={chosen.some(t => !t.read) ? 'Mark as read' : 'Mark as unread'} onClick={markChosen}>
+                  <MailOpen className="size-4" />
+                </RowButton>
+              </>
+            ) : (
+              <ListTitle>{title}</ListTitle>
+            )}
+          </>
+        }
+        trailing={
+          chosen.length > 0 ? (
+            <RowButton label="Clear selection" onClick={() => setSelected(new Set())}>
               <X className="size-4" />
             </RowButton>
-          </>
-        ) : (
-          <>
-            <span className="mr-1 ml-auto">
-              {start + 1}–{start + visible.length} of {optimisticThreads.length}
-            </span>
-            <RowButton disabled={current === 0} label="Newer" onClick={() => setPage(current - 1)}>
-              <ChevronLeft className="size-4" />
-            </RowButton>
-            <RowButton disabled={current >= pageCount - 1} label="Older" onClick={() => setPage(current + 1)}>
-              <ChevronRight className="size-4" />
-            </RowButton>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              <span className="text-gray mr-1 text-xs tabular-nums">
+                {start + 1}–{start + visible.length} of {optimisticThreads.length}
+              </span>
+              <RowButton disabled={current === 0} label="Newer" onClick={() => setPage(current - 1)}>
+                <ChevronLeft className="size-4" />
+              </RowButton>
+              <RowButton disabled={current >= pageCount - 1} label="Older" onClick={() => setPage(current + 1)}>
+                <ChevronRight className="size-4" />
+              </RowButton>
+            </>
+          )
+        }
+      />
       <ul aria-label="Conversations" className="flex flex-col" data-testid="thread-rows">
         {visible.map(thread => {
           const href = `/${mailbox ?? thread.mailbox}/${thread.id}` as Route;
@@ -189,7 +198,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
           return (
             <li
               className={cn(
-                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-2 border-b py-3 pr-4 pl-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:pr-5 sm:pl-4',
+                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
                 active || isSelected ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
               )}
               data-read={thread.read ? '' : undefined}
@@ -204,14 +213,13 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                 className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
                 href={href}
               />
-              <RowCheckbox
+              <SelectAvatar
                 checked={isSelected}
-                className={cn(!isSelected && 'invisible group-hover:visible focus-visible:visible')}
                 label={`Select ${thread.subject}`}
+                name={sender === 'me' ? 'Me' : sender}
                 onChange={() => toggleSelected(thread.id)}
               />
-              <UserAvatar name={sender === 'me' ? 'Me' : sender} />
-              <div className="flex min-w-0 flex-col pl-1">
+              <div className="flex min-w-0 flex-col">
                 <div className="flex h-5 items-center gap-1.5">
                   {!thread.read ? (
                     <span aria-label="Unread" className="bg-accent size-1.5 shrink-0 rounded-full" />
@@ -300,17 +308,54 @@ function RowCheckbox({
       aria-checked={checked}
       aria-label={label}
       className={cn(
-        'relative z-20 flex size-4 items-center justify-center rounded-[4px] border transition-colors',
+        'relative z-20 flex size-7 items-center justify-center rounded-full border transition-colors',
         checked
           ? 'border-accent bg-accent text-white'
-          : 'border-gray/60 hover:border-gray bg-white text-transparent dark:bg-black',
+          : 'border-gray/50 bg-card hover:border-gray dark:bg-card-dark text-transparent',
         className,
       )}
       onClick={onChange}
       role="checkbox"
       type="button"
     >
-      <Check className="size-3" strokeWidth={3} />
+      <Check className="size-3.5" strokeWidth={3} />
+    </button>
+  );
+}
+
+function SelectAvatar({
+  checked,
+  label,
+  name,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  name: string;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      aria-checked={checked}
+      aria-label={label}
+      className="group/select focus-visible:ring-accent/40 relative z-20 flex size-9 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
+      onClick={onChange}
+      role="checkbox"
+      type="button"
+    >
+      <span className={cn('absolute inset-0', checked ? 'invisible' : 'group-hover/select:invisible')}>
+        <UserAvatar name={name} />
+      </span>
+      <span
+        className={cn(
+          'flex size-7 items-center justify-center rounded-full border',
+          checked
+            ? 'border-accent bg-accent text-white'
+            : 'border-gray/50 bg-card dark:bg-card-dark invisible text-transparent group-hover/select:visible',
+        )}
+      >
+        <Check className="size-3.5" strokeWidth={3} />
+      </span>
     </button>
   );
 }

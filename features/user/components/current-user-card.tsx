@@ -9,7 +9,7 @@ export async function CurrentUserCard() {
 
 export function CurrentUserCardSkeleton() {
   return (
-    <div aria-hidden className="flex h-12 min-w-0 flex-1 items-center gap-2.5 px-2">
+    <div aria-hidden className="flex h-12 items-center gap-2.5 px-2">
       <Skeleton className="skeleton-subtle size-8 shrink-0 rounded-full" />
       <div className="flex flex-col gap-2">
         <Skeleton className="h-3 w-16" />

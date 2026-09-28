@@ -41,7 +41,7 @@ export type ThreadSummary = {
   starred: boolean;
   mailbox: string;
   messageCount: number;
-  latest: ThreadMessage;
+  latest: Omit<ThreadMessage, 'paragraphs' | 'attachments'>;
 };
 
 export type ThreadMessage = {
