@@ -18,9 +18,12 @@ type Selection = {
 
 const SelectionContext = createContext<Selection>({ selected: new Map(), setSelected: () => {} });
 
-// Key the provider by mailbox and page so a new page starts with nothing selected.
-export function SelectionProvider({ children }: { children: React.ReactNode }) {
-  const [selected, setSelected] = useState<Map<string, SelectableThread>>(new Map());
+// Selection belongs to one list (a mailbox page, a search), so it resets when `list` changes, without the
+// provider remounting and taking the header and rows boundary with it.
+export function SelectionProvider({ children, list }: { children: React.ReactNode; list: string }) {
+  const [state, setState] = useState({ list, selected: new Map<string, SelectableThread>() });
+  const selected = state.list === list ? state.selected : new Map<string, SelectableThread>();
+  const setSelected = (next: Map<string, SelectableThread>) => setState({ list, selected: next });
   return <SelectionContext value={{ selected, setSelected }}>{children}</SelectionContext>;
 }
 

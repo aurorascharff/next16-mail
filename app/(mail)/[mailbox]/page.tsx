@@ -20,10 +20,10 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
     <div className="flex h-full flex-col" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton />}>
         {query.then(({ mailbox, page }) => (
-          <SelectionProvider key={`${mailbox}:${page}`}>
+          <SelectionProvider list={`${mailbox}:${page}`}>
             <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
             <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <AnimatedSuspense fallback={<ThreadRowsSkeleton />}>
+              <AnimatedSuspense fallback={<ThreadRowsSkeleton />} key={`${mailbox}:${page}`}>
                 <ThreadList mailbox={mailbox} page={page} />
               </AnimatedSuspense>
             </div>
