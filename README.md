@@ -41,7 +41,7 @@ Rows are ordinary links until the pointer reaches them. A [hover-triggered prefe
 
 ## Getting started
 
-Relay runs on Postgres and a Next.js 16.4 canary, which `unstable_navigation()` needs. Set `DATABASE_URL` in `.env.local`, then:
+Relay runs on Postgres and a Next.js 16.4 canary, which `unstable_navigation()` needs. Copy `.env.example` to `.env.local` and set `DATABASE_URL`, either the commented local example or a hosted database, then:
 
 ```bash
 pnpm install
