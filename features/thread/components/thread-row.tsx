@@ -19,7 +19,7 @@ import type { Route } from 'next';
 
 export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Mailbox; thread: ThreadListItem }) {
   const [state, setState] = useOptimistic({ mailbox: thread.mailbox, starred: thread.starred });
-  const { selected, toggle } = useRowSelection(thread.id);
+  const { selected, toggle } = useRowSelection({ id: thread.id, read: thread.read, starred: state.starred });
   const canMove = mailbox === 'inbox' || mailbox === 'archive';
   const leaving = canMove && state.mailbox !== mailbox;
   const sender = thread.participants.at(-1) ?? '';

@@ -51,7 +51,7 @@ export function ThreadListHeaderFor({ title, ...props }: ListProps & { title: st
 
 async function SelectAllFor(props: ListProps) {
   const { threads } = await loadPage(props);
-  return <SelectAll ids={threads.map(thread => thread.id)} />;
+  return <SelectAll threads={threads.map(({ id, read, starred }) => ({ id, read, starred }))} />;
 }
 
 async function PagerFor(props: ListProps) {

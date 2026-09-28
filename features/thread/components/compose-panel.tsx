@@ -1,8 +1,7 @@
 'use client';
 
 import { Minus, X } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import type { User } from '@/features/user/types/user';
 import { cn } from '@/lib/utils';
@@ -22,13 +21,6 @@ export function ComposePanel({ contacts, from }: { contacts: Participant[]; from
     () => true,
     () => false,
   );
-  const pathname = usePathname();
-  const lastPathname = useRef(pathname);
-
-  useEffect(() => {
-    if (lastPathname.current !== pathname && pathname.startsWith('/sent/')) close();
-    lastPathname.current = pathname;
-  }, [close, pathname]);
 
   return (
     <Boundary label="ComposePanel" asChild>

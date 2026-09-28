@@ -19,10 +19,12 @@ test.describe('Compose and accounts', () => {
     await form.getByLabel('Message').fill('Sent from the end-to-end suite.\n\nSecond paragraph, further down.');
     await form.getByLabel('Message').press('Meta+Enter');
 
-    await page.waitForURL(url => url.pathname.startsWith('/sent/thr-'));
     await expect(page.getByTestId('compose-panel')).toHaveCount(0);
-    await expect(page.getByRole('heading', { exact: true, level: 1, name: subject }).filter(visible)).toBeVisible();
-    await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Second paragraph, further down.');
+    await expect(page.getByText('Message sent')).toBeVisible();
+    await expect(page).toHaveURL(/\/inbox$/);
+    await page.getByRole('navigation', { name: 'Mailboxes' }).getByRole('link', { name: /Sent/ }).click();
+    await page.waitForURL(url => url.pathname === '/sent');
+    await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: subject })).toBeVisible();
 
     await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
     await page

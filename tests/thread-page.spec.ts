@@ -51,6 +51,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await expect(page.getByTestId('thread-latest').filter(visible)).toContainText(reply);
     await expect(page.getByTestId('earlier-message').filter(visible)).toHaveCount(2);
     await expect(page.getByLabel('Reply')).toHaveValue('');
+    await expect(page.getByText('Reply sent')).toBeVisible();
   });
 
   test('starring from the toolbar shows up in Starred', async ({ page }) => {

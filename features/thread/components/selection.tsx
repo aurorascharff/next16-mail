@@ -1,6 +1,6 @@
 'use client';
 
-import { Archive, ArchiveRestore, Check, MailOpen, Star, X } from 'lucide-react';
+import { Archive, ArchiveRestore, Check, Mail, MailOpen, Star, X } from 'lucide-react';
 import { createContext, use, useState, useTransition } from 'react';
 import { toast } from 'sonner';
 import { actionToast } from '@/components/ui/action-toast';
@@ -10,13 +10,17 @@ import { RowButton } from './row-button';
 import { ListTitle, ThreadListHeader } from './thread-list-header';
 import type { Mailbox } from '../thread-mailboxes';
 
-type Selection = { selected: Set<string>; setSelected: (ids: Set<string>) => void };
+export type SelectableThread = { id: string; read: boolean; starred: boolean };
+type Selection = {
+  selected: Map<string, SelectableThread>;
+  setSelected: (next: Map<string, SelectableThread>) => void;
+};
 
-const SelectionContext = createContext<Selection>({ selected: new Set(), setSelected: () => {} });
+const SelectionContext = createContext<Selection>({ selected: new Map(), setSelected: () => {} });
 
 // Key the provider by mailbox and page so a new page starts with nothing selected.
 export function SelectionProvider({ children }: { children: React.ReactNode }) {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Map<string, SelectableThread>>(new Map());
   return <SelectionContext value={{ selected, setSelected }}>{children}</SelectionContext>;
 }
 
@@ -24,14 +28,14 @@ export function useSelection() {
   return use(SelectionContext);
 }
 
-export function useRowSelection(id: string) {
+export function useRowSelection(thread: SelectableThread) {
   const { selected, setSelected } = useSelection();
   return {
-    selected: selected.has(id),
+    selected: selected.has(thread.id),
     toggle() {
-      const next = new Set(selected);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = new Map(selected);
+      if (next.has(thread.id)) next.delete(thread.id);
+      else next.set(thread.id, thread);
       setSelected(next);
     },
   };
@@ -75,16 +79,16 @@ const selectAllClass =
   'border-gray/50 bg-card dark:bg-card-dark ml-2 flex size-5 shrink-0 items-center justify-center rounded-full border text-transparent transition-colors';
 
 // Without ids the control is disabled but still drawn, so the header keeps its shape while rows load.
-export function SelectAll({ ids }: { ids?: string[] }) {
+export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
   const { selected, setSelected } = useSelection();
-  const all = ids !== undefined && ids.length > 0 && ids.every(id => selected.has(id));
+  const all = threads !== undefined && threads.length > 0 && threads.every(thread => selected.has(thread.id));
   return (
     <button
       aria-checked={all}
       aria-label={all ? 'Clear selection' : 'Select all on this page'}
       className={cn(selectAllClass, all ? 'border-accent bg-accent text-white' : 'enabled:hover:border-gray')}
-      disabled={!ids || ids.length === 0}
-      onClick={() => setSelected(all ? new Set() : new Set(ids))}
+      disabled={!threads || threads.length === 0}
+      onClick={() => setSelected(all ? new Map() : new Map(threads?.map(thread => [thread.id, thread])))}
       role="checkbox"
       type="button"
     >
@@ -98,9 +102,12 @@ type ActionResult = { ok: true } | { ok: false; error: string };
 function BulkActions({ mailbox }: { mailbox?: Mailbox }) {
   const { selected, setSelected } = useSelection();
   const [isPending, startTransition] = useTransition();
-  const ids = [...selected];
+  const chosen = [...selected.values()];
+  const ids = chosen.map(thread => thread.id);
   const canMove = mailbox === 'inbox' || mailbox === 'archive';
   const target = mailbox === 'archive' ? 'inbox' : 'archive';
+  const star = chosen.some(thread => !thread.starred);
+  const read = chosen.some(thread => !thread.read);
 
   function run(action: () => Promise<ActionResult>, onDone?: () => void) {
     startTransition(async () => {
@@ -109,7 +116,7 @@ function BulkActions({ mailbox }: { mailbox?: Mailbox }) {
         toast.error(result.error);
         return;
       }
-      setSelected(new Set());
+      setSelected(new Map());
       onDone?.();
     });
   }
@@ -135,11 +142,19 @@ function BulkActions({ mailbox }: { mailbox?: Mailbox }) {
           {target === 'archive' ? <Archive className="size-4" /> : <ArchiveRestore className="size-4" />}
         </RowButton>
       ) : null}
-      <RowButton disabled={isPending} label="Star" onClick={() => run(() => starThreads(ids, true))}>
-        <Star className="size-4" strokeWidth={1.5} />
+      <RowButton
+        disabled={isPending}
+        label={star ? 'Star' : 'Remove star'}
+        onClick={() => run(() => starThreads(ids, star))}
+      >
+        <Star className={cn('size-4', !star && 'fill-current')} strokeWidth={1.5} />
       </RowButton>
-      <RowButton disabled={isPending} label="Mark as read" onClick={() => run(() => markThreadsRead(ids, true))}>
-        <MailOpen className="size-4" />
+      <RowButton
+        disabled={isPending}
+        label={read ? 'Mark as read' : 'Mark as unread'}
+        onClick={() => run(() => markThreadsRead(ids, read))}
+      >
+        {read ? <MailOpen className="size-4" /> : <Mail className="size-4" />}
       </RowButton>
     </>
   );
