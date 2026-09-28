@@ -1,34 +1,31 @@
 import { Suspense } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
+import { SelectAll, SelectionProvider } from '@/features/thread/components/selection';
 import {
   ThreadList,
+  ThreadListHeaderFor,
   ThreadListSkeleton,
-  ThreadListToolbar,
   ThreadRowsSkeleton,
 } from '@/features/thread/components/thread-list';
-import { ListTitle, SelectAll, ThreadListHeader } from '@/features/thread/components/thread-list-header';
-import { parseSelected } from '@/features/thread/thread-list-url';
+import { ListTitle, ThreadListHeader } from '@/features/thread/components/thread-list-header';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Search' };
 
 export default function SearchPage({ searchParams }: PageProps<'/search'>) {
-  const query = searchParams.then(params => ({
-    q: typeof params.q === 'string' ? params.q.trim() : '',
-    selected: parseSelected(params.selected),
-  }));
+  const query = searchParams.then(params => (typeof params.q === 'string' ? params.q.trim() : ''));
 
   return (
     <div className="thread-results h-full overflow-y-auto overscroll-y-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
-        {query.then(({ q, selected }) =>
+        {query.then(q =>
           q ? (
-            <>
-              <ThreadListToolbar page={1} q={q} selected={selected} title="Search" />
+            <SelectionProvider key={q}>
+              <ThreadListHeaderFor page={1} q={q} title="Search" />
               <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
-                <ThreadList page={1} q={q} selected={selected} />
+                <ThreadList page={1} q={q} />
               </Suspense>
-            </>
+            </SelectionProvider>
           ) : (
             <>
               <ThreadListHeader

@@ -1,7 +1,6 @@
 'use client';
 
 import { Archive, ArchiveRestore, Check, Paperclip, Star } from 'lucide-react';
-import Link from 'next/link';
 import { startTransition, useOptimistic } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
@@ -12,25 +11,15 @@ import { cn } from '@/lib/utils';
 import { moveThread, toggleStar } from '../thread-actions';
 import { LabelChip } from './label-chip';
 import { RowButton } from './row-button';
+import { useRowSelection } from './selection';
 import { ThreadTime } from './thread-time';
 import type { Mailbox } from '../thread-mailboxes';
 import type { ThreadListItem } from '../types/thread';
 import type { Route } from 'next';
 
-export function ThreadRow({
-  href,
-  mailbox,
-  selected,
-  selectHref,
-  thread,
-}: {
-  href: Route;
-  mailbox?: Mailbox;
-  selected: boolean;
-  selectHref: Route;
-  thread: ThreadListItem;
-}) {
+export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Mailbox; thread: ThreadListItem }) {
   const [state, setState] = useOptimistic({ mailbox: thread.mailbox, starred: thread.starred });
+  const { selected, toggle } = useRowSelection(thread.id);
   const canMove = mailbox === 'inbox' || mailbox === 'archive';
   const leaving = canMove && state.mailbox !== mailbox;
   const sender = thread.participants.at(-1) ?? '';
@@ -81,15 +70,13 @@ export function ThreadRow({
           className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
           href={href}
         />
-        <Link
+        <button
           aria-checked={selected}
           aria-label={`Select ${thread.subject}`}
           className="group/select focus-visible:ring-accent/40 relative z-20 flex size-9 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:outline-none"
-          href={selectHref}
-          prefetch={false}
-          replace
+          onClick={toggle}
           role="checkbox"
-          scroll={false}
+          type="button"
         >
           <span className={cn('absolute inset-0', selected ? 'invisible' : 'group-hover/select:invisible')}>
             <UserAvatar name={sender === 'me' ? 'Me' : sender} />
@@ -104,7 +91,7 @@ export function ThreadRow({
           >
             <Check className="size-3.5" strokeWidth={3} />
           </span>
-        </Link>
+        </button>
         <div className="flex min-w-0 flex-col">
           <div className="flex h-5 items-center gap-1.5">
             <span className={cn('truncate text-sm', emphasis, !thread.read && 'tracking-tight')}>

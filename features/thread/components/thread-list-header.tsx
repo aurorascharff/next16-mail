@@ -1,5 +1,4 @@
-import { Check, ChevronLeft, ChevronRight, X } from 'lucide-react';
-import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { cn } from '@/lib/utils';
 import { listHref, type ListLocation } from '../thread-list-url';
@@ -18,57 +17,8 @@ export function ListTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="truncate text-sm font-semibold tracking-tight">{children}</h2>;
 }
 
-const selectAllClass =
-  'ml-2 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors border-gray/50 bg-card dark:bg-card-dark text-transparent';
-
-// Without an href the control is disabled but still drawn, so the header keeps its shape while rows load.
-export function SelectAll({ checked = false, href }: { checked?: boolean; href?: Route }) {
-  if (!href) {
-    return (
-      <button
-        aria-checked={false}
-        aria-label="Select all on this page"
-        className={selectAllClass}
-        disabled
-        role="checkbox"
-        type="button"
-      />
-    );
-  }
-  return (
-    <Link
-      aria-checked={checked}
-      aria-label={checked ? 'Clear selection' : 'Select all on this page'}
-      className={cn(selectAllClass, checked ? 'border-accent bg-accent text-white' : 'hover:border-gray')}
-      href={href}
-      prefetch={false}
-      replace
-      role="checkbox"
-      scroll={false}
-    >
-      <Check className="size-3" strokeWidth={3} />
-    </Link>
-  );
-}
-
 const iconLinkClass =
   'text-gray inline-flex size-6 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white';
-
-export function ClearSelection({ href }: { href: Route }) {
-  return (
-    <Link
-      aria-label="Clear selection"
-      className={iconLinkClass}
-      href={href}
-      prefetch={false}
-      replace
-      scroll={false}
-      title="Clear selection"
-    >
-      <X className="size-4" />
-    </Link>
-  );
-}
 
 export function Pager({
   count,
@@ -89,10 +39,10 @@ export function Pager({
       <span className="text-gray mr-1 text-xs tabular-nums">
         {count === 0 ? 0 : `${start + 1}–${start + count}`} of {total}
       </span>
-      <PagerLink disabled={page <= 1} href={listHref({ ...list, page: page - 1, selected: [] })} label="Newer">
+      <PagerLink disabled={page <= 1} href={listHref({ ...list, page: page - 1 })} label="Newer">
         <ChevronLeft className="size-4" />
       </PagerLink>
-      <PagerLink disabled={page >= pageCount} href={listHref({ ...list, page: page + 1, selected: [] })} label="Older">
+      <PagerLink disabled={page >= pageCount} href={listHref({ ...list, page: page + 1 })} label="Older">
         <ChevronRight className="size-4" />
       </PagerLink>
     </>

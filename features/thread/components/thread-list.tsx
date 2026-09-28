@@ -2,15 +2,15 @@ import { Suspense } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { listHref, toggled, type ListLocation } from '../thread-list-url';
 import { PAGE_SIZE, type Mailbox } from '../thread-mailboxes';
 import { getThreads, searchThreads, type ThreadPage } from '../thread-queries';
-import { BulkActions } from './bulk-actions';
-import { ClearSelection, ListTitle, Pager, SelectAll, ThreadListHeader } from './thread-list-header';
+import { SelectAll, ThreadListToolbar } from './selection';
+import { ListTitle, Pager, ThreadListHeader } from './thread-list-header';
 import { ThreadRow } from './thread-row';
+import type { ListLocation } from '../thread-list-url';
 import type { Route } from 'next';
 
-type ListProps = { mailbox?: Mailbox; page: number; q?: string; selected: string[] };
+type ListProps = { mailbox?: Mailbox; page: number; q?: string };
 
 const emptyCopy: Record<Mailbox, { body: string; title: string }> = {
   archive: { body: 'Archived conversations land here and stay searchable.', title: 'Nothing archived' },
@@ -29,44 +29,29 @@ async function loadPage({ mailbox, page, q }: ListProps): Promise<ThreadPage> {
   return { threads, total: threads.length };
 }
 
-// Selection lives in the URL, so the header renders from the route alone and only its two data-dependent
-// controls wait for the rows.
-export function ThreadListToolbar({ title, ...props }: ListProps & { title: string }) {
-  const list = locationOf(props);
-  const clearHref = listHref(list);
+// The header sits outside the rows boundary; only its two data-dependent controls wait for the rows.
+export function ThreadListHeaderFor({ title, ...props }: ListProps & { title: string }) {
   return (
-    <ThreadListHeader
-      leading={
-        <>
-          <Suspense fallback={<SelectAll />}>
-            <SelectAllFor {...props} />
-          </Suspense>
-          {props.selected.length > 0 ? (
-            <BulkActions clearHref={clearHref} ids={props.selected} mailbox={props.mailbox} />
-          ) : (
-            <ListTitle>{title}</ListTitle>
-          )}
-        </>
+    <ThreadListToolbar
+      mailbox={props.mailbox}
+      pager={
+        <Suspense>
+          <PagerFor {...props} />
+        </Suspense>
       }
-      trailing={
-        props.selected.length > 0 ? (
-          <ClearSelection href={clearHref} />
-        ) : (
-          <Suspense>
-            <PagerFor {...props} />
-          </Suspense>
-        )
+      selectAll={
+        <Suspense fallback={<SelectAll />}>
+          <SelectAllFor {...props} />
+        </Suspense>
       }
+      title={title}
     />
   );
 }
 
 async function SelectAllFor(props: ListProps) {
   const { threads } = await loadPage(props);
-  if (threads.length === 0) return <SelectAll />;
-  const ids = threads.map(thread => thread.id);
-  const all = ids.every(id => props.selected.includes(id));
-  return <SelectAll checked={all} href={listHref({ ...locationOf(props), selected: all ? [] : ids })} />;
+  return <SelectAll ids={threads.map(thread => thread.id)} />;
 }
 
 async function PagerFor(props: ListProps) {
@@ -81,7 +66,6 @@ export async function ThreadList(props: ListProps) {
     const copy = props.mailbox ? emptyCopy[props.mailbox] : { body: undefined, title: 'No results' };
     return <EmptyState body={copy.body} className="m-3" title={copy.title} />;
   }
-  const list = locationOf(props);
   return (
     <ul aria-label="Conversations" className="flex flex-col" data-testid="thread-rows">
       {threads.map(thread => (
@@ -93,8 +77,6 @@ export async function ThreadList(props: ListProps) {
           }
           key={thread.id}
           mailbox={props.mailbox}
-          selected={props.selected.includes(thread.id)}
-          selectHref={listHref({ ...list, selected: toggled(props.selected, thread.id) })}
           thread={thread}
         />
       ))}
