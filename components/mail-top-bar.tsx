@@ -1,3 +1,4 @@
+import { MobileSidebarTrigger } from '@/components/mobile-sidebar';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -6,7 +7,8 @@ import { SearchForm } from '@/features/thread/components/search-form';
 
 export function MailTopBar() {
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 px-3 sm:px-4">
+    <header className="flex h-16 shrink-0 items-center gap-2 px-3 sm:px-4 md:gap-3">
+      <MobileSidebarTrigger className="-ml-1 size-10" />
       <div className="hidden w-56 items-center gap-1 pl-2 md:flex">
         <PrefetchLink
           aria-label="Stamp inbox"
