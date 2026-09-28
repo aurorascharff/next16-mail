@@ -24,7 +24,7 @@ const description =
   'A Next.js 16.4 mail client demonstrating navigation() and prefetch() with Cache Components and Partial Prefetching.';
 
 export const metadata: Metadata = {
-  applicationName: 'Relay',
+  applicationName: 'Stamp',
   description,
   formatDetection: {
     address: false,
@@ -41,11 +41,11 @@ export const metadata: Metadata = {
   ),
   openGraph: {
     description,
-    siteName: 'Relay',
-    title: 'Relay',
+    siteName: 'Stamp',
+    title: 'Stamp',
     type: 'website',
   },
-  title: { default: 'Relay', template: '%s · Relay' },
+  title: { default: 'Stamp', template: '%s · Stamp' },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <ThemeProvider>
           <BoundaryProvider>
             {children}
-            <div className="demo-toggles fixed right-4 bottom-4 z-50 hidden items-end md:flex">
+            <div className="demo-toggles fixed top-4 right-4 z-50 hidden items-start md:flex">
               <Suspense>
                 <DemoToolbar />
               </Suspense>

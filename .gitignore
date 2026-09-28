@@ -38,6 +38,7 @@ next-env.d.ts
 # generated
 /generated/
 
-# sqlite (local opt-in, see README)
+# sqlite (local development, see README)
 prisma/*.db
 prisma/*.db-journal
+prisma/.local/

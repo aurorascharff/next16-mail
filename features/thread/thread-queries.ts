@@ -4,7 +4,7 @@ import { cacheLife, cacheTag, unstable_navigation } from 'next/cache';
 import { notFound } from 'next/navigation';
 import { isSlowEnabled } from '@/features/demo/demo-queries';
 import { verifyUser } from '@/features/user/user-queries';
-import { prisma } from '@/lib/db';
+import { prisma, usesSqlite } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { threadTags } from './thread-cache';
 import { MAILBOXES, type Mailbox } from './thread-mailboxes';
@@ -25,9 +25,13 @@ function mailboxWhere(userId: string, mailbox: Mailbox) {
   }
 }
 
-/** First name for people; automations such as "Relay Deploys" keep their full name. */
+function matches(value: string): { contains: string } {
+  const filter = usesSqlite ? { contains: value } : { contains: value, mode: 'insensitive' as const };
+  return filter;
+}
+
 function shortName(name: string) {
-  return name.startsWith('Relay ') ? name : name.split(' ')[0];
+  return name.startsWith('Stamp ') ? name : name.split(' ')[0];
 }
 
 function splitParagraphs(body: string) {
@@ -87,7 +91,6 @@ async function getThreadsForUser(userId: string, mailbox: Mailbox, slow: boolean
   return threads.map(thread => toListItem(thread, userId));
 }
 
-/** Rows matching a search across subjects, senders and bodies. */
 export async function searchThreads(query: string): Promise<ThreadListItem[]> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
   return searchThreadsForUser(user.id, query.trim().toLowerCase(), slow);
@@ -113,10 +116,10 @@ async function searchThreadsForUser(userId: string, query: string, slow: boolean
     take: 25,
     where: {
       OR: [
-        { subject: { contains: query, mode: 'insensitive' } },
-        { messages: { some: { body: { contains: query, mode: 'insensitive' } } } },
-        { messages: { some: { from: { name: { contains: query, mode: 'insensitive' } } } } },
-        { labels: { some: { name: { contains: query, mode: 'insensitive' } } } },
+        { subject: matches(query) },
+        { messages: { some: { body: matches(query) } } },
+        { messages: { some: { from: { name: matches(query) } } } },
+        { labels: { some: { name: matches(query) } } },
       ],
       states: { some: { userId } },
     },
@@ -158,9 +161,28 @@ function toListItem(thread: ThreadRow, userId: string): ThreadListItem {
   };
 }
 
+const messageInclude = {
+  attachments: { orderBy: { name: 'asc' } },
+  from: { select: participantSelect },
+  recipients: { include: { user: { select: participantSelect } }, where: { kind: 'to' } },
+} as const;
+
+type MessageRow = Awaited<ReturnType<typeof prisma.message.findMany<{ include: typeof messageInclude }>>>[number];
+
+function toMessage(message: MessageRow): ThreadMessage {
+  return {
+    attachments: message.attachments,
+    from: message.from,
+    id: message.id,
+    paragraphs: splitParagraphs(message.body),
+    sentAt: message.sentAt.toISOString(),
+    to: message.recipients.map(recipient => recipient.user),
+  };
+}
+
 /**
- * The part of a thread that is worth rendering before the click: subject, labels, who sent the latest message,
- * and its opening paragraph. A hovered row resolves this in its per-link prefetch.
+ * The part of a thread that is worth having before the click: subject, labels, and the latest message in full.
+ * A hovered row resolves this in its per-link prefetch, so opening the thread shows it at once.
  */
 export async function getThreadSummary(threadId: string): Promise<ThreadSummary> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
@@ -177,14 +199,7 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
     include: {
       _count: { select: { messages: true } },
       labels: true,
-      messages: {
-        include: {
-          from: { select: participantSelect },
-          recipients: { include: { user: { select: participantSelect } }, where: { kind: 'to' } },
-        },
-        orderBy: { sentAt: 'desc' },
-        take: 1,
-      },
+      messages: { include: messageInclude, orderBy: { sentAt: 'desc' }, take: 1 },
       states: { where: { userId } },
     },
     where: { id: threadId },
@@ -196,13 +211,7 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   return {
     id: thread.id,
     labels: thread.labels,
-    latest: {
-      from: latest.from,
-      id: latest.id,
-      opening: splitParagraphs(latest.body)[0] ?? '',
-      sentAt: latest.sentAt.toISOString(),
-      to: latest.recipients.map(recipient => recipient.user),
-    },
+    latest: toMessage(latest),
     mailbox: state.mailbox,
     messageCount: thread._count.messages,
     read: state.read,
@@ -212,43 +221,30 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
 }
 
 /**
- * Every message in the thread, with full bodies and attachments. `await unstable_navigation()` keeps this out of
- * the App Shell and out of every per-link prefetch: hovering rows never downloads bodies, and the cached result
- * is only produced once someone actually opens the thread.
+ * Every message before the latest one, newest first. `await unstable_navigation()` keeps this out of the App Shell
+ * and out of every per-link prefetch: hovering rows never downloads the history, and the cached result is only
+ * produced once someone actually opens the thread.
  */
-export async function getThreadMessages(threadId: string): Promise<ThreadMessage[]> {
+export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
   await unstable_navigation();
-  return getThreadMessagesCached(threadId, await isSlowEnabled());
+  return getEarlierMessagesCached(threadId, await isSlowEnabled());
 }
 
-async function getThreadMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(threadTags.detail(threadId));
 
   await delay(1400, slow);
   const messages = await prisma.message.findMany({
-    include: {
-      attachments: { orderBy: { name: 'asc' } },
-      from: { select: participantSelect },
-      recipients: { include: { user: { select: participantSelect } }, where: { kind: 'to' } },
-    },
-    orderBy: { sentAt: 'asc' },
+    include: messageInclude,
+    orderBy: { sentAt: 'desc' },
+    skip: 1,
     where: { threadId },
   });
-  if (messages.length === 0) notFound();
-
-  return messages.map(message => ({
-    attachments: message.attachments,
-    from: message.from,
-    id: message.id,
-    paragraphs: splitParagraphs(message.body),
-    sentAt: message.sentAt.toISOString(),
-    to: message.recipients.map(recipient => recipient.user),
-  }));
+  return messages.map(toMessage);
 }
 
-/** People the compose form can address: every account and everyone who has written to this account. */
 export async function getContacts(): Promise<Participant[]> {
   const user = await verifyUser();
   return getContactsForUser(user.id);

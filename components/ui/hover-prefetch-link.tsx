@@ -10,10 +10,6 @@ type Props<T extends string = string> = Omit<ComponentProps<typeof Link>, 'href'
   href: Route<T> | URL;
 };
 
-/**
- * A `<Link>` that only requests its per-link prefetch once the user shows intent (pointer, focus, or touch).
- * A list of many rows would otherwise wake the server once per visible row.
- */
 export function HoverPrefetchLink<T extends string>({ href, onFocus, onMouseEnter, onTouchStart, ...props }: Props<T>) {
   const [intent, setIntent] = useState(false);
   const enabled = usePrefetchDefault() === true;

@@ -7,15 +7,13 @@ export function MailSplit({ children, list }: { children: React.ReactNode; list:
     <div className="mail-split grid h-full min-h-0 grid-cols-1 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,27rem)_minmax(0,1fr)]">
       <section
         aria-label="Conversation list"
-        className="bg-surface dark:bg-surface-dark border-divider dark:border-divider-dark flex min-h-0 flex-col overflow-hidden lg:border-r"
+        className="border-divider/70 dark:border-divider-dark/70 flex min-h-0 flex-col overflow-hidden lg:border-r"
         data-thread-list
         style={{ viewTransitionName: 'thread-list' }}
       >
         {list}
       </section>
-      <div className="bg-elevated dark:bg-elevated-dark min-h-0 min-w-0 overflow-y-auto overscroll-contain">
-        {children}
-      </div>
+      <div className="min-h-0 min-w-0 overflow-y-auto overscroll-contain">{children}</div>
     </div>
   );
 }

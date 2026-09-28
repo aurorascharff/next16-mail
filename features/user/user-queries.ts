@@ -9,7 +9,6 @@ import type { User } from './types/user';
 
 const userSelect = { email: true, handle: true, id: true, name: true, title: true } as const;
 
-/** The switchable demo accounts. Shared by every visitor, so it lives in the App Shell as static output. */
 export async function getAccounts(): Promise<User[]> {
   'use cache';
   cacheLife('max');
@@ -18,7 +17,6 @@ export async function getAccounts(): Promise<User[]> {
   return prisma.user.findMany({ orderBy: { name: 'asc' }, select: userSelect, where: { account: true } });
 }
 
-/** The signed-in account, resolved from the session cookie. Private, so it is cached per visitor in the browser only. */
 export async function getCurrentUser(): Promise<User> {
   'use cache: private';
   cacheLife({ stale: Infinity });

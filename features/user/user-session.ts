@@ -1,4 +1,3 @@
-export const SESSION_COOKIE = 'relay-user';
+export const SESSION_COOKIE = 'stamp-user';
 
-/** The account a visitor lands in before switching. */
 export const DEFAULT_ACCOUNT = 'mara';

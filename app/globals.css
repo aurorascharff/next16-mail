@@ -1,20 +1,20 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-gray: #a1a1aa;
-  --color-muted: #71717a;
-  --color-divider: #e4e4e7;
-  --color-divider-dark: #27272a;
-  --color-card: #f4f4f5;
-  --color-card-dark: #1c1c1f;
-  --color-surface: #f6f6f7;
-  --color-surface-dark: #141416;
+  --color-gray: #9ca3af;
+  --color-muted: #6b7280;
+  --color-divider: #e5e7eb;
+  --color-divider-dark: #262626;
+  --color-card: #f7f7f8;
+  --color-card-dark: #0f0f0f;
+  --color-surface: #ffffff;
+  --color-surface-dark: #000000;
   --color-elevated: #ffffff;
-  --color-elevated-dark: #0b0b0c;
+  --color-elevated-dark: #000000;
 
-  --color-accent: #6d5dfc;
-  --color-accent-hover: #5a4ae6;
-  --color-accent-fade: #6d5dfc1f;
+  --color-accent: #1b50ff;
+  --color-accent-hover: #1340d1;
+  --color-accent-fade: #214fff22;
   --color-success: #0fa958;
   --color-danger: #e54848;
   --color-warning: #f5a524;
@@ -27,35 +27,33 @@
 
   --radius-xs: 4px;
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-
-  --shadow-soft: 0 2px 8px -2px rgb(24 24 27 / 0.12), 0 4px 16px -4px rgb(24 24 27 / 0.1);
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 .dark {
-  --color-accent: #8578ff;
-  --color-accent-hover: #6d5dfc;
-  --color-accent-fade: #8578ff26;
+  --color-accent: #3d6bff;
+  --color-accent-hover: #1b50ff;
+  --color-accent-fade: #3d6bff26;
 }
 
 @layer base {
   body {
-    @apply selection:bg-accent bg-elevated dark:bg-elevated-dark font-sans text-black antialiased selection:text-white dark:text-white;
+    @apply selection:bg-accent bg-white font-sans text-black antialiased selection:text-white dark:bg-black dark:text-white;
   }
 
   h1 {
-    @apply font-sans text-xl font-semibold tracking-tight text-black dark:text-white;
+    @apply font-sans text-2xl font-bold tracking-tight text-black dark:text-white;
   }
 
   h2 {
-    @apply font-sans text-base font-semibold tracking-tight text-black dark:text-white;
+    @apply font-sans text-lg font-semibold tracking-tight text-black dark:text-white;
   }
 
   h3 {
-    @apply font-sans text-sm font-semibold tracking-tight text-black dark:text-white;
+    @apply font-sans text-base font-semibold tracking-tight text-black dark:text-white;
   }
 
   button,
@@ -96,6 +94,11 @@
   }
 }
 
+[data-thread-list]:has(form[data-pending]) .thread-results {
+  opacity: 0.6;
+  transition: opacity 200ms ease-out;
+}
+
 /* Reading pane open on a small screen: hide the list, the pane takes the column. */
 @media (width < 64rem) {
   .mail-split:has([data-reading-pane]) > [data-thread-list] {
@@ -104,12 +107,12 @@
 }
 
 .skeleton-animation {
-  background: rgba(150, 150, 150, 0.15);
+  background: rgba(150, 150, 150, 0.2);
   background: linear-gradient(
     to right,
-    rgba(130, 130, 130, 0.15) 8%,
-    rgba(170, 170, 170, 0.25) 18%,
-    rgba(150, 150, 150, 0.15) 33%
+    rgba(130, 130, 130, 0.2) 8%,
+    rgba(170, 170, 170, 0.3) 18%,
+    rgba(150, 150, 150, 0.2) 33%
   );
   background-size: 800px 100px;
   animation: wave-lines 2s infinite ease-out;

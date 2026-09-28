@@ -6,6 +6,8 @@ import { useSyncExternalStore } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { cn } from '@/lib/utils';
 
+type Props = { variant?: 'pill' | 'inline' };
+
 const subscribe = () => () => {};
 function useIsMounted() {
   return useSyncExternalStore(
@@ -15,7 +17,7 @@ function useIsMounted() {
   );
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({ variant = 'pill' }: Props) {
   const { theme, setTheme } = useTheme();
   const mounted = useIsMounted();
   const active = mounted ? theme : undefined;
@@ -24,16 +26,19 @@ export function ThemeToggle() {
     <Boundary label="ThemeToggle">
       <div
         style={{ viewTransitionName: 'theme-toggle' }}
-        className="border-divider dark:border-divider-dark inline-flex items-center rounded-full border p-0.5"
+        className={cn(
+          'inline-flex items-center',
+          variant === 'inline' ? 'gap-0.5' : 'border-divider dark:border-divider-dark rounded-full border p-0.5',
+        )}
       >
-        <ToggleButton active={active === 'light'} label="Light theme" onClick={() => setTheme('light')}>
-          <Sun className="size-3.5" />
+        <ToggleButton active={active === 'light'} label="Light mode" onClick={() => setTheme('light')}>
+          <Sun className="size-4" />
         </ToggleButton>
-        <ToggleButton active={active === 'dark'} label="Dark theme" onClick={() => setTheme('dark')}>
-          <Moon className="size-3.5" />
+        <ToggleButton active={active === 'dark'} label="Dark mode" onClick={() => setTheme('dark')}>
+          <Moon className="size-4" />
         </ToggleButton>
         <ToggleButton active={active === 'system'} label="System theme" onClick={() => setTheme('system')}>
-          <Monitor className="size-3.5" />
+          <Monitor className="size-4" />
         </ToggleButton>
       </div>
     </Boundary>
@@ -60,8 +65,8 @@ function ToggleButton({
       className={cn(
         'rounded-full p-1.5 transition-colors',
         active
-          ? 'bg-card dark:bg-card-dark text-black dark:text-white'
-          : 'text-muted hover:text-black dark:hover:text-white',
+          ? 'bg-black text-white shadow-sm dark:bg-white dark:text-black'
+          : 'text-gray hover:text-black dark:hover:text-white',
       )}
     >
       {children}

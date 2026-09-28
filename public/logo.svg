@@ -1,5 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72">
-  <rect width="72" height="72" rx="22" fill="#6d5dfc" />
-  <path d="M18 26.1 36 40.5 54 26.1" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.7" />
-  <path d="M18 45.9h36" fill="none" stroke="#fff" stroke-opacity="0.55" stroke-linecap="round" stroke-width="4.7" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <mask id="m">
+    <rect width="40" height="40" fill="#fff" />
+    <g fill="#000">
+      <circle cx="8" cy="2" r="2.4" /><circle cx="16" cy="2" r="2.4" /><circle cx="24" cy="2" r="2.4" /><circle cx="32" cy="2" r="2.4" />
+      <circle cx="8" cy="38" r="2.4" /><circle cx="16" cy="38" r="2.4" /><circle cx="24" cy="38" r="2.4" /><circle cx="32" cy="38" r="2.4" />
+      <circle cx="2" cy="8" r="2.4" /><circle cx="2" cy="16" r="2.4" /><circle cx="2" cy="24" r="2.4" /><circle cx="2" cy="32" r="2.4" />
+      <circle cx="38" cy="8" r="2.4" /><circle cx="38" cy="16" r="2.4" /><circle cx="38" cy="24" r="2.4" /><circle cx="38" cy="32" r="2.4" />
+    </g>
+  </mask>
+  <rect x="2" y="2" width="36" height="36" rx="4" fill="#1b50ff" mask="url(#m)" />
+  <path d="M11 15.5 20 22l9-6.5" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" />
+  <rect x="10" y="12" width="20" height="16" rx="2" fill="none" stroke="#fff" stroke-width="2.4" />
 </svg>

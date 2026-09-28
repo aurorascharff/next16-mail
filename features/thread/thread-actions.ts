@@ -5,6 +5,7 @@ import { redirect, RedirectType } from 'next/navigation';
 import { z } from 'zod';
 import { verifyUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
+import { moderateText } from '@/lib/moderation';
 import { threadTags } from './thread-cache';
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -51,6 +52,8 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
   const parsed = replySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message, ok: false };
   const { body, threadId } = parsed.data;
+  const problem = await moderateText(body);
+  if (problem) return { error: problem, ok: false };
 
   const thread = await prisma.thread.findUnique({
     include: {
@@ -115,8 +118,9 @@ export async function composeMessage(_state: ComposeState, formData: FormData): 
   const parsed = composeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message, ok: false };
   const { body, subject, to } = parsed.data;
+  const problem = await moderateText(`${subject}\n\n${body}`);
+  if (problem) return { error: problem, ok: false };
 
-  // Only people this account can already see, the same list the form renders, never an arbitrary id.
   const recipient = await prisma.user.findFirst({
     select: { account: true, id: true },
     where: {

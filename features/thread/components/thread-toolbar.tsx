@@ -18,7 +18,7 @@ export function StarButton({ starred, threadId }: { starred: boolean; threadId: 
   return (
     <IconButton
       aria-pressed={optimisticStarred}
-      className={cn(optimisticStarred && 'text-warning hover:text-warning')}
+      className={cn(optimisticStarred && 'text-accent hover:text-accent')}
       label={optimisticStarred ? 'Remove star' : 'Star'}
       onClick={() =>
         startTransition(async () => {

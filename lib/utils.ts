@@ -21,7 +21,6 @@ const fullFormatter = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 });
 
-/** Compact list timestamp: time of day when sent today, otherwise the day. Deterministic in UTC so cached output matches. */
 export function formatListDate(date: Date, now: Date) {
   const sameDay = date.toISOString().slice(0, 10) === now.toISOString().slice(0, 10);
   return sameDay ? timeFormatter.format(date) : dayFormatter.format(date);

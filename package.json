@@ -1,5 +1,5 @@
 {
-  "name": "relay",
+  "name": "stamp",
   "version": "0.1.0",
   "private": true,
   "description": "A Gmail-style mail client demo exploring Async React, Cache Components, Partial Prefetching, and navigation() with Next.js 16.4, React 19, Tailwind CSS v4, and Prisma.",
@@ -37,12 +37,14 @@
     "prisma.reset": "prisma db push --force-reset && pnpm prisma.seed"
   },
   "dependencies": {
+    "@ai-sdk/gateway": "^4.0.97",
     "@ariakit/react": "^0.4.40",
     "@prisma/adapter-better-sqlite3": "^7.10.0",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
+    "ai": "^7.0.119",
     "better-sqlite3": "^13.0.3",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",

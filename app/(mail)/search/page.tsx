@@ -18,7 +18,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
       list={
         <>
           <ThreadListHeader title="Search" />
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <ErrorBoundary className="m-3" title="Search unavailable">
               <Suspense fallback={<ThreadListSkeleton count={4} />}>
                 {query.then(value =>
@@ -27,11 +27,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
                       <SearchResults query={value} />
                     </AnimatedSuspense>
                   ) : (
-                    <EmptyState
-                      body="Search subjects, senders, bodies and labels across every mailbox."
-                      className="m-3"
-                      title="Search your mail"
-                    />
+                    <EmptyState className="m-3" title="Search your mail" />
                   ),
                 )}
               </Suspense>
@@ -44,9 +40,6 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
         <div className="flex max-w-xs flex-col items-center gap-3">
           <BrandMark className="text-divider dark:text-divider-dark size-10" />
           <p className="text-sm font-medium">Search results open here</p>
-          <p className="text-muted text-sm leading-6">
-            Results are cached per query and refresh when a conversation changes.
-          </p>
         </div>
       </div>
     </MailSplit>

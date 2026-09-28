@@ -9,9 +9,8 @@ import type { MailboxCounts } from '../types/thread';
 const icons: Record<Mailbox, LucideIcon> = { archive: Archive, inbox: Inbox, sent: Send, starred: Star };
 
 const linkClass =
-  'group flex h-9 items-center gap-3 rounded-full pr-2 pl-3 text-sm font-medium transition-colors text-muted hover:bg-card hover:text-black dark:hover:bg-card-dark dark:hover:text-white aria-[current=page]:bg-accent-fade aria-[current=page]:text-accent aria-[current=page]:font-semibold';
+  'group flex h-10 items-center gap-3 rounded-lg px-3 text-base tracking-tight transition-colors not-aria-[current=page]:hover:bg-card dark:not-aria-[current=page]:hover:bg-card-dark aria-[current=page]:bg-accent/10 aria-[current=page]:text-accent aria-[current=page]:dark:bg-accent/15 aria-[current=page]:font-bold aria-[current=page]:[&_svg]:stroke-[2.5]';
 
-/** Mailbox links with unread counts. Session data only, so the App Shell carries it for every route. */
 export async function MailboxNav() {
   const counts = await getMailboxCounts();
   return <MailboxNavShell counts={counts} />;
@@ -29,7 +28,7 @@ function MailboxNavShell({ counts }: { counts: MailboxCounts | null }) {
         const count = counts?.[mailbox] ?? 0;
         return (
           <NavLink className={linkClass} href={`/${mailbox}`} key={mailbox} prefetch={true}>
-            <Icon aria-hidden className="size-4 shrink-0" strokeWidth={2} />
+            <Icon aria-hidden className="size-5 shrink-0" />
             <span className="flex-1">{MAILBOX_LABELS[mailbox]}</span>
             {counts === null ? (
               mailbox === 'archive' ? null : (
@@ -37,9 +36,7 @@ function MailboxNavShell({ counts }: { counts: MailboxCounts | null }) {
               )
             ) : count > 0 ? (
               <span
-                className={cn(
-                  'bg-card dark:bg-card-dark text-muted group-aria-[current=page]:bg-accent flex h-5 min-w-7 items-center justify-center rounded-full px-1.5 text-[11px] font-semibold tabular-nums group-aria-[current=page]:text-white',
-                )}
+                className={cn('text-gray group-aria-[current=page]:text-accent text-xs font-medium tabular-nums')}
                 data-testid={`unread-${mailbox}`}
               >
                 {count}

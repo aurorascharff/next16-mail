@@ -22,7 +22,7 @@ export default function MailboxLayout({ children, params }: LayoutProps<'/[mailb
               <ThreadListHeader title={MAILBOX_LABELS[value]} />
             ))}
           </Suspense>
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <ErrorBoundary className="m-3" title="Conversations unavailable">
               <Suspense fallback={<ThreadListSkeleton />}>
                 {mailbox.then(value => (

@@ -7,7 +7,7 @@ test.describe('Inbox (/inbox)', () => {
       page,
       async () => {
         await page.goto('/inbox');
-        await expect(page.getByRole('link', { name: 'Relay inbox' })).toBeVisible();
+        await expect(page.getByRole('link', { name: 'Stamp inbox' })).toBeVisible();
         await expect(
           page.getByRole('navigation', { name: 'Mailboxes' }).getByRole('link', { name: /Inbox/ }),
         ).toBeVisible();

@@ -1,18 +1,15 @@
 import 'server-only';
 
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@/generated/prisma/client';
-import { normalizeDatabaseUrl } from '@/lib/database-url';
+import { createAdapter, DEFAULT_DATABASE_URL, isSqliteUrl } from '@/lib/prisma-adapter';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-const adapter = new PrismaPg({
-  connectionString: normalizeDatabaseUrl(process.env.DATABASE_URL!),
-  idleTimeoutMillis: 10_000,
-  max: 3,
-});
+const databaseUrl = process.env.DATABASE_URL || DEFAULT_DATABASE_URL;
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter: createAdapter(databaseUrl) });
+
+export const usesSqlite = isSqliteUrl(databaseUrl);
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma;

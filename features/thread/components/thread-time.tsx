@@ -8,7 +8,6 @@ function subscribeToMinute(callback: () => void) {
   return () => clearInterval(id);
 }
 
-/** A timestamp whose "today" shorthand depends on the viewer's clock, so it settles on the client. */
 export function ThreadTime({ className, iso }: { className?: string; iso: string }) {
   const label = useSyncExternalStore(
     subscribeToMinute,

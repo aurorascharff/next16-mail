@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 
-const NO_PREFETCH_COOKIE = 'relay-no-prefetch';
+const NO_PREFETCH_COOKIE = 'stamp-no-prefetch';
 
 function subscribe() {
   return () => {};

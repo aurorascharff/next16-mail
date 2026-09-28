@@ -1,20 +1,19 @@
 /* eslint-disable no-console */
-import { PrismaPg } from '@prisma/adapter-pg';
 import { config } from 'dotenv';
 import { PrismaClient } from '../generated/prisma/client';
-import { normalizeDatabaseUrl } from '../lib/database-url';
+import { createAdapter, DEFAULT_DATABASE_URL } from '../lib/prisma-adapter';
 
 config({ path: '.env.local' });
 config({ path: '.env' });
 
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: normalizeDatabaseUrl(process.env.DATABASE_URL!), max: 1 }),
+  adapter: createAdapter(process.env.DATABASE_URL || DEFAULT_DATABASE_URL, { max: 1 }),
 });
 
 const users = [
   {
     account: true,
-    email: 'mara@relay.dev',
+    email: 'mara@stamp.dev',
     handle: 'mara',
     id: 'mara',
     name: 'Mara Lindqvist',
@@ -22,22 +21,22 @@ const users = [
   },
   {
     account: true,
-    email: 'jonas@relay.dev',
+    email: 'jonas@stamp.dev',
     handle: 'jonas',
     id: 'jonas',
     name: 'Jonas Berg',
     title: 'Product designer',
   },
-  { email: 'ingrid@relay.dev', handle: 'ingrid', id: 'ingrid', name: 'Ingrid Solberg', title: 'Engineering manager' },
-  { email: 'tomas@relay.dev', handle: 'tomas', id: 'tomas', name: 'Tomas Aas', title: 'Backend engineer' },
-  { email: 'priya@relay.dev', handle: 'priya', id: 'priya', name: 'Priya Nair', title: 'Frontend engineer' },
-  { email: 'leo@relay.dev', handle: 'leo', id: 'leo', name: 'Leo Marchetti', title: 'Developer advocate' },
-  { email: 'sofie@relay.dev', handle: 'sofie', id: 'sofie', name: 'Sofie Dahl', title: 'Product manager' },
-  { email: 'noah@relay.dev', handle: 'noah', id: 'noah', name: 'Noah Kim', title: 'Security engineer' },
-  { email: 'finn@relay.dev', handle: 'finn', id: 'finn', name: 'Finn Haugen', title: 'Support lead' },
-  { email: 'elin@relay.dev', handle: 'elin', id: 'elin', name: 'Elin Ruud', title: 'Recruiter' },
-  { email: 'deploys@relay.dev', handle: 'deploys', id: 'deploys', name: 'Relay Deploys', title: 'Automation' },
-  { email: 'calendar@relay.dev', handle: 'calendar', id: 'calendar', name: 'Relay Calendar', title: 'Automation' },
+  { email: 'ingrid@stamp.dev', handle: 'ingrid', id: 'ingrid', name: 'Ingrid Solberg', title: 'Engineering manager' },
+  { email: 'tomas@stamp.dev', handle: 'tomas', id: 'tomas', name: 'Tomas Aas', title: 'Backend engineer' },
+  { email: 'priya@stamp.dev', handle: 'priya', id: 'priya', name: 'Priya Nair', title: 'Frontend engineer' },
+  { email: 'leo@stamp.dev', handle: 'leo', id: 'leo', name: 'Leo Marchetti', title: 'Developer advocate' },
+  { email: 'sofie@stamp.dev', handle: 'sofie', id: 'sofie', name: 'Sofie Dahl', title: 'Product manager' },
+  { email: 'noah@stamp.dev', handle: 'noah', id: 'noah', name: 'Noah Kim', title: 'Security engineer' },
+  { email: 'finn@stamp.dev', handle: 'finn', id: 'finn', name: 'Finn Haugen', title: 'Support lead' },
+  { email: 'elin@stamp.dev', handle: 'elin', id: 'elin', name: 'Elin Ruud', title: 'Recruiter' },
+  { email: 'deploys@stamp.dev', handle: 'deploys', id: 'deploys', name: 'Stamp Deploys', title: 'Automation' },
+  { email: 'calendar@stamp.dev', handle: 'calendar', id: 'calendar', name: 'Stamp Calendar', title: 'Automation' },
 ];
 
 const labels = [
@@ -67,7 +66,7 @@ const threads: SeedThread[] = [
           'Quick one before standup: I pulled the numbers on how many per-link prefetches the inbox fires when you land on it cold, and it is a lot more than I expected.',
           'On a 1440px screen we render 38 rows. Every one of them is a `<Link prefetch>`, so every one of them wakes the server for a per-link prerender the moment it scrolls into view. That is 38 renders of the thread page, bodies included, for a screen where the median user opens two threads.',
           'I think we should move the rows to prefetch on intent instead. Hover, focus, or touch-start flips the row to `prefetch={true}`, and the default `<Link>` keeps prefetching the shared App Shell for free. Priya has a small hook for it already.',
-          'The second half of the fix is what the prefetch actually renders. Right now it is the whole thread. If we gate the body behind `await navigation()`, the prefetch stops at the subject, the sender, and the first paragraph, and the body only renders once someone clicks. That is the part I would like to pair on.',
+          'The second half of the fix is what the prefetch actually renders. Right now it is the whole thread. If we gate the history behind `await navigation()`, the prefetch stops at the subject and the latest message, and the earlier messages only render once someone clicks. That is the part I would like to pair on.',
           'Numbers attached. The first tab is the current behavior, the second is the projection.',
         ),
         from: 'tomas',
@@ -89,8 +88,8 @@ const threads: SeedThread[] = [
         ],
         body: p(
           'I finished the reading pane explorations and I think we have a winner, but I want your take on the header before I hand it to Priya.',
-          'The header is the piece that shows up first on navigation, so it needs to feel like a complete thing on its own. Subject, labels, who wrote last, when, and the opening lines of their message. Then the rest of the body fades in underneath without shifting anything above it.',
-          'Version C keeps the sender row at a fixed 44px so the body always starts at the same y. Version D lets the sender row grow when there are many recipients, which reads better but moves the fold around. I lean C.',
+          'The header is the piece that shows up first on navigation, so it needs to feel like a complete thing on its own. Subject, labels, and the latest message in full. Then the earlier messages fade in underneath without shifting anything above it.',
+          'Version C keeps the sender row at a fixed 44px so the message always starts at the same y. Version D lets the sender row grow when there are many recipients, which reads better but moves the fold around. I lean C.',
           'Figma link is in the attachment list. The frames are named after the stages: Shell, Prefetch, Navigation.',
         ),
         from: 'jonas',
@@ -109,7 +108,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Agreed on both. Updated the frames and swapped the skeleton to three animated bars over a flat block. Handing it over now.',
-          'If you want to see the fold in motion, the prototype has the 900ms delay you asked for on the body so you can watch the header land first.',
+          'If you want to see the fold in motion, the prototype has the 900ms delay you asked for on the history so you can watch the latest message land first.',
         ),
         from: 'jonas',
         hoursAgo: 3.5,
@@ -128,10 +127,10 @@ const threads: SeedThread[] = [
     messages: [
       {
         body: p(
-          'Deployment relay-web@7f3a2c1 to production failed.',
+          'Deployment stamp-web@7f3a2c1 to production failed.',
           'The build stopped in `next build` while prerendering `/[mailbox]/[threadId]`. The route reads `cookies()` in a component that is not wrapped in a Suspense boundary, so the prerender cannot produce a static shell for it.',
           'Error: Route "/[mailbox]/[threadId]" used `cookies()` outside of a Suspense boundary. Wrap the component in `<Suspense>`, or move the read into a `"use cache: private"` function.',
-          'Fix the route and push again, or roll back to relay-web@e91bb04 from the deployments page.',
+          'Fix the route and push again, or roll back to stamp-web@e91bb04 from the deployments page.',
         ),
         from: 'deploys',
         hoursAgo: 5,
@@ -139,7 +138,7 @@ const threads: SeedThread[] = [
       },
     ],
     states: [{ user: 'mara' }],
-    subject: 'Deployment failed: relay-web@7f3a2c1',
+    subject: 'Deployment failed: stamp-web@7f3a2c1',
   },
   {
     id: 'thr-launch-post',
@@ -149,7 +148,7 @@ const threads: SeedThread[] = [
         attachments: [{ name: 'launch-post-draft.md', size: 9_842, type: 'document' }],
         body: p(
           'Draft of the launch post is ready for a technical read. I kept it short, three sections, one code sample each.',
-          'The framing I landed on is "the inbox that never shows you a spinner for the part you already know". Subject, sender, and the first lines arrive from the prefetch; the body arrives on the click. It is honest about what is cached and what is not, which I think readers appreciate more than a blanket "instant".',
+          'The framing I landed on is "the inbox that never shows you a spinner for the part you already know". Subject and the latest message arrive from the prefetch; the earlier messages arrive on the click. It is honest about what is cached and what is not, which I think readers appreciate more than a blanket "instant".',
           'The code samples are lifted straight from the app so they should stay in sync. If we rename `getThreadSummary` again I will hear about it.',
           'Can you check the paragraph about `navigation()` versus `connection()`? I want to be precise about why one keeps the cache lifetime and the other does not.',
         ),
@@ -357,7 +356,7 @@ const threads: SeedThread[] = [
     messages: [
       {
         body: p(
-          'Deployment relay-web@e91bb04 to production succeeded.',
+          'Deployment stamp-web@e91bb04 to production succeeded.',
           'Build took 2m 41s. 14 routes prerendered, 2 routes with a runtime shell. No warnings.',
           'Preview and production URLs are on the deployments page.',
         ),
@@ -367,7 +366,7 @@ const threads: SeedThread[] = [
       },
     ],
     states: [{ mailbox: 'archive', read: true, user: 'mara' }],
-    subject: 'Deployment succeeded: relay-web@e91bb04',
+    subject: 'Deployment succeeded: stamp-web@e91bb04',
   },
   {
     id: 'thr-conf-talk',
@@ -376,7 +375,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'The conference accepted the talk. Forty minutes, main stage, second day.',
-          'Working title is "Above the fold: what a prefetch should render". I want to open with the inbox demo live, slow mode on, and let the audience watch the header arrive before the body. Then walk through the three stages and how each read chooses its stage.',
+          'Working title is "Above the fold: what a prefetch should render". I want to open with the inbox demo live, slow mode on, and let the audience watch the latest message arrive before the history. Then walk through the three stages and how each read chooses its stage.',
           'Would you co-present the middle section? The caching decisions are yours and you explain them better than my slides do.',
         ),
         from: 'leo',
@@ -538,7 +537,7 @@ const threads: SeedThread[] = [
         attachments: [{ name: 'inbox-research-notes.pdf', size: 402_118, type: 'document' }],
         body: p(
           'Sharing the notes from the five user sessions on the current inbox. The strongest signal is the one we expected: people notice the spinner in the reading pane far more than the one in the list, because the pane is where they were looking when they clicked.',
-          'Three of five described the ideal as "show me who it is from and what it is about immediately, the rest can follow". That is basically the prefetch stage.',
+          'Three of five described the ideal as "show me the newest message immediately, the rest can follow". That is basically the prefetch stage.',
           'Full notes attached.',
         ),
         from: 'sofie',
@@ -573,7 +572,7 @@ const threads: SeedThread[] = [
     messages: [
       {
         body: p(
-          'Deployment relay-design@1a9c0f2 to production succeeded.',
+          'Deployment stamp-design@1a9c0f2 to production succeeded.',
           'The token package is published as 2.4.0. Consumers pick it up on their next install.',
         ),
         from: 'deploys',
@@ -582,7 +581,7 @@ const threads: SeedThread[] = [
       },
     ],
     states: [{ mailbox: 'archive', read: true, user: 'jonas' }],
-    subject: 'Deployment succeeded: relay-design@1a9c0f2',
+    subject: 'Deployment succeeded: stamp-design@1a9c0f2',
   },
 ];
 

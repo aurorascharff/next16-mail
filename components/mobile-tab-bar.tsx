@@ -1,4 +1,4 @@
-import { Archive, Inbox, Search, Send, Star } from 'lucide-react';
+import { Archive, Inbox, PenLine, Search, Send, Star } from 'lucide-react';
 import { NavLink } from '@/components/ui/nav-link';
 
 const items = [
@@ -7,6 +7,7 @@ const items = [
   { href: '/sent', icon: Send, label: 'Sent' },
   { href: '/archive', icon: Archive, label: 'Archive' },
   { href: '/search', icon: Search, label: 'Search' },
+  { href: '/compose', icon: PenLine, label: 'Compose' },
 ] as const;
 
 export function MobileTabBar() {

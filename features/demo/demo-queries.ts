@@ -2,8 +2,8 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 
-export const NO_PREFETCH_COOKIE = 'relay-no-prefetch';
-export const SLOW_COOKIE = 'relay-slow';
+export const NO_PREFETCH_COOKIE = 'stamp-no-prefetch';
+export const SLOW_COOKIE = 'stamp-slow';
 
 export async function isPrefetchEnabled() {
   return !(await cookies()).has(NO_PREFETCH_COOKIE);

@@ -1,18 +1,15 @@
 import { PenLine } from 'lucide-react';
 import { buttonClasses } from '@/components/ui/button-classes';
-import { getContacts } from '../thread-queries';
-import { ComposeDialog } from './compose-dialog';
+import { PrefetchLink } from '@/components/ui/prefetch-link';
 
-/** Opens the compose dialog with the contacts this account can write to. */
-export async function ComposeButton() {
-  const contacts = await getContacts();
-  return <ComposeDialog contacts={contacts} />;
-}
-
-export function ComposeButtonSkeleton() {
+export function ComposeButton() {
   return (
-    <span aria-hidden className={buttonClasses({ className: 'w-full opacity-60', size: 'lg', variant: 'accent' })}>
+    <PrefetchLink
+      className={buttonClasses({ className: 'w-full', variant: 'accent' })}
+      data-testid="compose"
+      href="/compose"
+    >
       <PenLine className="size-4" /> Compose
-    </span>
+    </PrefetchLink>
   );
 }

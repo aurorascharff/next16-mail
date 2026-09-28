@@ -26,10 +26,6 @@ function threadReducer(threads: ThreadListItem[], action: RowAction) {
   }
 }
 
-/**
- * Rows for a mailbox or a search. The server hands over the list; this leaf owns only the optimistic
- * star and archive changes until the action settles and the server list replaces it.
- */
 export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: ThreadListItem[] }) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, threadReducer);
   const pathname = usePathname();
@@ -66,8 +62,8 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
           return (
             <li
               className={cn(
-                'group border-divider/60 dark:border-divider-dark/60 relative border-b transition-colors',
-                active ? 'bg-accent-fade' : 'hover:bg-card dark:hover:bg-card-dark',
+                'group border-divider/70 dark:border-divider-dark/70 relative border-b transition-colors',
+                active ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
               )}
               data-read={thread.read ? '' : undefined}
               data-testid="thread-row"
@@ -75,7 +71,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
             >
               <HoverPrefetchLink
                 aria-current={active ? 'page' : undefined}
-                className="focus-visible:ring-accent/40 grid grid-cols-[2.25rem_minmax(0,1fr)_auto] gap-x-3 px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-inset"
+                className="focus-visible:ring-accent/40 grid grid-cols-[2.25rem_minmax(0,1fr)_4rem] gap-x-3 px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-inset sm:px-5"
                 href={href}
               >
                 <UserAvatar name={sender === 'me' ? 'Me' : sender} />
@@ -83,7 +79,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                   <span
                     className={cn(
                       'flex h-5 items-center gap-1.5 truncate text-sm',
-                      thread.read ? 'text-muted' : 'font-semibold text-black dark:text-white',
+                      thread.read ? 'text-gray' : 'font-semibold tracking-tight text-black dark:text-white',
                     )}
                   >
                     {!thread.read ? (
@@ -91,7 +87,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                     ) : null}
                     <span className="truncate">{thread.participants.join(', ')}</span>
                     {thread.messageCount > 1 ? (
-                      <span className="text-muted text-xs font-normal tabular-nums">{thread.messageCount}</span>
+                      <span className="text-gray text-xs font-normal tabular-nums">{thread.messageCount}</span>
                     ) : null}
                   </span>
                   <span
@@ -105,25 +101,25 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                       <LabelChip className="hidden xl:inline-flex" key={label.id} label={label} />
                     ))}
                   </span>
-                  <span className="text-muted flex h-5 items-center truncate text-[13px]">{thread.snippet}</span>
+                  <span className="text-gray flex h-5 items-center truncate text-[13px]">{thread.snippet}</span>
                 </span>
-                <span className="flex flex-col items-end gap-1">
+                <span className="flex flex-col items-end group-focus-within:invisible group-hover:invisible">
                   <ThreadTime
                     className={cn(
-                      'h-5 text-xs leading-5 tabular-nums group-hover:invisible',
-                      thread.read ? 'text-muted' : 'text-accent font-semibold',
+                      'h-5 text-xs leading-5 tabular-nums',
+                      thread.read ? 'text-gray' : 'text-accent font-semibold',
                     )}
                     iso={thread.updatedAt}
                   />
-                  <span className="text-muted flex h-5 items-center gap-1.5">
+                  <span className="text-gray flex h-5 items-center gap-1.5">
                     {thread.hasAttachments ? <Paperclip aria-label="Has attachments" className="size-3.5" /> : null}
                     {thread.starred ? (
-                      <Star aria-label="Starred" className="text-warning size-3.5 fill-current" />
+                      <Star aria-label="Starred" className="text-accent size-3.5 fill-current" />
                     ) : null}
                   </span>
                 </span>
               </HoverPrefetchLink>
-              <span className="absolute top-2.5 right-3 hidden items-center gap-0.5 group-focus-within:flex group-hover:flex">
+              <span className="absolute top-3 right-4 hidden h-10 w-16 items-center justify-end gap-1 group-focus-within:flex group-hover:flex sm:right-5">
                 <RowButton
                   active={thread.starred}
                   label={thread.starred ? 'Remove star' : 'Star'}
@@ -168,8 +164,8 @@ function RowButton({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        'bg-elevated dark:bg-elevated-dark border-divider dark:border-divider-dark text-muted inline-flex size-7 items-center justify-center rounded-full border shadow-sm transition-colors hover:text-black dark:hover:text-white',
-        active && 'text-warning hover:text-warning',
+        'text-gray inline-flex size-7 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white',
+        active && 'text-accent hover:text-accent',
       )}
       onClick={onClick}
       title={label}

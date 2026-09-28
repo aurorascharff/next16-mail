@@ -1,16 +1,21 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('Search (/search)', () => {
-  test('searching from the list header navigates and streams matching rows', async ({ page }) => {
-    await page.goto('/inbox');
-    await page.getByRole('searchbox', { name: 'Search mail' }).fill('deployment');
-    await page.getByRole('searchbox', { name: 'Search mail' }).press('Enter');
-    await page.waitForURL(url => url.pathname === '/search' && url.searchParams.get('q') === 'deployment');
+const visible = { visible: true };
 
-    const rows = page.getByTestId('thread-row').filter({ visible: true });
-    await expect(rows.filter({ hasText: 'Deployment failed: relay-web@7f3a2c1' })).toBeVisible();
-    await expect(rows.filter({ hasText: 'Deployment succeeded: relay-web@e91bb04' })).toBeVisible();
-    await expect(page.getByRole('searchbox', { name: 'Search mail' })).toHaveValue('deployment');
+test.describe('Search (/search)', () => {
+  test('typing in the search box navigates, keeps focus, and streams matching rows', async ({ page }) => {
+    await page.goto('/inbox');
+    const box = page.getByRole('searchbox', { name: 'Search mail' }).filter(visible);
+    await box.pressSequentially('deploy');
+    await page.waitForURL(url => url.pathname === '/search' && url.searchParams.get('q') === 'deploy');
+
+    const focused = page.getByRole('searchbox', { name: 'Search mail' }).filter(visible);
+    await expect(focused).toBeFocused();
+    await expect(focused).toHaveValue('deploy');
+
+    const rows = page.getByTestId('thread-row').filter(visible);
+    await expect(rows.filter({ hasText: 'Deployment failed: stamp-web@7f3a2c1' })).toBeVisible();
+    await expect(rows.filter({ hasText: 'Deployment succeeded: stamp-web@e91bb04' })).toBeVisible();
   });
 
   test('an empty query shows the search prompt, and no matches show an empty state', async ({ page }) => {
@@ -25,11 +30,13 @@ test.describe('Search (/search)', () => {
     await page.goto('/search?q=token%20rename');
     await page
       .getByTestId('thread-row')
-      .filter({ visible: true })
+      .filter(visible)
       .filter({ hasText: 'Token rename is done' })
       .getByRole('link')
       .click();
     await page.waitForURL(url => url.pathname === '/archive/thr-design-tokens');
-    await expect(page.getByRole('heading', { exact: true, level: 1, name: 'Token rename is done' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'Token rename is done' }).filter(visible),
+    ).toBeVisible();
   });
 });

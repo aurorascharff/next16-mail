@@ -1,9 +1,9 @@
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { MAILBOX_LABELS, type Mailbox } from '../thread-mailboxes';
 import { getThreads, searchThreads } from '../thread-queries';
 import { ThreadRows } from './thread-rows';
+import type { Mailbox } from '../thread-mailboxes';
 
 const emptyCopy: Record<Mailbox, { body: string; title: string }> = {
   archive: { body: 'Archived conversations land here and stay searchable.', title: 'Nothing archived' },
@@ -12,7 +12,6 @@ const emptyCopy: Record<Mailbox, { body: string; title: string }> = {
   starred: { body: 'Star a conversation to keep it close.', title: 'No starred conversations' },
 };
 
-/** The rows of one mailbox. A mailbox link resolves this in its per-link prefetch, so switching is instant. */
 export async function ThreadList({ mailbox }: { mailbox: Mailbox }) {
   const threads = await getThreads(mailbox);
 
@@ -27,13 +26,7 @@ export async function SearchResults({ query }: { query: string }) {
   const threads = await searchThreads(query);
 
   if (threads.length === 0) {
-    return (
-      <EmptyState
-        body={`Nothing in ${Object.values(MAILBOX_LABELS).slice(0, 1).join('')}, Archive or Sent matches “${query}”.`}
-        className="m-3"
-        title="No results"
-      />
-    );
+    return <EmptyState className="m-3" title="No results" />;
   }
 
   return <ThreadRows threads={threads} />;
@@ -45,7 +38,7 @@ export function ThreadListSkeleton({ count = 7 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <li
           className={cn(
-            'border-divider/60 dark:border-divider-dark/60 grid grid-cols-[2.25rem_minmax(0,1fr)_auto] gap-x-3 border-b px-4 py-3',
+            'border-divider/70 dark:border-divider-dark/70 grid grid-cols-[2.25rem_minmax(0,1fr)_4rem] gap-x-3 border-b px-4 py-3 sm:px-5',
           )}
           key={index}
         >
@@ -61,7 +54,7 @@ export function ThreadListSkeleton({ count = 7 }: { count?: number }) {
               <Skeleton className="skeleton-subtle h-3 w-11/12" />
             </span>
           </div>
-          <span className="flex h-5 items-center">
+          <span className="flex h-5 items-center justify-end">
             <Skeleton className="skeleton-subtle h-3 w-10" />
           </span>
         </li>

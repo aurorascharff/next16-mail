@@ -170,19 +170,19 @@ function DemoGuideDialog({
       Icon: prefetch ? Zap : ZapOff,
       name: 'Prefetch',
       on: prefetch,
-      text: 'Hovering a row prefetches that thread’s header and opening lines. Off, only the shared App Shell is prefetched and the whole thread streams in after the click.',
+      text: 'Hovering a row prefetches that thread’s subject and latest message. Off, only the shared App Shell is prefetched and the whole thread streams in after the click.',
     },
     {
       Icon: slow ? Timer : TimerOff,
       name: 'Delays',
       on: slow,
-      text: 'Adds artificial latency to the thread queries, so you can watch the header arrive from the prefetch and the body arrive on the navigation.',
+      text: 'Adds artificial latency to the thread queries, so you can watch the latest message arrive from the prefetch and the earlier ones arrive on the navigation.',
     },
     {
       Icon: offline ? WifiOff : Wifi,
       name: offline ? 'Offline' : 'Online',
       on: !offline,
-      text: 'Go offline and mailboxes still open to their App Shell, with prefetched headers ready. Recovers when you reconnect.',
+      text: 'Go offline and mailboxes still open to their App Shell, with prefetched messages ready. Recovers when you reconnect.',
     },
   ];
 
@@ -199,9 +199,9 @@ function DemoGuideDialog({
       >
         <Ariakit.DialogHeading className="text-xl font-bold">How this demo works</Ariakit.DialogHeading>
         <Ariakit.DialogDescription className="text-muted mt-2 text-sm leading-relaxed">
-          Relay renders a thread in three stages. The mailbox chrome ships in the App Shell, a thread’s header and
-          opening lines resolve in a per-link prefetch, and{' '}
-          <code className="font-mono text-xs">await navigation()</code> holds the rest of the body back until you
+          Stamp renders a thread in three stages. The mailbox chrome ships in the App Shell, a thread’s subject and
+          latest message resolve in a per-link prefetch, and{' '}
+          <code className="font-mono text-xs">await navigation()</code> holds the earlier messages back until you
           actually open it.
         </Ariakit.DialogDescription>
         <div className="mt-6 flex flex-col gap-4">

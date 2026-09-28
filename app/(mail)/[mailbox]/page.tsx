@@ -6,9 +6,6 @@ export default function MailboxPage() {
       <div className="flex max-w-xs flex-col items-center gap-3">
         <BrandMark className="text-divider dark:text-divider-dark size-10" />
         <p className="text-sm font-medium">Select a conversation</p>
-        <p className="text-muted text-sm leading-6">
-          Hover a row to prefetch its header and opening lines. Open it, and the rest of the conversation loads.
-        </p>
       </div>
     </div>
   );
