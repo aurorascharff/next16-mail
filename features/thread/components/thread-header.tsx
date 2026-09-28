@@ -7,7 +7,7 @@ import { ArchiveButton, BackToList, StarButton } from './thread-toolbar';
 import type { Route } from 'next';
 
 const toolbarClass =
-  'border-divider/70 dark:border-divider-dark/70 sticky top-0 z-30 -mx-5 flex h-14 items-center gap-1 border-b bg-white/90 px-3 backdrop-blur-md sm:-mx-8 sm:px-6 dark:bg-black/90';
+  'border-divider/70 dark:border-divider-dark/70 flex h-14 shrink-0 items-center gap-1 border-b bg-white px-3 sm:px-6 dark:bg-black';
 
 export async function ThreadToolbar({ backHref, threadId }: { backHref: Route; threadId: string }) {
   const thread = await getThreadSummary(threadId);
@@ -42,7 +42,7 @@ export async function ThreadHeader({ children, threadId }: { children: React.Rea
 
   return (
     <>
-      <header data-testid="thread-header">
+      <header className="mx-auto w-full max-w-4xl" data-testid="thread-header">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
           <h1 className="text-xl leading-7 font-semibold sm:text-2xl sm:leading-8">{thread.subject}</h1>
           {thread.labels.map(label => (
@@ -58,14 +58,14 @@ export async function ThreadHeader({ children, threadId }: { children: React.Rea
           />
         </div>
       </header>
-      <div className="mt-5">{children}</div>
+      <div className="mx-auto mt-5 w-full max-w-4xl">{children}</div>
     </>
   );
 }
 
 export function ThreadHeaderSkeleton() {
   return (
-    <div aria-hidden>
+    <div aria-hidden className="mx-auto w-full max-w-4xl">
       <div className="flex h-7 items-center pt-4 sm:h-8">
         <Skeleton className="h-6 w-3/5 max-w-xl" />
       </div>

@@ -26,7 +26,7 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
 
   return (
     <NavForward>
-      <article className="mx-auto w-full max-w-4xl px-5 pb-24 sm:px-8">
+      <div className="flex h-full flex-col">
         <Suspense fallback={<ThreadToolbarSkeleton />}>
           {query.then(({ backHref, threadId }) => (
             <Suspense fallback={<ThreadToolbarSkeleton />}>
@@ -34,23 +34,25 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
             </Suspense>
           ))}
         </Suspense>
-        <Suspense fallback={<ThreadHeaderSkeleton />}>
-          {query.then(({ threadId }) => (
-            <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
-              <ThreadHeader threadId={threadId}>
-                <ErrorBoundary title="This conversation could not be loaded">
-                  <Suspense fallback={<LatestMessageSkeleton />}>
-                    <LatestMessage threadId={threadId} />
-                    <Suspense fallback={<EarlierMessagesSkeleton />}>
-                      <EarlierMessages threadId={threadId} />
+        <article className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 pb-24 sm:px-8">
+          <Suspense fallback={<ThreadHeaderSkeleton />}>
+            {query.then(({ threadId }) => (
+              <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
+                <ThreadHeader threadId={threadId}>
+                  <ErrorBoundary title="This conversation could not be loaded">
+                    <Suspense fallback={<LatestMessageSkeleton />}>
+                      <LatestMessage threadId={threadId} />
+                      <Suspense fallback={<EarlierMessagesSkeleton />}>
+                        <EarlierMessages threadId={threadId} />
+                      </Suspense>
                     </Suspense>
-                  </Suspense>
-                </ErrorBoundary>
-              </ThreadHeader>
-            </AnimatedSuspense>
-          ))}
-        </Suspense>
-      </article>
+                  </ErrorBoundary>
+                </ThreadHeader>
+              </AnimatedSuspense>
+            ))}
+          </Suspense>
+        </article>
+      </div>
     </NavForward>
   );
 }
