@@ -1,7 +1,6 @@
 'use server';
 
 import { updateTag } from 'next/cache';
-import { redirect, RedirectType } from 'next/navigation';
 import { z } from 'zod';
 import { verifyUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
@@ -9,7 +8,7 @@ import { moderateText } from '@/lib/moderation';
 import { threadTags } from './thread-cache';
 import { resolveRecipients, splitAddresses } from './thread-recipients';
 
-type ActionResult = { ok: true } | { ok: false; error: string };
+export type ActionResult = { ok: true } | { ok: false; error: string };
 
 export async function toggleStar(threadId: string, starred: boolean): Promise<ActionResult> {
   const user = await verifyUser();
@@ -62,7 +61,7 @@ export async function markThreadRead(threadId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-export type ReplyState = { ok: true; sentAt: string } | { ok: false; error: string } | null;
+export type ReplyResult = { ok: true; messageId: string } | { ok: false; error: string };
 
 const replySchema = z.object({
   bcc: z.string().optional(),
@@ -71,7 +70,7 @@ const replySchema = z.object({
   threadId: z.string().min(1),
 });
 
-export async function sendReply(_state: ReplyState, formData: FormData): Promise<ReplyState> {
+export async function sendReply(formData: FormData): Promise<ReplyResult> {
   const user = await verifyUser();
   const parsed = replySchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message, ok: false };
@@ -111,13 +110,14 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
     where: { account: true, id: { in: recipients.map(recipient => recipient.userId) } },
   });
   const sentAt = new Date();
+  const messageId = `msg-${crypto.randomUUID().slice(0, 8)}`;
 
   await prisma.$transaction([
     prisma.message.create({
       data: {
         body,
         fromId: user.id,
-        id: `msg-${crypto.randomUUID().slice(0, 8)}`,
+        id: messageId,
         recipients: { create: recipients },
         sentAt,
         threadId,
@@ -137,10 +137,10 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
   updateTag(threadTags.detail(threadId));
   updateTag(threadTags.list(user.id));
   for (const account of accounts) updateTag(threadTags.list(account.id));
-  return { ok: true, sentAt: sentAt.toISOString() };
+  return { messageId, ok: true };
 }
 
-export type ComposeState = { ok: false; error: string } | null;
+export type ComposeResult = { ok: true; threadId: string } | { ok: false; error: string };
 
 const composeSchema = z.object({
   bcc: z.string().optional(),
@@ -150,7 +150,7 @@ const composeSchema = z.object({
   to: z.string().trim().min(1, 'Add at least one recipient.'),
 });
 
-export async function composeMessage(_state: ComposeState, formData: FormData): Promise<ComposeState> {
+export async function composeMessage(formData: FormData): Promise<ComposeResult> {
   const user = await verifyUser();
   const parsed = composeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message, ok: false };
@@ -199,5 +199,29 @@ export async function composeMessage(_state: ComposeState, formData: FormData): 
 
   updateTag(threadTags.list(user.id));
   for (const recipient of resolved.recipients) if (recipient.account) updateTag(threadTags.list(recipient.userId));
-  redirect(`/sent/${threadId}`, RedirectType.replace);
+  return { ok: true, threadId };
+}
+
+// Undo for a message you just sent: only your own message goes, and the thread with it when nothing else remains.
+export async function unsendMessage(messageId: string): Promise<ActionResult> {
+  const user = await verifyUser();
+  const message = await prisma.message.findUnique({
+    include: { thread: { include: { messages: { orderBy: { sentAt: 'desc' } }, states: true } } },
+    where: { id: messageId },
+  });
+  if (!message || message.fromId !== user.id) return { error: 'That message could not be found.', ok: false };
+
+  const remaining = message.thread.messages.filter(other => other.id !== messageId);
+  if (remaining.length === 0) {
+    await prisma.thread.delete({ where: { id: message.threadId } });
+  } else {
+    await prisma.$transaction([
+      prisma.message.delete({ where: { id: messageId } }),
+      prisma.thread.update({ data: { updatedAt: remaining[0].sentAt }, where: { id: message.threadId } }),
+    ]);
+  }
+
+  updateTag(threadTags.detail(message.threadId));
+  for (const state of message.thread.states) updateTag(threadTags.list(state.userId));
+  return { ok: true };
 }
