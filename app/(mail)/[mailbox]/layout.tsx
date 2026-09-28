@@ -24,7 +24,7 @@ export default function MailboxLayout({ children, params }: LayoutProps<'/[mailb
           <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <Suspense fallback={<ThreadListSkeleton />}>
               {mailbox.then(value => (
-                <AnimatedSuspense fallback={<ThreadListSkeleton />} key={value}>
+                <AnimatedSuspense fallback={<ThreadListSkeleton />}>
                   <ThreadList mailbox={value} />
                 </AnimatedSuspense>
               ))}

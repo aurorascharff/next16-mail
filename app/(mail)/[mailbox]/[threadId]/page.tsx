@@ -15,7 +15,7 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
     <article className="mx-auto w-full max-w-3xl px-5 pb-24 sm:px-8" data-reading-pane>
       <Suspense fallback={<ThreadHeaderSkeleton />}>
         {query.then(({ mailbox, threadId }) => (
-          <AnimatedSuspense fallback={<ThreadHeaderSkeleton />} key={threadId}>
+          <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
             <ThreadHeader mailbox={mailbox} threadId={threadId}>
               <ErrorBoundary title="Earlier messages could not be loaded">
                 <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
