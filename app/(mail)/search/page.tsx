@@ -1,5 +1,4 @@
 import { Suspense } from 'react';
-import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SearchResults, ThreadListSkeleton } from '@/features/thread/components/thread-list';
 import { ListTitle, ThreadListHeader } from '@/features/thread/components/thread-list-header';
@@ -15,9 +14,9 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
       <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
         {query.then(value =>
           value ? (
-            <AnimatedSuspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
+            <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
               <SearchResults query={value} />
-            </AnimatedSuspense>
+            </Suspense>
           ) : (
             <>
               <ThreadListHeader leading={<ListTitle spaced>Search</ListTitle>} />

@@ -177,6 +177,8 @@ body:has(form[role='search'][data-pending]) .thread-results {
 }
 
 ::view-transition-group(account-menu),
+::view-transition-group(search-form),
+::view-transition-group(compose-panel),
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(dialog),
@@ -187,6 +189,10 @@ body:has(form[role='search'][data-pending]) .thread-results {
 
 ::view-transition-old(account-menu),
 ::view-transition-new(account-menu),
+::view-transition-old(search-form),
+::view-transition-new(search-form),
+::view-transition-old(compose-panel),
+::view-transition-new(compose-panel),
 ::view-transition-old(demo-toolbar),
 ::view-transition-new(demo-toolbar),
 ::view-transition-old(theme-toggle),

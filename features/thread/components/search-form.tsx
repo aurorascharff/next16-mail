@@ -31,6 +31,7 @@ export function SearchForm() {
       <form
         className="relative"
         data-pending={isPending ? '' : undefined}
+        style={{ viewTransitionName: 'search-form' }}
         onSubmit={event => event.preventDefault()}
         role="search"
       >

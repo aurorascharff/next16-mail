@@ -15,7 +15,7 @@ test.describe('Compose and accounts', () => {
     await form.getByRole('button', { exact: true, name: 'Bcc' }).click();
     await form.getByRole('combobox', { name: 'Bcc' }).fill('jonas');
     await page.getByRole('option', { name: /jonas@stamp\.dev/ }).click();
-    await form.getByLabel('Subject').fill(subject);
+    await form.getByPlaceholder('Subject').fill(subject);
     await form.getByLabel('Message').fill('Sent from the end-to-end suite.\n\nSecond paragraph, further down.');
     await form.getByLabel('Message').press('Meta+Enter');
 
