@@ -63,10 +63,10 @@ const threads: SeedThread[] = [
       {
         attachments: [{ name: 'prefetch-budget.xlsx', size: 48_211, type: 'spreadsheet' }],
         body: p(
-          'Quick one before standup: I pulled the numbers on how many per-link prefetches the inbox fires when you land on it cold, and it is a lot more than I expected.',
-          'On a 1440px screen we render 38 rows. Every one of them is a `<Link prefetch>`, so every one of them wakes the server for a per-link prerender the moment it scrolls into view. That is 38 renders of the thread page, bodies included, for a screen where the median user opens two threads.',
-          'I think we should move the rows to prefetch on intent instead. Hover, focus, or touch-start flips the row to `prefetch={true}`, and the default `<Link>` keeps prefetching the shared App Shell for free. Priya has a small hook for it already.',
-          'The second half of the fix is what the prefetch actually renders. Right now it is the whole thread. If we gate the history behind `await navigation()`, the prefetch stops at the subject and the latest message, and the earlier messages only render once someone clicks. That is the part I would like to pair on.',
+          'Quick one before standup: I ran the inbox through the 4G profile on the test phone last night, and the cold load is slower than the numbers we quoted in the planning doc.',
+          'Landing on the inbox pulls down the full content of every visible conversation, 38 of them on the test device, for a screen where the median user opens two. Most of that is message bodies and attachment metadata nobody looks at.',
+          'I would like to load conversations when someone shows intent instead: hover, focus or touch on a row. Priya has a small hook for it already, and it keeps the list itself just as fast.',
+          'The second half is how much we load per conversation. Right now it is the whole thread. If we stop at the newest message and load the history once the conversation is actually open, the numbers in the sheet drop by about two thirds. That is the part I would like to pair on.',
           'Numbers attached. The first tab is the current behavior, the second is the projection.',
         ),
         from: 'tomas',
@@ -88,9 +88,9 @@ const threads: SeedThread[] = [
         ],
         body: p(
           'I finished the reading pane explorations and I think we have a winner, but I want your take on the header before I hand it to Priya.',
-          'The header is the piece that shows up first on navigation, so it needs to feel like a complete thing on its own. Subject, labels, and the latest message in full. Then the earlier messages fade in underneath without shifting anything above it.',
+          'The top of the pane is what people see first, so it needs to feel complete on its own. Subject, labels, and the latest message in full. Then the earlier messages fade in underneath without shifting anything above it.',
           'Version C keeps the sender row at a fixed 44px so the message always starts at the same y. Version D lets the sender row grow when there are many recipients, which reads better but moves the fold around. I lean C.',
-          'Figma link is in the attachment list. The frames are named after the stages: Shell, Prefetch, Navigation.',
+          'Both versions are attached as exports. The Figma file has the interactive versions if you want to click through.',
         ),
         from: 'jonas',
         hoursAgo: 30,
@@ -108,7 +108,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Agreed on both. Updated the frames and swapped the skeleton to three animated bars over a flat block. Handing it over now.',
-          'If you want to see the fold in motion, the prototype has the 900ms delay you asked for on the history so you can watch the latest message land first.',
+          'If you want to see the transition in motion, the prototype has the slow network setting you asked for.',
         ),
         from: 'jonas',
         hoursAgo: 3.5,
@@ -128,8 +128,8 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Deployment stamp-web@7f3a2c1 to production failed.',
-          'The build stopped in `next build` while prerendering `/[mailbox]/[threadId]`. The route reads `cookies()` in a component that is not wrapped in a Suspense boundary, so the prerender cannot produce a static shell for it.',
-          'Error: Route "/[mailbox]/[threadId]" used `cookies()` outside of a Suspense boundary. Wrap the component in `<Suspense>`, or move the read into a `"use cache: private"` function.',
+          'The build stopped during type checking with one error in the thread feature.',
+          'Error: Property `read` does not exist on type `ThreadSummary`. Did you mean `unread`?',
           'Fix the route and push again, or roll back to stamp-web@e91bb04 from the deployments page.',
         ),
         from: 'deploys',
@@ -148,9 +148,9 @@ const threads: SeedThread[] = [
         attachments: [{ name: 'launch-post-draft.md', size: 9_842, type: 'document' }],
         body: p(
           'Draft of the launch post is ready for a technical read. I kept it short, three sections, one code sample each.',
-          'The framing I landed on is "the inbox that never shows you a spinner for the part you already know". Subject and the latest message arrive from the prefetch; the earlier messages arrive on the click. It is honest about what is cached and what is not, which I think readers appreciate more than a blanket "instant".',
-          'The code samples are lifted straight from the app so they should stay in sync. If we rename `getThreadSummary` again I will hear about it.',
-          'Can you check the paragraph about `navigation()` versus `connection()`? I want to be precise about why one keeps the cache lifetime and the other does not.',
+          'The framing I landed on is "the inbox that never shows you a spinner for the part you already know". Open a conversation and the newest message is simply there; the older ones follow. It is honest about what is fast and what is not, which I think readers appreciate more than a blanket "instant".',
+          'The screenshots are from the current build, so if the reading pane changes again before launch I will need new ones.',
+          'Can you check the paragraph on how we decide what to load before the click? I want it precise without turning into an engineering blog post.',
         ),
         from: 'leo',
         hoursAgo: 8,
@@ -159,7 +159,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Reading it tonight. First reaction to the framing: yes. It matches how the demo actually feels.',
-          'For the `connection()` paragraph, the distinction is that `connection()` waits for a real request, so everything below it becomes request-dependent and cannot be cached. `navigation()` only excludes the subtree from prefetches. The function below it can still say `use cache` and keep its lifetime, it just is not produced until someone navigates.',
+          'For that paragraph, keep it to one idea: we load what a person is about to look at, and nothing they are not. The rest is implementation and belongs in the docs, not the post.',
         ),
         from: 'mara',
         hoursAgo: 6.5,
@@ -176,7 +176,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Two candidates for the senior frontend role are through to onsite and I would love you on the systems panel for both.',
-          'Thursday 10:00 and Friday 13:00, one hour each. The prompt is the one you wrote in the spring: design the loading sequence for a mailbox with a persistent sidebar, a list, and a reading pane, and explain what can be cached, what has to wait for the URL, and what has to wait for the click.',
+          'Thursday 10:00 and Friday 13:00, one hour each. The prompt is the one you wrote in the spring: design the data loading for a mailbox with a sidebar, a list and a reading pane, and explain what you would load ahead of time and what you would wait for.',
           'Feedback in the usual form by end of day Friday if you can. Calendar invites coming separately.',
         ),
         from: 'elin',
@@ -237,8 +237,8 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Here is the intent-based prefetch hook Tomas mentioned. It is small enough to paste.',
-          'The idea: the row is a normal `<Link>`, so it gets the shared App Shell prefetch like everything else. On pointer enter, focus, or touch start we flip local state and the link becomes `prefetch={true}`, which asks for the per-link prefetch for that one row. The list never fires more than a handful of them, and only for rows the user is actually looking at.',
-          'I also wired it to the demo toolbar. When Prefetch is off the hook returns `null` and rows stay on the shell-only path so you can compare.',
+          'The idea: a row is a plain link until the pointer, keyboard focus or a touch reaches it, and only then do we start loading that conversation. The list never loads more than a handful of them, and only the ones someone is actually looking at.',
+          'It is behind a setting for now so we can compare both behaviours on the test devices before we commit.',
           'One open question: should the first row prefetch eagerly? It is the one people open most. I left it off for now.',
         ),
         from: 'priya',
@@ -265,14 +265,14 @@ const threads: SeedThread[] = [
       },
       {
         body: p(
-          'Session proposal: "Three stages of a navigation", 40 minutes. Shell, prefetch, navigation, with the inbox as the running example. I will bring the slow-mode toggle.',
+          'Session proposal: "How the new inbox loads", 40 minutes, with the field-test numbers and the app on a throttled connection.',
         ),
         from: 'mara',
         hoursAgo: 70,
         to: ['sofie'],
       },
       {
-        body: p('Booked for Thursday 14:00. Bring the toggle.'),
+        body: p('Booked for Thursday 14:00. Bring the phone.'),
         from: 'sofie',
         hoursAgo: 69,
         to: ['mara'],
@@ -317,7 +317,7 @@ const threads: SeedThread[] = [
       },
       {
         body: p(
-          'Thanks Finn, that is a real one. The pane is keyed on the mailbox instead of the thread id, so React reuses the tree across threads and the transition holds the old content.',
+          'Thanks Finn, that is a real one. Two conversations opened quickly after each other race, and the slower response lands last. Same root cause as the ticket from June.',
           'Keying the boundary on the thread id fixes it. Priya is on it, should be in the next deploy.',
         ),
         from: 'mara',
@@ -375,7 +375,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'The conference accepted the talk. Forty minutes, main stage, second day.',
-          'Working title is "Above the fold: what a prefetch should render". I want to open with the inbox demo live, slow mode on, and let the audience watch the latest message arrive before the history. Then walk through the three stages and how each read chooses its stage.',
+          'Working title is "The inbox that never shows a spinner". I want to open with the app live on a throttled connection and let the audience watch the newest message land before the history. Then walk through how we decided what loads when.',
           'Would you co-present the middle section? The caching decisions are yours and you explain them better than my slides do.',
         ),
         from: 'leo',
@@ -385,7 +385,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Yes. Send me the slide deck when you have a skeleton and I will fill in the middle.',
-          'One request for the opening: do the first click with prefetch off, then the second with it on. The contrast does the talking.',
+          'One request for the opening: show the old build first, then the new one. The contrast does the talking.',
         ),
         from: 'mara',
         hoursAgo: 90,
@@ -473,9 +473,9 @@ const threads: SeedThread[] = [
     messages: [
       {
         body: p(
-          'Search is on the query path now instead of the client. `searchThreads(userId, q)` is cached per query with the same list tag as the mailbox, so a reply or an archive invalidates results too.',
+          'Search runs on the server now instead of in the browser. Results are cached per query and refresh when a conversation changes, so an archive or a reply shows up in results right away.',
           'It is a plain `contains` over subject, sender, body, and label for now. If we outgrow it we can move to a real index, but with the current volume this is fine and it keeps the demo honest.',
-          'The search page uses `searchParams.then()` so the input stays interactive while the results stream in. The results fade to 60% while the transition is pending.',
+          'The search box keeps focus while you type, and the previous results stay on screen, dimmed, until the new ones arrive. No more flash of empty list between keystrokes.',
         ),
         from: 'priya',
         hoursAgo: 31,
@@ -492,7 +492,7 @@ const threads: SeedThread[] = [
       {
         body: p(
           'Following up on the flag cleanup. `readingPaneV2` and `hoverPrefetch` are both at 100% for two weeks now. I would like to delete both flags and the old code paths this sprint.',
-          'The only consumer left is the e2e suite, which still toggles `hoverPrefetch` off for one test. I will rewrite that test to use the demo toolbar cookie instead.',
+          'The only consumer left is the e2e suite, which still turns `hoverPrefetch` off for one test. I will rewrite that test against the new default.',
         ),
         from: 'tomas',
         hoursAgo: 100,
@@ -537,7 +537,7 @@ const threads: SeedThread[] = [
         attachments: [{ name: 'inbox-research-notes.pdf', size: 402_118, type: 'document' }],
         body: p(
           'Sharing the notes from the five user sessions on the current inbox. The strongest signal is the one we expected: people notice the spinner in the reading pane far more than the one in the list, because the pane is where they were looking when they clicked.',
-          'Three of five described the ideal as "show me the newest message immediately, the rest can follow". That is basically the prefetch stage.',
+          'Three of five described the ideal as "show me the newest message immediately, the rest can follow".',
           'Full notes attached.',
         ),
         from: 'sofie',
