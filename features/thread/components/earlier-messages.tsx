@@ -13,7 +13,7 @@ export async function EarlierMessages({ threadId }: { threadId: string }) {
           key={message.id}
         >
           <article>
-            <SenderRow date={message.sentAt} from={message.from} to={message.to} />
+            <SenderRow cc={message.cc} date={message.sentAt} from={message.from} to={message.to} />
             <div className="mt-4">
               <MessageText paragraphs={message.paragraphs} />
             </div>

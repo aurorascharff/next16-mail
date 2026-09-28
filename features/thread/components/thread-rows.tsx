@@ -1,39 +1,68 @@
 'use client';
 
-import { Archive, ArchiveRestore, Paperclip, Star } from 'lucide-react';
+import { Archive, ArchiveRestore, ChevronLeft, ChevronRight, MailOpen, Paperclip, Star, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
-import { startTransition, useOptimistic } from 'react';
+import { startTransition, useOptimistic, useState } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
-import { moveThread, toggleStar } from '../thread-actions';
+import { markThreadsRead, moveThread, moveThreads, starThreads, toggleStar } from '../thread-actions';
 import { LabelChip } from './label-chip';
 import { ThreadTime } from './thread-time';
 import type { Mailbox } from '../thread-mailboxes';
 import type { ThreadListItem } from '../types/thread';
 import type { Route } from 'next';
 
-type RowAction = { type: 'star'; id: string; starred: boolean } | { type: 'move'; id: string; mailbox: string };
+type RowAction =
+  | { type: 'star'; ids: string[]; starred: boolean }
+  | { type: 'move'; ids: string[]; mailbox: string }
+  | { type: 'read'; ids: string[]; read: boolean };
 
 function threadReducer(threads: ThreadListItem[], action: RowAction) {
-  switch (action.type) {
-    case 'star':
-      return threads.map(thread => (thread.id === action.id ? { ...thread, starred: action.starred } : thread));
-    case 'move':
-      return threads.map(thread => (thread.id === action.id ? { ...thread, mailbox: action.mailbox } : thread));
-  }
+  const ids = new Set(action.ids);
+  return threads.map(thread => {
+    if (!ids.has(thread.id)) return thread;
+    switch (action.type) {
+      case 'star':
+        return { ...thread, starred: action.starred };
+      case 'move':
+        return { ...thread, mailbox: action.mailbox };
+      case 'read':
+        return { ...thread, read: action.read };
+    }
+  });
 }
+
+const PAGE_SIZE = 10;
 
 export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: ThreadListItem[] }) {
   const [optimisticThreads, dispatch] = useOptimistic(threads, threadReducer);
+  const [page, setPage] = useState(0);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const pathname = usePathname();
   const router = useRouter();
+  const pageCount = Math.max(1, Math.ceil(optimisticThreads.length / PAGE_SIZE));
+  const current = Math.min(page, pageCount - 1);
+  const start = current * PAGE_SIZE;
+  const visible = optimisticThreads.slice(start, start + PAGE_SIZE);
+  const chosen = visible.filter(thread => selected.has(thread.id));
+  const canMove = mailbox === 'inbox' || mailbox === 'archive';
+
+  function toggleSelected(id: string) {
+    setSelected(previous => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function star(thread: ThreadListItem) {
     startTransition(async () => {
-      dispatch({ id: thread.id, starred: !thread.starred, type: 'star' });
+      dispatch({ ids: [thread.id], starred: !thread.starred, type: 'star' });
       const result = await toggleStar(thread.id, !thread.starred);
       if (!result.ok) toast.error(result.error);
     });
@@ -42,33 +71,130 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
   function move(thread: ThreadListItem, href: string) {
     const target = thread.mailbox === 'archive' ? 'inbox' : 'archive';
     startTransition(async () => {
-      dispatch({ id: thread.id, mailbox: target, type: 'move' });
+      dispatch({ ids: [thread.id], mailbox: target, type: 'move' });
       const result = await moveThread(thread.id, target);
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
-      if (pathname === href && mailbox && mailbox !== 'starred' && mailbox !== 'sent')
-        router.push(`/${mailbox}` as Route);
+      if (pathname === href && canMove) router.push(`/${mailbox}` as Route);
+      toast(target === 'archive' ? 'Conversation archived' : 'Conversation moved to inbox', {
+        action: {
+          label: 'Undo',
+          onClick: () =>
+            startTransition(async () => {
+              await moveThread(thread.id, thread.mailbox === 'archive' ? 'archive' : 'inbox');
+            }),
+        },
+      });
+    });
+  }
+
+  function moveChosen() {
+    const ids = chosen.map(thread => thread.id);
+    const target = mailbox === 'archive' ? 'inbox' : 'archive';
+    setSelected(new Set());
+    startTransition(async () => {
+      dispatch({ ids, mailbox: target, type: 'move' });
+      const result = await moveThreads(ids, target);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      toast(
+        `${ids.length} ${ids.length === 1 ? 'conversation' : 'conversations'} ${target === 'archive' ? 'archived' : 'moved to inbox'}`,
+        {
+          action: {
+            label: 'Undo',
+            onClick: () =>
+              startTransition(async () => {
+                await moveThreads(ids, target === 'archive' ? 'inbox' : 'archive');
+              }),
+          },
+        },
+      );
+    });
+  }
+
+  function starChosen() {
+    const ids = chosen.map(thread => thread.id);
+    const starred = chosen.some(thread => !thread.starred);
+    setSelected(new Set());
+    startTransition(async () => {
+      dispatch({ ids, starred, type: 'star' });
+      const result = await starThreads(ids, starred);
+      if (!result.ok) toast.error(result.error);
+    });
+  }
+
+  function markChosen() {
+    const ids = chosen.map(thread => thread.id);
+    const read = chosen.some(thread => !thread.read);
+    setSelected(new Set());
+    startTransition(async () => {
+      dispatch({ ids, read, type: 'read' });
+      const result = await markThreadsRead(ids, read);
+      if (!result.ok) toast.error(result.error);
     });
   }
 
   return (
-    <Boundary label="ThreadRows" asChild>
+    <Boundary label="ThreadRows">
+      <div className="text-gray flex h-10 items-center gap-1 px-4 text-xs tabular-nums sm:px-5">
+        <RowCheckbox
+          checked={chosen.length > 0 && chosen.length === visible.length}
+          className="mr-3"
+          label={chosen.length === visible.length ? 'Clear selection' : 'Select all on this page'}
+          onChange={() => setSelected(chosen.length === visible.length ? new Set() : new Set(visible.map(t => t.id)))}
+        />
+        {chosen.length > 0 ? (
+          <>
+            <span className="mr-1 text-black dark:text-white">{chosen.length} selected</span>
+            {canMove ? (
+              <RowButton label={mailbox === 'archive' ? 'Move to inbox' : 'Archive'} onClick={moveChosen}>
+                {mailbox === 'archive' ? <ArchiveRestore className="size-4" /> : <Archive className="size-4" />}
+              </RowButton>
+            ) : null}
+            <RowButton label={chosen.some(t => !t.starred) ? 'Star' : 'Remove star'} onClick={starChosen}>
+              <Star className="size-4" strokeWidth={1.5} />
+            </RowButton>
+            <RowButton label={chosen.some(t => !t.read) ? 'Mark as read' : 'Mark as unread'} onClick={markChosen}>
+              <MailOpen className="size-4" />
+            </RowButton>
+            <RowButton className="ml-auto" label="Clear selection" onClick={() => setSelected(new Set())}>
+              <X className="size-4" />
+            </RowButton>
+          </>
+        ) : (
+          <>
+            <span className="mr-1 ml-auto">
+              {start + 1}–{start + visible.length} of {optimisticThreads.length}
+            </span>
+            <RowButton disabled={current === 0} label="Newer" onClick={() => setPage(current - 1)}>
+              <ChevronLeft className="size-4" />
+            </RowButton>
+            <RowButton disabled={current >= pageCount - 1} label="Older" onClick={() => setPage(current + 1)}>
+              <ChevronRight className="size-4" />
+            </RowButton>
+          </>
+        )}
+      </div>
       <ul aria-label="Conversations" className="flex flex-col" data-testid="thread-rows">
-        {optimisticThreads.map(thread => {
+        {visible.map(thread => {
           const href = `/${mailbox ?? thread.mailbox}/${thread.id}` as Route;
           const active = pathname === href;
+          const isSelected = selected.has(thread.id);
           const sender = thread.participants.at(-1) ?? '';
-          const leaving = (mailbox === 'inbox' || mailbox === 'archive') && thread.mailbox !== mailbox;
+          const leaving = canMove && thread.mailbox !== mailbox;
           return (
             <li
               className={cn(
-                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
-                active ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
+                'group border-divider/70 dark:border-divider-dark/70 relative grid grid-cols-[1rem_2.25rem_minmax(0,1fr)] items-center gap-x-3 border-b px-4 py-3 transition-[background-color,opacity] duration-200 data-removing:opacity-40 sm:px-5',
+                active || isSelected ? 'bg-accent/10 dark:bg-accent/15' : 'hover:bg-card/60 dark:hover:bg-card-dark/60',
               )}
               data-read={thread.read ? '' : undefined}
               data-removing={leaving ? '' : undefined}
+              data-selected={isSelected ? '' : undefined}
               data-testid="thread-row"
               key={thread.id}
             >
@@ -77,6 +203,12 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                 aria-label={thread.subject}
                 className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
                 href={href}
+              />
+              <RowCheckbox
+                checked={isSelected}
+                className={cn(!isSelected && 'invisible group-focus-within:visible group-hover:visible')}
+                label={`Select ${thread.subject}`}
+                onChange={() => toggleSelected(thread.id)}
               />
               <UserAvatar name={sender === 'me' ? 'Me' : sender} />
               <div className="flex min-w-0 flex-col">
@@ -112,14 +244,14 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                   {thread.subject}
                 </div>
                 <div className="flex h-5 items-center gap-2">
+                  {thread.labels.map(label => (
+                    <LabelChip className="hidden xl:inline-flex" key={label.id} label={label} />
+                  ))}
+                  {thread.hasAttachments ? (
+                    <Paperclip aria-label="Has attachments" className="text-gray size-3.5 shrink-0" />
+                  ) : null}
                   <span className="text-gray min-w-0 flex-1 truncate text-[13px]">{thread.snippet}</span>
                   <span className="relative z-20 flex shrink-0 items-center gap-1">
-                    {thread.labels.map(label => (
-                      <LabelChip className="hidden xl:inline-flex" key={label.id} label={label} />
-                    ))}
-                    {thread.hasAttachments ? (
-                      <Paperclip aria-label="Has attachments" className="text-gray mx-1 size-3.5" />
-                    ) : null}
                     {thread.mailbox === 'sent' ? null : (
                       <RowButton
                         className="invisible group-focus-within:visible group-hover:visible"
@@ -139,7 +271,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                       label={thread.starred ? 'Remove star' : 'Star'}
                       onClick={() => star(thread)}
                     >
-                      <Star className={cn('size-4', thread.starred && 'fill-current')} />
+                      <Star className={cn('size-4', thread.starred && 'fill-current')} strokeWidth={1.5} />
                     </RowButton>
                   </span>
                 </div>
@@ -152,16 +284,49 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
   );
 }
 
+function RowCheckbox({
+  checked,
+  className,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  className?: string;
+  label: string;
+  onChange: () => void;
+}) {
+  return (
+    <button
+      aria-checked={checked}
+      aria-label={label}
+      className={cn(
+        'relative z-20 flex size-4 items-center justify-center rounded-[4px] border transition-colors',
+        checked
+          ? 'border-accent bg-accent text-white'
+          : 'border-gray/60 hover:border-gray bg-white text-transparent dark:bg-black',
+        className,
+      )}
+      onClick={onChange}
+      role="checkbox"
+      type="button"
+    >
+      <Check className="size-3" strokeWidth={3} />
+    </button>
+  );
+}
+
 function RowButton({
   active,
   children,
   className,
+  disabled,
   label,
   onClick,
 }: {
   active?: boolean;
   children: React.ReactNode;
   className?: string;
+  disabled?: boolean;
   label: string;
   onClick: () => void;
 }) {
@@ -170,10 +335,11 @@ function RowButton({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        'text-gray inline-flex size-6 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white',
+        'text-gray inline-flex size-6 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent dark:hover:bg-white/10 dark:hover:text-white',
         active && 'text-accent hover:text-accent',
         className,
       )}
+      disabled={disabled}
       onClick={onClick}
       title={label}
       type="button"

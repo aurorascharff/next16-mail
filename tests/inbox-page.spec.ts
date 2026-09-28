@@ -46,4 +46,26 @@ test.describe('Inbox (/inbox)', () => {
     await page.goto('/spam');
     await expect(page.getByText('404')).toBeVisible();
   });
+
+  test('selecting rows shows bulk actions, and archiving them removes the rows', async ({ page }) => {
+    await page.goto('/inbox');
+    const rows = page.getByTestId('thread-row').filter({ visible: true });
+    for (const subject of ['Ramen at 12?', 'Deployment failed: stamp-web@7f3a2c1']) {
+      await rows.filter({ hasText: subject }).hover();
+      await rows.filter({ hasText: subject }).getByRole('checkbox').check();
+    }
+    await expect(page.getByText('2 selected')).toBeVisible();
+    await page.getByRole('button', { exact: true, name: 'Archive' }).first().click();
+    await expect(rows.filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
+    await expect(rows.filter({ hasText: 'Deployment failed: stamp-web@7f3a2c1' })).toHaveCount(0);
+
+    await page.goto('/archive');
+    const archived = page.getByTestId('thread-row').filter({ visible: true });
+    for (const subject of ['Ramen at 12?', 'Deployment failed: stamp-web@7f3a2c1']) {
+      await archived.filter({ hasText: subject }).hover();
+      await archived.filter({ hasText: subject }).getByRole('checkbox').check();
+    }
+    await page.getByRole('button', { exact: true, name: 'Move to inbox' }).first().click();
+    await expect(archived.filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
+  });
 });

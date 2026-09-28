@@ -28,7 +28,7 @@ export function StarButton({ starred, threadId }: { starred: boolean; threadId: 
         })
       }
     >
-      <Star className={cn('size-4', optimisticStarred && 'fill-current')} />
+      <Star className={cn('size-4', optimisticStarred && 'fill-current')} strokeWidth={1.5} />
     </IconButton>
   );
 }
@@ -59,6 +59,15 @@ export function ArchiveButton({
             return;
           }
           router.push(`/${mailbox}` as Route);
+          toast(archived ? 'Conversation moved to inbox' : 'Conversation archived', {
+            action: {
+              label: 'Undo',
+              onClick: () =>
+                startArchive(async () => {
+                  await moveThread(threadId, archived ? 'archive' : 'inbox');
+                }),
+            },
+          });
         })
       }
     >

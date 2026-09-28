@@ -12,7 +12,17 @@ import { UserAvatar } from '@/features/user/components/user-avatar';
 import { formatBytes, formatFullDate } from '@/lib/utils';
 import type { Attachment, Participant } from '../types/thread';
 
-export function SenderRow({ date, from, to }: { date: string; from: Participant; to: Participant[] }) {
+export function SenderRow({
+  cc = [],
+  date,
+  from,
+  to,
+}: {
+  cc?: Participant[];
+  date: string;
+  from: Participant;
+  to: Participant[];
+}) {
   return (
     <div className="flex h-11 items-center gap-3">
       <UserAvatar name={from.name} size="lg" />
@@ -23,6 +33,7 @@ export function SenderRow({ date, from, to }: { date: string; from: Participant;
         </p>
         <p className="text-gray flex h-5 items-center truncate text-[13px]">
           to {to.map(person => person.name.split(' ')[0]).join(', ') || 'me'}
+          {cc.length > 0 ? `, cc ${cc.map(person => person.name.split(' ')[0]).join(', ')}` : ''}
         </p>
       </div>
       <time className="text-gray shrink-0 text-xs tabular-nums" dateTime={date}>

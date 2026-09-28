@@ -11,7 +11,9 @@ test.describe('Compose and accounts', () => {
     await expect(form).toBeVisible();
 
     const subject = `Stamp compose test ${Date.now()}`;
-    await form.getByLabel('To').selectOption({ label: 'Mara Lindqvist · mara@lindqvist.no' });
+    await form.getByLabel('To').fill('mara@lindqvist.no');
+    await form.getByRole('button', { exact: true, name: 'Bcc' }).click();
+    await form.getByLabel('Bcc').fill('jonas@stamp.dev');
     await form.getByLabel('Subject').fill(subject);
     await form.getByLabel('Message').fill('Sent from the end-to-end suite.\n\nSecond paragraph, further down.');
     await form.getByLabel('Message').press('Meta+Enter');
@@ -26,7 +28,7 @@ test.describe('Compose and accounts', () => {
       .last()
       .click();
     await page.waitForURL(url => url.pathname === '/inbox');
-    await expect(page.getByTestId('current-user').filter(visible)).toContainText('mara@lindqvist.no');
+    await expect(page.getByTestId('current-user').filter(visible)).toHaveAttribute('data-account', 'mara@lindqvist.no');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: subject })).toBeVisible();
 
     await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
@@ -34,6 +36,6 @@ test.describe('Compose and accounts', () => {
       .getByRole('button', { name: /mara@stamp\.dev/ })
       .last()
       .click();
-    await expect(page.getByTestId('current-user').filter(visible)).toContainText('mara@stamp.dev');
+    await expect(page.getByTestId('current-user').filter(visible)).toHaveAttribute('data-account', 'mara@stamp.dev');
   });
 });

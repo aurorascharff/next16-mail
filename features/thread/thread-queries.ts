@@ -8,7 +8,7 @@ import { prisma, usesSqlite } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { threadTags } from './thread-cache';
 import { MAILBOXES, type Mailbox } from './thread-mailboxes';
-import type { MailboxCounts, Participant, ThreadListItem, ThreadMessage, ThreadSummary } from './types/thread';
+import type { Label, MailboxCounts, Participant, ThreadListItem, ThreadMessage, ThreadSummary } from './types/thread';
 
 const participantSelect = { email: true, id: true, name: true } as const;
 
@@ -164,7 +164,7 @@ function toListItem(thread: ThreadRow, userId: string): ThreadListItem {
 const messageInclude = {
   attachments: { orderBy: { name: 'asc' } },
   from: { select: participantSelect },
-  recipients: { include: { user: { select: participantSelect } }, where: { kind: 'to' } },
+  recipients: { include: { user: { select: participantSelect } }, where: { kind: { not: 'bcc' } } },
 } as const;
 
 type MessageRow = Awaited<ReturnType<typeof prisma.message.findMany<{ include: typeof messageInclude }>>>[number];
@@ -172,11 +172,12 @@ type MessageRow = Awaited<ReturnType<typeof prisma.message.findMany<{ include: t
 function toMessage(message: MessageRow): ThreadMessage {
   return {
     attachments: message.attachments,
+    cc: message.recipients.filter(recipient => recipient.kind === 'cc').map(recipient => recipient.user),
     from: message.from,
     id: message.id,
     paragraphs: splitParagraphs(message.body),
     sentAt: message.sentAt.toISOString(),
-    to: message.recipients.map(recipient => recipient.user),
+    to: message.recipients.filter(recipient => recipient.kind === 'to').map(recipient => recipient.user),
   };
 }
 
@@ -266,3 +267,11 @@ async function getContactsForUser(userId: string): Promise<Participant[]> {
 }
 
 export { MAILBOXES };
+
+export async function getLabels(): Promise<Label[]> {
+  'use cache';
+  cacheLife('max');
+  cacheTag(threadTags.labels);
+
+  return prisma.label.findMany({ orderBy: { name: 'asc' } });
+}

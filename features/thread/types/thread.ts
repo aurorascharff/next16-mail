@@ -48,6 +48,7 @@ export type ThreadMessage = {
   id: string;
   from: Participant;
   to: Participant[];
+  cc: Participant[];
   sentAt: string;
   paragraphs: string[];
   attachments: Attachment[];

@@ -7,6 +7,7 @@ import { verifyUser } from '@/features/user/user-queries';
 import { prisma } from '@/lib/db';
 import { moderateText } from '@/lib/moderation';
 import { threadTags } from './thread-cache';
+import { resolveRecipients, splitAddresses } from './thread-recipients';
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -30,6 +31,27 @@ export async function moveThread(threadId: string, mailbox: 'inbox' | 'archive')
   return { ok: true };
 }
 
+export async function moveThreads(threadIds: string[], mailbox: 'inbox' | 'archive'): Promise<ActionResult> {
+  const user = await verifyUser();
+  await prisma.threadState.updateMany({ data: { mailbox }, where: { threadId: { in: threadIds }, userId: user.id } });
+  updateTag(threadTags.list(user.id));
+  return { ok: true };
+}
+
+export async function starThreads(threadIds: string[], starred: boolean): Promise<ActionResult> {
+  const user = await verifyUser();
+  await prisma.threadState.updateMany({ data: { starred }, where: { threadId: { in: threadIds }, userId: user.id } });
+  updateTag(threadTags.list(user.id));
+  return { ok: true };
+}
+
+export async function markThreadsRead(threadIds: string[], read: boolean): Promise<ActionResult> {
+  const user = await verifyUser();
+  await prisma.threadState.updateMany({ data: { read }, where: { threadId: { in: threadIds }, userId: user.id } });
+  updateTag(threadTags.list(user.id));
+  return { ok: true };
+}
+
 export async function markThreadRead(threadId: string): Promise<ActionResult> {
   const user = await verifyUser();
   const { count } = await prisma.threadState.updateMany({
@@ -43,7 +65,9 @@ export async function markThreadRead(threadId: string): Promise<ActionResult> {
 export type ReplyState = { ok: true; sentAt: string } | { ok: false; error: string } | null;
 
 const replySchema = z.object({
+  bcc: z.string().optional(),
   body: z.string().trim().min(1, 'Write a reply first.').max(4000, 'Keep replies under 4000 characters.'),
+  cc: z.string().optional(),
   threadId: z.string().min(1),
 });
 
@@ -64,16 +88,27 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
   });
   if (!thread || thread.states.length === 0) return { error: 'That conversation could not be found.', ok: false };
 
+  const extra = await resolveRecipients(user.id, {
+    bcc: splitAddresses(parsed.data.bcc),
+    cc: splitAddresses(parsed.data.cc),
+    to: [],
+  });
+  if (!extra.ok) return extra;
+
   const others = new Set<string>();
   for (const message of thread.messages) {
     others.add(message.fromId);
-    for (const recipient of message.recipients) others.add(recipient.userId);
+    for (const recipient of message.recipients) if (recipient.kind !== 'bcc') others.add(recipient.userId);
   }
   others.delete(user.id);
-  const recipientIds = [...others];
+  for (const recipient of extra.recipients) others.delete(recipient.userId);
+  const recipients = [
+    ...[...others].map(userId => ({ kind: 'to', userId })),
+    ...extra.recipients.map(recipient => ({ kind: recipient.kind, userId: recipient.userId })),
+  ];
   const accounts = await prisma.user.findMany({
     select: { id: true },
-    where: { account: true, id: { in: recipientIds } },
+    where: { account: true, id: { in: recipients.map(recipient => recipient.userId) } },
   });
   const sentAt = new Date();
 
@@ -83,7 +118,7 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
         body,
         fromId: user.id,
         id: `msg-${crypto.randomUUID().slice(0, 8)}`,
-        recipients: { create: recipientIds.map(userId => ({ kind: 'to', userId })) },
+        recipients: { create: recipients },
         sentAt,
         threadId,
       },
@@ -108,28 +143,30 @@ export async function sendReply(_state: ReplyState, formData: FormData): Promise
 export type ComposeState = { ok: false; error: string } | null;
 
 const composeSchema = z.object({
+  bcc: z.string().optional(),
   body: z.string().trim().min(1, 'Write a message first.').max(4000, 'Keep messages under 4000 characters.'),
+  cc: z.string().optional(),
   subject: z.string().trim().min(1, 'Add a subject.').max(120, 'Keep the subject under 120 characters.'),
-  to: z.string().min(1, 'Choose a recipient.'),
+  to: z.string().trim().min(1, 'Add at least one recipient.'),
 });
 
 export async function composeMessage(_state: ComposeState, formData: FormData): Promise<ComposeState> {
   const user = await verifyUser();
   const parsed = composeSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message, ok: false };
-  const { body, subject, to } = parsed.data;
+  const { body, subject } = parsed.data;
   const problem = await moderateText(`${subject}\n\n${body}`);
   if (problem) return { error: problem, ok: false };
 
-  const recipient = await prisma.user.findFirst({
-    select: { account: true, id: true },
-    where: {
-      NOT: { id: user.id },
-      OR: [{ account: true }, { messages: { some: { thread: { states: { some: { userId: user.id } } } } } }],
-      id: to,
-    },
+  const resolved = await resolveRecipients(user.id, {
+    bcc: splitAddresses(parsed.data.bcc),
+    cc: splitAddresses(parsed.data.cc),
+    to: splitAddresses(parsed.data.to),
   });
-  if (!recipient) return { error: 'Choose someone from your contacts.', ok: false };
+  if (!resolved.ok) return resolved;
+  if (!resolved.recipients.some(recipient => recipient.kind === 'to')) {
+    return { error: 'Add at least one recipient.', ok: false };
+  }
 
   const sentAt = new Date();
   const threadId = `thr-${crypto.randomUUID().slice(0, 8)}`;
@@ -141,14 +178,18 @@ export async function composeMessage(_state: ComposeState, formData: FormData): 
           body,
           fromId: user.id,
           id: `msg-${crypto.randomUUID().slice(0, 8)}`,
-          recipients: { create: [{ kind: 'to', userId: recipient.id }] },
+          recipients: {
+            create: resolved.recipients.map(recipient => ({ kind: recipient.kind, userId: recipient.userId })),
+          },
           sentAt,
         },
       },
       states: {
         create: [
           { mailbox: 'sent', read: true, userId: user.id },
-          ...(recipient.account ? [{ mailbox: 'inbox', read: false, userId: recipient.id }] : []),
+          ...resolved.recipients
+            .filter(recipient => recipient.account)
+            .map(recipient => ({ mailbox: 'inbox', read: false, userId: recipient.userId })),
         ],
       },
       subject,
@@ -157,6 +198,6 @@ export async function composeMessage(_state: ComposeState, formData: FormData): 
   });
 
   updateTag(threadTags.list(user.id));
-  if (recipient.account) updateTag(threadTags.list(recipient.id));
+  for (const recipient of resolved.recipients) if (recipient.account) updateTag(threadTags.list(recipient.userId));
   redirect(`/sent/${threadId}`, RedirectType.replace);
 }

@@ -43,12 +43,12 @@ const users = [
 ];
 
 const labels = [
-  { color: '#6d5dfc', id: 'engineering', name: 'Engineering' },
-  { color: '#0ea5e9', id: 'design', name: 'Design' },
-  { color: '#f59e0b', id: 'launch', name: 'Launch' },
-  { color: '#10b981', id: 'hiring', name: 'Hiring' },
-  { color: '#ef4444', id: 'infra', name: 'Infra' },
-  { color: '#ec4899', id: 'social', name: 'Social' },
+  { color: '#1b50ff', id: 'engineering', name: 'Engineering' },
+  { color: '#8b5cf6', id: 'design', name: 'Design' },
+  { color: '#ec4899', id: 'launch', name: 'Launch' },
+  { color: '#38bdf8', id: 'hiring', name: 'Hiring' },
+  { color: '#6366f1', id: 'infra', name: 'Infra' },
+  { color: '#f472b6', id: 'social', name: 'Social' },
 ];
 
 type SeedAttachment = { name: string; size: number; type: string };

@@ -15,7 +15,7 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
   const [isPending, startTransition] = useTransition();
   const [optimisticId, setOptimisticId] = useOptimistic(currentUserId);
   const selected = accounts.find(account => account.id === optimisticId) ?? accounts[0];
-  const popover = Ariakit.usePopoverStore({ placement: 'bottom-start' });
+  const popover = Ariakit.usePopoverStore({ placement: 'top-start' });
 
   function select(id: string) {
     popover.hide();
@@ -29,21 +29,26 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
 
   return (
     <Boundary label="UserSwitcher">
-      <div data-pending={isPending ? '' : undefined} data-testid="current-user">
+      <div
+        className="min-w-0 flex-1"
+        data-account={selected.email}
+        data-pending={isPending ? '' : undefined}
+        data-testid="current-user"
+      >
         <Ariakit.PopoverDisclosure
-          className="hover:bg-card dark:hover:bg-card-dark flex h-12 w-full items-center gap-2.5 rounded-lg px-2 text-left transition-colors data-pending:opacity-60"
+          className="hover:bg-card dark:hover:bg-card-dark flex h-12 w-full min-w-0 items-center gap-2.5 rounded-lg px-2 text-left transition-colors data-pending:opacity-60"
           store={popover}
         >
           <UserAvatar name={selected.name} size="sm" />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm leading-tight font-semibold tracking-tight">{selected.name}</span>
+            <span className="block truncate text-sm leading-tight font-semibold tracking-tight">{selected.title}</span>
             <span className="text-gray block truncate text-xs leading-tight">{selected.email}</span>
           </span>
           <ChevronsUpDown className="text-gray size-3.5 shrink-0" />
         </Ariakit.PopoverDisclosure>
         <Ariakit.Popover
           className="border-divider dark:border-divider-dark z-50 overflow-hidden rounded-xl border bg-white shadow-xl dark:bg-black"
-          gutter={6}
+          gutter={8}
           overflowPadding={16}
           portal
           sameWidth

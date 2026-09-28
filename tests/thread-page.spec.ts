@@ -92,13 +92,13 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
 
   test('archiving from a row fades it out until the server confirms', async ({ page }) => {
     await page.goto('/inbox');
-    const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'On-call rotation for October' });
+    const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' });
     await row.hover();
     await row.getByRole('button', { exact: true, name: 'Archive' }).click();
     await expect(row).toHaveCount(0);
 
     await page.goto('/archive');
-    const archived = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'On-call rotation for October' });
+    const archived = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' });
     await expect(archived).toBeVisible();
     await archived.hover();
     await archived.getByRole('button', { name: 'Move to inbox' }).click();

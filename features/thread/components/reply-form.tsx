@@ -6,9 +6,11 @@ import { Boundary } from '@/components/internal/boundary';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/input';
 import { sendReply } from '../thread-actions';
+import { AddressFields } from './address-fields';
 import { submitOnCommandEnter } from './submit-on-command-enter';
+import type { Participant } from '../types/thread';
 
-export function ReplyForm({ threadId, to }: { threadId: string; to: string }) {
+export function ReplyForm({ contacts, threadId, to }: { contacts: Participant[]; threadId: string; to: string }) {
   const [state, formAction] = useActionState(sendReply, null);
 
   return (
@@ -32,16 +34,14 @@ export function ReplyForm({ threadId, to }: { threadId: string; to: string }) {
           placeholder={`Reply to ${to}…`}
           required
         />
+        <AddressFields contacts={contacts} idPrefix={`reply-${threadId}`} showTo={false} />
         <div className="flex items-center justify-between gap-3">
           <p className="text-danger min-h-4 text-xs" role={state && !state.ok ? 'alert' : undefined}>
             {state && !state.ok ? state.error : ''}
           </p>
-          <div className="flex items-center gap-3">
-            <kbd className="text-gray hidden text-[11px] sm:inline">⌘ ↵</kbd>
-            <Button className="w-24" type="submit" variant="accent">
-              <Send className="size-3.5" /> Send
-            </Button>
-          </div>
+          <Button className="w-24" type="submit" variant="accent">
+            <Send className="size-3.5" /> Send
+          </Button>
         </div>
       </form>
     </Boundary>
