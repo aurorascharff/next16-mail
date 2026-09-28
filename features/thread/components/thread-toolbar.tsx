@@ -58,7 +58,7 @@ export function ArchiveButton({
             toast.error(result.error);
             return;
           }
-          router.push(backHref, { transitionTypes: ['nav-back'] });
+          router.push(backHref);
           actionToast(archived ? 'Conversation moved to inbox' : 'Conversation archived', {
             label: 'Undo',
             run: () => moveThread(threadId, archived ? 'archive' : 'inbox'),
@@ -78,7 +78,6 @@ export function BackToList({ href }: { href: Route }) {
         aria-label="Back to list"
         className="text-gray hover:bg-card dark:hover:bg-card-dark inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:text-black dark:hover:text-white"
         href={href}
-        transitionTypes={['nav-back']}
       >
         <ArrowLeft className="size-5" />
       </PrefetchLink>

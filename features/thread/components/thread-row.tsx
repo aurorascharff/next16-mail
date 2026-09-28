@@ -77,7 +77,6 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
           aria-label={thread.subject}
           className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
           href={href}
-          transitionTypes={['nav-forward']}
         />
         <button
           aria-checked={selected}

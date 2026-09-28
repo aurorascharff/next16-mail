@@ -1,13 +1,7 @@
 import { Suspense } from 'react';
-import { NavForward } from '@/components/animations';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import ErrorBoundary from '@/components/ui/error-boundary';
-import {
-  ThreadHeader,
-  ThreadHeaderSkeleton,
-  ThreadToolbar,
-  ThreadToolbarSkeleton,
-} from '@/features/thread/components/thread-header';
+import { ThreadHeader, ThreadHeaderSkeleton } from '@/features/thread/components/thread-header';
 import {
   EarlierMessages,
   EarlierMessagesSkeleton,
@@ -24,34 +18,23 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
   }));
 
   return (
-    <NavForward>
-      <div className="flex h-full flex-col">
-        <Suspense fallback={<ThreadToolbarSkeleton />}>
-          {query.then(({ backHref, threadId }) => (
-            <Suspense fallback={<ThreadToolbarSkeleton />}>
-              <ThreadToolbar backHref={backHref} threadId={threadId} />
-            </Suspense>
-          ))}
-        </Suspense>
-        <article className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 pb-24 sm:px-8">
-          <Suspense fallback={<ThreadHeaderSkeleton />}>
-            {query.then(({ threadId }) => (
-              <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
-                <ThreadHeader threadId={threadId}>
-                  <ErrorBoundary title="This conversation could not be loaded">
-                    <Suspense fallback={<LatestMessageSkeleton />}>
-                      <LatestMessage threadId={threadId} />
-                      <Suspense fallback={<EarlierMessagesSkeleton />}>
-                        <EarlierMessages threadId={threadId} />
-                      </Suspense>
-                    </Suspense>
-                  </ErrorBoundary>
-                </ThreadHeader>
-              </AnimatedSuspense>
-            ))}
-          </Suspense>
-        </article>
-      </div>
-    </NavForward>
+    <article className="mx-auto w-full max-w-4xl px-5 pb-24 sm:px-8">
+      <Suspense fallback={<ThreadHeaderSkeleton />}>
+        {query.then(({ backHref, threadId }) => (
+          <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
+            <ThreadHeader backHref={backHref} threadId={threadId}>
+              <ErrorBoundary title="This conversation could not be loaded">
+                <AnimatedSuspense fallback={<LatestMessageSkeleton />}>
+                  <LatestMessage threadId={threadId} />
+                  <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
+                    <EarlierMessages threadId={threadId} />
+                  </AnimatedSuspense>
+                </AnimatedSuspense>
+              </ErrorBoundary>
+            </ThreadHeader>
+          </AnimatedSuspense>
+        ))}
+      </Suspense>
+    </article>
   );
 }

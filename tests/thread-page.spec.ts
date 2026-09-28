@@ -57,7 +57,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
   test('starring from the toolbar shows up in Starred', async ({ page }) => {
     await page.goto('/inbox/thr-typography');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
-    const toolbar = page.getByTestId('thread-toolbar').filter(visible);
+    const toolbar = page.getByTestId('thread-header').filter(visible);
     await toolbar.getByRole('button', { exact: true, name: 'Star' }).click();
     await expect(toolbar.getByRole('button', { name: 'Remove star' })).toBeVisible();
 
@@ -71,7 +71,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     ).toBeVisible();
 
     await page.goto('/starred/thr-typography');
-    const starredToolbar = page.getByTestId('thread-toolbar').filter(visible);
+    const starredToolbar = page.getByTestId('thread-header').filter(visible);
     await starredToolbar.getByRole('button', { name: 'Remove star' }).click();
     await expect(starredToolbar.getByRole('button', { exact: true, name: 'Star' })).toBeVisible();
   });
@@ -80,7 +80,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await page.goto('/inbox/thr-lunch');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
     await page
-      .getByTestId('thread-toolbar')
+      .getByTestId('thread-header')
       .filter(visible)
       .getByRole('button', { exact: true, name: 'Archive' })
       .click();
@@ -88,7 +88,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
 
     await page.goto('/archive/thr-lunch');
-    await page.getByTestId('thread-toolbar').filter(visible).getByRole('button', { name: 'Move to inbox' }).click();
+    await page.getByTestId('thread-header').filter(visible).getByRole('button', { name: 'Move to inbox' }).click();
     await page.waitForURL(url => url.pathname === '/archive');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Ramen at 12?' })).toHaveCount(0);
   });

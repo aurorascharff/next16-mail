@@ -138,7 +138,6 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
 :root {
   --duration-exit: 130ms;
   --duration-enter: 190ms;
-  --duration-move: 400ms;
 }
 
 @keyframes opacity-fade {
@@ -162,92 +161,50 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
   animation: none;
 }
 
-/* Persistent UI never animates: its old snapshot is hidden and the new one appears in place. */
 ::view-transition-group(account-menu),
 ::view-transition-group(search-form),
 ::view-transition-group(compose-panel),
 ::view-transition-group(compose-fab),
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
-::view-transition-group(thread-toolbar),
-::view-transition-group(thread-list-header),
 ::view-transition-group(dialog),
-::view-transition-group(dialog-backdrop),
-::view-transition-group(toaster) {
+::view-transition-group(dialog-backdrop) {
   animation: none;
   z-index: 100;
 }
 
-::view-transition-group(toaster) {
-  z-index: 200;
-}
-
 ::view-transition-old(account-menu),
-::view-transition-old(search-form),
-::view-transition-old(compose-panel),
-::view-transition-old(compose-fab),
-::view-transition-old(demo-toolbar),
-::view-transition-old(theme-toggle),
-::view-transition-old(thread-toolbar),
-::view-transition-old(thread-list-header),
-::view-transition-old(dialog),
-::view-transition-old(dialog-backdrop),
-::view-transition-old(toaster) {
-  display: none;
-}
-
 ::view-transition-new(account-menu),
+::view-transition-old(search-form),
 ::view-transition-new(search-form),
+::view-transition-old(compose-panel),
 ::view-transition-new(compose-panel),
+::view-transition-old(compose-fab),
 ::view-transition-new(compose-fab),
+::view-transition-old(demo-toolbar),
 ::view-transition-new(demo-toolbar),
+::view-transition-old(theme-toggle),
 ::view-transition-new(theme-toggle),
-::view-transition-new(thread-toolbar),
-::view-transition-new(thread-list-header),
+::view-transition-old(dialog),
 ::view-transition-new(dialog),
-::view-transition-new(dialog-backdrop),
-::view-transition-new(toaster) {
+::view-transition-old(dialog-backdrop),
+::view-transition-new(dialog-backdrop) {
   animation: none;
 }
 
-/* Directional navigation between a list and a thread, on phones only. */
-@media (max-width: 767px) {
-  ::view-transition-new(.nav-forward) {
-    --slide-offset: 60px;
-    animation:
-      var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
-      var(--duration-move) ease-in-out both slide;
-  }
-
-  ::view-transition-old(.nav-forward) {
-    --slide-offset: -60px;
-    animation:
-      var(--duration-exit) ease-in both opacity-fade reverse,
-      var(--duration-move) ease-in-out both slide reverse;
-  }
-
-  ::view-transition-new(.nav-back) {
-    --slide-offset: -60px;
-    animation:
-      var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
-      var(--duration-move) ease-in-out both slide;
-  }
-
-  ::view-transition-old(.nav-back) {
-    --slide-offset: 60px;
-    animation:
-      var(--duration-exit) ease-in both opacity-fade reverse,
-      var(--duration-move) ease-in-out both slide reverse;
-  }
+::view-transition-group(thread-toolbar),
+::view-transition-old(thread-toolbar),
+::view-transition-new(thread-toolbar) {
+  animation: none;
 }
 
-@keyframes slide {
-  from {
-    translate: var(--slide-offset);
-  }
-  to {
-    translate: 0;
-  }
+::view-transition-group(toaster) {
+  animation: none;
+  z-index: 200;
+}
+::view-transition-old(toaster),
+::view-transition-new(toaster) {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
