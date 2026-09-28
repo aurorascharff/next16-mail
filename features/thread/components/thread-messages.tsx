@@ -1,5 +1,5 @@
 import { unstable_navigation } from 'next/cache';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { getContacts, getEarlierMessages, getLatestMessage } from '../thread-queries';
 import { Attachments, MessageText, MessageTextSkeleton, SenderRow, SenderRowSkeleton } from './message-body';
 import { ReplyForm } from './reply-form';
@@ -21,14 +21,7 @@ export async function LatestMessage({ threadId }: { threadId: string }) {
 }
 
 export function LatestMessageSkeleton() {
-  return (
-    <div aria-hidden>
-      <MessageTextSkeleton className="min-h-48" />
-      <div className="mt-8 h-43">
-        <Skeleton className="h-24 rounded-md" />
-      </div>
-    </div>
-  );
+  return <MessageTextSkeleton className="min-h-48" />;
 }
 
 export async function EarlierMessages({ threadId }: { threadId: string }) {
