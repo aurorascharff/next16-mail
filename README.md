@@ -50,7 +50,7 @@ pnpm run prisma.seed
 pnpm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. You can browse the data with `pnpm run prisma.studio`, or wipe and re-seed the database with `pnpm run prisma.reset`.
+Open [http://localhost:3000](http://localhost:3000) in your browser. You can browse the data with `pnpm run prisma.studio`, or wipe and re-seed the database with `pnpm run prisma.reset`. Restart `next dev` after re-seeding, since cached reads outlive the rows they came from.
 
 Use the toolbar in the bottom right to turn **Prefetch** off and compare, and turn **Delays** on to watch the latest message arrive from the prefetch and the earlier ones arrive on the navigation. Set `VERCEL_AI_GATEWAY_TOKEN` to screen replies and new messages for spam and profanity; without it, everything goes through. Two demo accounts share the seeded threads; switch between them from the sidebar.
 

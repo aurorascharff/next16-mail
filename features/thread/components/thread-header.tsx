@@ -50,12 +50,7 @@ export async function ThreadHeader({
       </article>
       <ReplyForm threadId={threadId} to={thread.latest.from.name.split(' ')[0]} />
       {earlier > 0 ? (
-        <section className="border-divider/70 dark:border-divider-dark/70 mt-10 border-t pt-6">
-          <h2 className="text-gray text-sm font-semibold tracking-tight">
-            {earlier === 1 ? '1 earlier message' : `${earlier} earlier messages`}
-          </h2>
-          <div className="mt-6">{children}</div>
-        </section>
+        <section className="border-divider/70 dark:border-divider-dark/70 mt-10 border-t pt-8">{children}</section>
       ) : null}
     </>
   );

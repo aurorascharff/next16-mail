@@ -21,7 +21,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
             <Suspense fallback={<ThreadListSkeleton count={4} />}>
               {query.then(value =>
                 value ? (
-                  <AnimatedSuspense fallback={<ThreadListSkeleton count={4} />} key={value}>
+                  <AnimatedSuspense fallback={<ThreadListSkeleton count={4} />}>
                     <SearchResults query={value} />
                   </AnimatedSuspense>
                 ) : (
