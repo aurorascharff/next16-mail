@@ -240,9 +240,17 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
 }
 
 // Message content. The components await `unstable_navigation()` before calling these, which keeps bodies out of
-// the App Shell and every prefetch.
+// the App Shell and every prefetch while the cached result still serves the next visitor.
 export async function getLatestMessage(threadId: string): Promise<ThreadMessage | null> {
-  await delay(1000, await isSlowEnabled());
+  return getLatestMessageCached(threadId, await isSlowEnabled());
+}
+
+async function getLatestMessageCached(threadId: string, slow: boolean): Promise<ThreadMessage | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(threadTags.detail(threadId));
+
+  await delay(1000, slow);
   const message = await prisma.message.findFirst({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
@@ -252,7 +260,15 @@ export async function getLatestMessage(threadId: string): Promise<ThreadMessage 
 }
 
 export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
-  await delay(1800, await isSlowEnabled());
+  return getEarlierMessagesCached(threadId, await isSlowEnabled());
+}
+
+async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(threadTags.detail(threadId));
+
+  await delay(1800, slow);
   const messages = await prisma.message.findMany({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
