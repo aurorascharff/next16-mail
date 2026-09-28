@@ -9,7 +9,6 @@ export function MailSplit({ children, list }: { children: React.ReactNode; list:
         aria-label="Conversation list"
         className="border-divider/70 dark:border-divider-dark/70 flex min-h-0 flex-col overflow-hidden lg:border-r"
         data-thread-list
-        style={{ viewTransitionName: 'thread-list' }}
       >
         {list}
       </section>

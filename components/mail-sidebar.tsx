@@ -11,10 +11,7 @@ import { CurrentUserCard, CurrentUserCardSkeleton } from '@/features/user/compon
 
 export function MailSidebar() {
   return (
-    <aside
-      className="border-divider/70 dark:border-divider-dark/70 hidden w-64 shrink-0 flex-col gap-5 border-r px-3 pt-5 pb-4 md:flex"
-      style={{ viewTransitionName: 'mail-sidebar' }}
-    >
+    <aside className="border-divider/70 dark:border-divider-dark/70 hidden w-64 shrink-0 flex-col gap-5 border-r px-3 pt-5 pb-4 md:flex">
       <div className="flex items-center justify-between pl-2">
         <PrefetchLink
           aria-label="Stamp inbox"

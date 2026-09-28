@@ -191,9 +191,7 @@
   animation: none;
 }
 
-::view-transition-group(mail-sidebar),
 ::view-transition-group(account-menu),
-::view-transition-group(thread-list),
 ::view-transition-group(demo-toolbar),
 ::view-transition-group(theme-toggle),
 ::view-transition-group(dialog),
@@ -202,12 +200,8 @@
   z-index: 100;
 }
 
-::view-transition-old(mail-sidebar),
-::view-transition-new(mail-sidebar),
 ::view-transition-old(account-menu),
 ::view-transition-new(account-menu),
-::view-transition-old(thread-list),
-::view-transition-new(thread-list),
 ::view-transition-old(demo-toolbar),
 ::view-transition-new(demo-toolbar),
 ::view-transition-old(theme-toggle),

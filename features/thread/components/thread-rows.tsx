@@ -71,7 +71,7 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
             >
               <HoverPrefetchLink
                 aria-current={active ? 'page' : undefined}
-                className="focus-visible:ring-accent/40 grid grid-cols-[2.25rem_minmax(0,1fr)_4rem] gap-x-3 px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-inset sm:px-5"
+                className="focus-visible:ring-accent/40 grid grid-cols-[2.25rem_minmax(0,1fr)_3rem] gap-x-3 px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-inset sm:px-5"
                 href={href}
               >
                 <UserAvatar name={sender === 'me' ? 'Me' : sender} />
@@ -100,46 +100,42 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
                     {thread.labels.map(label => (
                       <LabelChip className="hidden xl:inline-flex" key={label.id} label={label} />
                     ))}
+                    {thread.hasAttachments ? (
+                      <Paperclip aria-label="Has attachments" className="text-gray size-3.5 shrink-0" />
+                    ) : null}
                   </span>
                   <span className="text-gray flex h-5 items-center truncate text-[13px]">{thread.snippet}</span>
                 </span>
-                <span className="flex flex-col items-end">
-                  <ThreadTime
-                    className={cn(
-                      'h-5 text-xs leading-5 tabular-nums group-focus-within:invisible group-hover:invisible',
-                      thread.read ? 'text-gray' : 'text-accent font-semibold',
-                    )}
-                    iso={thread.updatedAt}
-                  />
-                  <span className="h-5" />
-                </span>
-              </HoverPrefetchLink>
-              <span className="absolute top-3 right-4 flex h-10 w-20 flex-col items-end justify-between sm:right-5">
-                <span className="invisible flex h-5 items-center gap-0.5 group-focus-within:visible group-hover:visible">
-                  {thread.mailbox === 'sent' ? null : (
-                    <RowButton
-                      label={thread.mailbox === 'archive' ? 'Move to inbox' : 'Archive'}
-                      onClick={() => move(thread, href)}
-                    >
-                      {thread.mailbox === 'archive' ? (
-                        <ArchiveRestore className="size-4" />
-                      ) : (
-                        <Archive className="size-4" />
-                      )}
-                    </RowButton>
+                <ThreadTime
+                  className={cn(
+                    'h-5 text-xs leading-5 tabular-nums',
+                    thread.read ? 'text-gray' : 'text-accent font-semibold',
                   )}
+                  iso={thread.updatedAt}
+                />
+              </HoverPrefetchLink>
+              <span className="absolute right-3 bottom-2 flex h-7 items-center gap-0.5 sm:right-4">
+                {thread.mailbox === 'sent' ? null : (
                   <RowButton
-                    active={thread.starred}
-                    label={thread.starred ? 'Remove star' : 'Star'}
-                    onClick={() => star(thread)}
+                    className="invisible group-focus-within:visible group-hover:visible"
+                    label={thread.mailbox === 'archive' ? 'Move to inbox' : 'Archive'}
+                    onClick={() => move(thread, href)}
                   >
-                    <Star className={cn('size-4', thread.starred && 'fill-current')} />
+                    {thread.mailbox === 'archive' ? (
+                      <ArchiveRestore className="size-4" />
+                    ) : (
+                      <Archive className="size-4" />
+                    )}
                   </RowButton>
-                </span>
-                <span className="text-gray flex h-5 items-center gap-1.5 pr-1.5">
-                  {thread.hasAttachments ? <Paperclip aria-label="Has attachments" className="size-3.5" /> : null}
-                  {thread.starred ? <Star aria-hidden className="text-accent size-3.5 fill-current" /> : null}
-                </span>
+                )}
+                <RowButton
+                  active={thread.starred}
+                  className={cn(!thread.starred && 'text-gray/40 hover:text-gray')}
+                  label={thread.starred ? 'Remove star' : 'Star'}
+                  onClick={() => star(thread)}
+                >
+                  <Star className={cn('size-4', thread.starred && 'fill-current')} />
+                </RowButton>
               </span>
             </li>
           );
@@ -152,11 +148,13 @@ export function ThreadRows({ mailbox, threads }: { mailbox?: Mailbox; threads: T
 function RowButton({
   active,
   children,
+  className,
   label,
   onClick,
 }: {
   active?: boolean;
   children: React.ReactNode;
+  className?: string;
   label: string;
   onClick: () => void;
 }) {
@@ -167,6 +165,7 @@ function RowButton({
       className={cn(
         'text-gray inline-flex size-7 items-center justify-center rounded-full transition-colors hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white',
         active && 'text-accent hover:text-accent',
+        className,
       )}
       onClick={onClick}
       title={label}

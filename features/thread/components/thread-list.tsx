@@ -38,7 +38,7 @@ export function ThreadListSkeleton({ count = 7 }: { count?: number }) {
       {Array.from({ length: count }).map((_, index) => (
         <li
           className={cn(
-            'border-divider/70 dark:border-divider-dark/70 grid grid-cols-[2.25rem_minmax(0,1fr)_4rem] gap-x-3 border-b px-4 py-3 sm:px-5',
+            'border-divider/70 dark:border-divider-dark/70 grid grid-cols-[2.25rem_minmax(0,1fr)_3rem] gap-x-3 border-b px-4 py-3 sm:px-5',
           )}
           key={index}
         >
