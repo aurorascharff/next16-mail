@@ -1,21 +1,10 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAccounts, getCurrentUser } from '../user-queries';
-import { UserAvatar } from './user-avatar';
 import { UserSwitcher } from './user-switcher';
 
 export async function CurrentUserCard() {
   const [user, accounts] = await Promise.all([getCurrentUser(), getAccounts()]);
-
-  return (
-    <div className="flex h-12 items-center gap-2.5 rounded-lg px-2" data-testid="current-user">
-      <UserAvatar name={user.name} size="sm" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold tracking-tight">{user.name}</p>
-        <p className="text-gray truncate text-xs">{user.email}</p>
-      </div>
-      <UserSwitcher accounts={accounts} currentUserId={user.id} />
-    </div>
-  );
+  return <UserSwitcher accounts={accounts} currentUserId={user.id} />;
 }
 
 export function CurrentUserCardSkeleton() {
@@ -30,7 +19,7 @@ export function CurrentUserCardSkeleton() {
           <Skeleton className="h-3 w-32" />
         </span>
       </div>
-      <Skeleton className="size-8 rounded-full" />
+      <Skeleton className="skeleton-subtle size-3.5 rounded" />
     </div>
   );
 }

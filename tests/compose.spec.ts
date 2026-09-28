@@ -20,12 +20,20 @@ test.describe('Compose and accounts', () => {
     await expect(page.getByRole('heading', { exact: true, level: 1, name: subject }).filter(visible)).toBeVisible();
     await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Second paragraph, further down.');
 
-    await page.getByRole('button', { name: 'Switch to Jonas Berg' }).click();
+    await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
+    await page
+      .getByRole('button', { name: /Jonas Berg/ })
+      .last()
+      .click();
     await page.waitForURL(url => url.pathname === '/inbox');
     await expect(page.getByTestId('current-user').filter(visible)).toContainText('Jonas Berg');
     await expect(page.getByTestId('thread-row').filter(visible).filter({ hasText: subject })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Switch to Mara Lindqvist' }).click();
+    await page.getByTestId('current-user').filter(visible).getByRole('button').first().click();
+    await page
+      .getByRole('button', { name: /Mara Lindqvist/ })
+      .last()
+      .click();
     await expect(page.getByTestId('current-user').filter(visible)).toContainText('Mara Lindqvist');
   });
 });
