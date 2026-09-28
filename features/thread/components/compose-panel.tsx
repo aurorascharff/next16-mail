@@ -2,7 +2,7 @@
 
 import { Minus, X } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import type { User } from '@/features/user/types/user';
 import { cn } from '@/lib/utils';
@@ -10,8 +10,18 @@ import { useCompose } from '../providers/compose-provider';
 import { ComposeForm } from './compose-form';
 import type { Participant } from '../types/thread';
 
+function subscribe() {
+  return () => {};
+}
+
 export function ComposePanel({ contacts, from }: { contacts: Participant[]; from: User }) {
   const { close, minimize, state } = useCompose();
+  // The dock streams in after the page; if Compose was clicked before that, hydrate closed first.
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false,
+  );
   const pathname = usePathname();
   const lastPathname = useRef(pathname);
 
@@ -23,7 +33,7 @@ export function ComposePanel({ contacts, from }: { contacts: Participant[]; from
   return (
     <Boundary label="ComposePanel" asChild>
       <div className="pointer-events-none fixed inset-0 z-40" style={{ viewTransitionName: 'compose-panel' }}>
-        {state === 'closed' ? null : (
+        {!mounted || state === 'closed' ? null : (
           <section
             aria-label="New message"
             className={cn(
