@@ -4,7 +4,7 @@
 
 # Next 16 Mail "Stamp"
 
-A mail client that demonstrates the new [`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation) and [`prefetch()`](https://nextjs.org/docs/app/api-reference/functions/prefetch) APIs from [Next.js 16.4](https://nextjs.org/blog/next-16-4), on top of Cache Components and Partial Prefetching.
+A Gmail-style mail client that demonstrates [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation) in [Next.js 16.4](https://nextjs.org/blog/next-16-4), including the new [`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation) API.
 
 [**Live demo →**](https://next16-mail.vercel.app/)
 

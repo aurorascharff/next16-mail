@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 };
 
 const description =
-  'A Next.js 16.4 mail client demonstrating navigation() and prefetch() with Cache Components and Partial Prefetching.';
+  'A Next.js 16.4 mail client demonstrating Instant Navigations with Cache Components and Partial Prefetching.';
 
 export const metadata: Metadata = {
   applicationName: 'Stamp',

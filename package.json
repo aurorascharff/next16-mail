@@ -2,7 +2,7 @@
   "name": "stamp",
   "version": "0.1.0",
   "private": true,
-  "description": "A Gmail-style mail client demo exploring Async React, Cache Components, Partial Prefetching, and navigation() with Next.js 16.4, React 19, Tailwind CSS v4, and Prisma.",
+  "description": "A Gmail-style mail client demo exploring Async React, Cache Components, Partial Prefetching, and Instant Navigations with Next.js 16.4, React 19, Tailwind CSS v4, and Prisma.",
   "license": "MIT",
   "keywords": [
     "nextjs",
