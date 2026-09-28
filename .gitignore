@@ -42,3 +42,6 @@ next-env.d.ts
 prisma/*.db
 prisma/*.db-journal
 prisma/.local/
+
+# local editor and agent settings
+.claude/
