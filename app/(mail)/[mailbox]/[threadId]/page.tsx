@@ -7,8 +7,6 @@ import {
   EarlierMessagesSkeleton,
   LatestMessage,
   LatestMessageSkeleton,
-  ThreadReply,
-  ThreadReplySkeleton,
 } from '@/features/thread/components/thread-messages';
 import { isMailbox } from '@/features/thread/thread-mailboxes';
 import type { Route } from 'next';
@@ -27,14 +25,10 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
             <ThreadHeader backHref={backHref} threadId={threadId}>
               <ErrorBoundary title="This conversation could not be loaded">
                 <AnimatedSuspense fallback={<LatestMessageSkeleton />}>
-                  <LatestMessage threadId={threadId}>
-                    <Suspense fallback={<ThreadReplySkeleton />}>
-                      <ThreadReply threadId={threadId} />
-                    </Suspense>
-                    <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
-                      <EarlierMessages threadId={threadId} />
-                    </AnimatedSuspense>
-                  </LatestMessage>
+                  <LatestMessage threadId={threadId} />
+                  <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
+                    <EarlierMessages threadId={threadId} />
+                  </AnimatedSuspense>
                 </AnimatedSuspense>
               </ErrorBoundary>
             </ThreadHeader>

@@ -7,8 +7,6 @@ import {
   EarlierMessagesSkeleton,
   LatestMessage,
   LatestMessageSkeleton,
-  ThreadReply,
-  ThreadReplySkeleton,
 } from '@/features/thread/components/thread-messages';
 import type { Route } from 'next';
 
@@ -28,14 +26,10 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
             <ThreadHeader backHref={backHref} threadId={threadId}>
               <ErrorBoundary title="This conversation could not be loaded">
                 <AnimatedSuspense fallback={<LatestMessageSkeleton />}>
-                  <LatestMessage threadId={threadId}>
-                    <Suspense fallback={<ThreadReplySkeleton />}>
-                      <ThreadReply threadId={threadId} />
-                    </Suspense>
-                    <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
-                      <EarlierMessages threadId={threadId} />
-                    </AnimatedSuspense>
-                  </LatestMessage>
+                  <LatestMessage threadId={threadId} />
+                  <AnimatedSuspense fallback={<EarlierMessagesSkeleton />}>
+                    <EarlierMessages threadId={threadId} />
+                  </AnimatedSuspense>
                 </AnimatedSuspense>
               </ErrorBoundary>
             </ThreadHeader>

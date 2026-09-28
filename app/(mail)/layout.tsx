@@ -12,7 +12,7 @@ export default function MailLayout({ children }: LayoutProps<'/'>) {
         <MailTopBar />
         <div className="flex min-h-0 flex-1">
           <MailSidebar />
-          <main className="border-divider/70 dark:border-divider-dark/70 min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain md:rounded-tl-2xl md:border-t md:border-l">
+          <main className="border-divider/70 dark:border-divider-dark/70 min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain md:rounded-tl-2xl md:border-t md:border-l">
             {children}
           </main>
         </div>

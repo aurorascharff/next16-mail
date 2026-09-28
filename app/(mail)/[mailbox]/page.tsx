@@ -11,7 +11,7 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   });
 
   return (
-    <div className="thread-results h-full overflow-y-auto overscroll-contain" data-thread-list>
+    <div className="thread-results h-full overflow-y-auto overscroll-y-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton />}>
         {query.then(({ mailbox, page }) => (
           <AnimatedSuspense fallback={<ThreadListSkeleton title={MAILBOX_LABELS[mailbox]} />}>

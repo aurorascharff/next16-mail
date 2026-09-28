@@ -10,7 +10,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
   const query = searchParams.then(params => (typeof params.q === 'string' ? params.q.trim() : ''));
 
   return (
-    <div className="thread-results h-full overflow-y-auto overscroll-contain" data-thread-list>
+    <div className="thread-results h-full overflow-y-auto overscroll-y-contain" data-thread-list>
       <Suspense fallback={<ThreadListSkeleton count={4} title="Search" />}>
         {query.then(value =>
           value ? (

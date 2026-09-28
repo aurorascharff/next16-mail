@@ -1,36 +1,34 @@
 import { Skeleton } from '@/components/ui/skeleton';
-import { getContacts, getEarlierMessages, getLatestMessage, getThreadSummary } from '../thread-queries';
+import { getContacts, getEarlierMessages, getLatestMessage } from '../thread-queries';
 import { Attachments, MessageText, MessageTextSkeleton, SenderRow, SenderRowSkeleton } from './message-body';
 import { ReplyForm } from './reply-form';
 
-// The body sets the height of everything below it, so the reply form and earlier messages render as children
-// and only stream in once the body is on screen.
-export async function LatestMessage({ children, threadId }: { children: React.ReactNode; threadId: string }) {
-  const latest = await getLatestMessage(threadId);
+export async function LatestMessage({ threadId }: { threadId: string }) {
+  const [latest, contacts] = await Promise.all([getLatestMessage(threadId), getContacts()]);
   if (!latest) return null;
 
   return (
     <>
-      <article data-testid="thread-latest">
+      <article className="min-h-48" data-testid="thread-latest">
         <MessageText paragraphs={latest.paragraphs} />
         <Attachments attachments={latest.attachments} />
       </article>
-      {children}
+      <ReplyForm contacts={contacts} threadId={threadId} to={latest.from.name.split(' ')[0]} />
     </>
   );
 }
 
 export function LatestMessageSkeleton() {
-  return <MessageTextSkeleton className="h-48" />;
-}
-
-export async function ThreadReply({ threadId }: { threadId: string }) {
-  const [thread, contacts] = await Promise.all([getThreadSummary(threadId), getContacts()]);
-  return <ReplyForm contacts={contacts} threadId={threadId} to={thread.latest.from.name.split(' ')[0]} />;
-}
-
-export function ThreadReplySkeleton() {
-  return <Skeleton className="mt-8 h-24 rounded-md" />;
+  return (
+    <div aria-hidden>
+      <MessageTextSkeleton className="h-48" />
+      <div className="mt-8 flex flex-col gap-3">
+        <Skeleton className="h-24 rounded-md" />
+        <Skeleton className="h-4 w-24 self-end" />
+        <Skeleton className="h-9 w-24 self-end rounded-md" />
+      </div>
+    </div>
+  );
 }
 
 export async function EarlierMessages({ threadId }: { threadId: string }) {
