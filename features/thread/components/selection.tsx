@@ -64,7 +64,7 @@ export function ThreadListToolbar({
       }
       trailing={
         count > 0 ? (
-          <RowButton label="Clear selection" onClick={() => setSelected(new Set())}>
+          <RowButton label="Clear selection" onClick={() => setSelected(new Map())}>
             <X className="size-4" />
           </RowButton>
         ) : (
