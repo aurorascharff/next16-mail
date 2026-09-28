@@ -236,6 +236,22 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
     var(--duration-move) ease-in-out both slide reverse;
 }
 
+/* The pinned thread toolbar moves with its page on a push or pop instead of appearing on top of it. */
+html:active-view-transition-type(nav-forward)::view-transition-new(thread-toolbar) {
+  --slide-offset: 60px;
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both opacity-fade,
+    var(--duration-move) ease-in-out both slide;
+}
+
+html:active-view-transition-type(nav-back)::view-transition-old(thread-toolbar) {
+  display: block;
+  --slide-offset: 60px;
+  animation:
+    var(--duration-exit) ease-in both opacity-fade reverse,
+    var(--duration-move) ease-in-out both slide reverse;
+}
+
 @keyframes slide {
   from {
     translate: var(--slide-offset);
