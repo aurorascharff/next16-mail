@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import { EmptyState } from '@/components/ui/empty-state';
 import { SelectAll, SelectionProvider } from '@/features/thread/components/selection';
 import {
@@ -23,9 +24,9 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
             <SelectionProvider key={q}>
               <ThreadListHeaderFor page={1} q={q} title="Search" />
               <div className="thread-results">
-                <Suspense fallback={<ThreadRowsSkeleton count={4} />}>
+                <AnimatedSuspense fallback={<ThreadRowsSkeleton count={4} />}>
                   <ThreadList page={1} q={q} />
-                </Suspense>
+                </AnimatedSuspense>
               </div>
             </SelectionProvider>
           ) : (
