@@ -24,8 +24,11 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
           {query.then(({ mailbox, page }) => (
             <SelectionProvider list={`${mailbox}:${page}`}>
               <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
-              <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-                <AnimatedSuspense fallback={<ThreadRowsSkeleton />} key={`${mailbox}:${page}`}>
+              <div
+                className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+                key={`${mailbox}:${page}`}
+              >
+                <AnimatedSuspense fallback={<ThreadRowsSkeleton />}>
                   <ThreadList mailbox={mailbox} page={page} />
                 </AnimatedSuspense>
               </div>

@@ -159,7 +159,7 @@ function BulkActions({ mailbox }: { mailbox?: Mailbox }) {
         label={star ? 'Star' : 'Remove star'}
         onClick={() => run(() => starThreads(ids, star))}
       >
-        <Star className={cn('size-4', !star && 'fill-current')} strokeWidth={1.5} />
+        <Star className={cn('size-4', !star && 'fill-current')} />
       </RowButton>
       <RowButton
         disabled={isPending}

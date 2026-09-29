@@ -28,7 +28,7 @@ export function StarButton({ starred, threadId }: { starred: boolean; threadId: 
         })
       }
     >
-      <Star className={cn('size-4', optimisticStarred && 'fill-current')} strokeWidth={1.5} />
+      <Star className={cn('size-4', optimisticStarred && 'fill-current')} />
     </IconButton>
   );
 }

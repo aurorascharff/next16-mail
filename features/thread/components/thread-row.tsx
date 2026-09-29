@@ -155,7 +155,7 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
                 label={state.starred ? 'Remove star' : 'Star'}
                 onClick={star}
               >
-                <Star className={cn('size-[18px]', state.starred && 'fill-current')} strokeWidth={1.5} />
+                <Star className={cn('size-[18px]', state.starred && 'fill-current')} />
               </RowButton>
             </span>
           </div>
