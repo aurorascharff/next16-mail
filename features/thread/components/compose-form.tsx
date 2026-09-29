@@ -13,6 +13,8 @@ import { AddressFields } from './address-fields';
 import { submitOnCommandEnter } from './submit-on-command-enter';
 import type { Participant } from '../types/thread';
 
+const INITIAL = { body: '', error: null as string | null, subject: '' };
+
 export function ComposeForm({
   contacts,
   from,
@@ -23,13 +25,19 @@ export function ComposeForm({
   onDiscard: () => void;
 }) {
   const { close } = useCompose();
-  const [error, send] = useActionState(async (_: string | null, formData: FormData) => {
+  const [{ body, error, subject }, send] = useActionState(async (_: typeof INITIAL, formData: FormData) => {
     const result = await composeMessage(formData);
-    if (!result.ok) return result.error;
+    if (!result.ok) {
+      return {
+        body: String(formData.get('body') ?? ''),
+        error: result.error,
+        subject: String(formData.get('subject') ?? ''),
+      };
+    }
     close();
     actionToast('Message sent', { label: 'Undo', run: () => unsendMessage(result.messageId) });
-    return null;
-  }, null);
+    return INITIAL;
+  }, INITIAL);
 
   return (
     <Boundary label="ComposeForm" asChild>
@@ -39,10 +47,19 @@ export function ComposeForm({
           {from.name} <span className="mx-1.5">·</span> {from.email}
         </p>
         <AddressFields contacts={contacts} idPrefix="compose" />
-        <Input autoComplete="off" id="compose-subject" maxLength={120} name="subject" placeholder="Subject" required />
+        <Input
+          autoComplete="off"
+          defaultValue={subject}
+          id="compose-subject"
+          maxLength={120}
+          name="subject"
+          placeholder="Subject"
+          required
+        />
         <Textarea
           aria-label="Message"
           className="min-h-56"
+          defaultValue={body}
           id="compose-body"
           maxLength={4000}
           name="body"

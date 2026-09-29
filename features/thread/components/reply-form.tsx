@@ -11,14 +11,14 @@ import { AddressFields } from './address-fields';
 import { submitOnCommandEnter } from './submit-on-command-enter';
 import type { Participant } from '../types/thread';
 
-const INITIAL = { error: null as string | null, sent: 0 };
+const INITIAL = { body: '', error: null as string | null, sent: 0 };
 
 export function ReplyForm({ contacts, threadId, to }: { contacts: Participant[]; threadId: string; to: string }) {
-  const [{ error, sent }, send] = useActionState(async (state: typeof INITIAL, formData: FormData) => {
+  const [{ body, error, sent }, send] = useActionState(async (state: typeof INITIAL, formData: FormData) => {
     const result = await sendReply(formData);
-    if (!result.ok) return { ...state, error: result.error };
+    if (!result.ok) return { ...state, body: String(formData.get('body') ?? ''), error: result.error };
     actionToast('Reply sent', { label: 'Undo', run: () => unsendMessage(result.messageId) });
-    return { error: null, sent: state.sent + 1 };
+    return { body: '', error: null, sent: state.sent + 1 };
   }, INITIAL);
 
   return (
@@ -31,6 +31,7 @@ export function ReplyForm({ contacts, threadId, to }: { contacts: Participant[];
         <Textarea
           aria-invalid={error ? true : undefined}
           className="min-h-24"
+          defaultValue={body}
           id={`reply-${threadId}`}
           name="body"
           onKeyDown={submitOnCommandEnter}
