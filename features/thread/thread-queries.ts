@@ -52,7 +52,7 @@ export async function getMailboxCounts(): Promise<MailboxCounts> {
 
 async function getMailboxCountsForUser(userId: string, slow: boolean): Promise<MailboxCounts> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.list(userId));
 
   await delay(400, slow);
@@ -74,7 +74,7 @@ export async function getThreads(mailbox: Mailbox, page: number): Promise<Thread
 
 async function getThreadsForUser(userId: string, mailbox: Mailbox, page: number, slow: boolean): Promise<ThreadPage> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.list(userId));
 
   await delay(700, slow);
@@ -106,7 +106,7 @@ export async function searchThreads(query: string): Promise<ThreadListItem[]> {
 
 async function searchThreadsForUser(userId: string, query: string, slow: boolean): Promise<ThreadListItem[]> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.list(userId));
 
   await delay(500, slow);
@@ -197,7 +197,7 @@ export async function getThreadSummary(threadId: string): Promise<ThreadSummary>
 
 async function getThreadSummaryForUser(threadId: string, userId: string, slow: boolean): Promise<ThreadSummary> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.detail(threadId), threadTags.list(userId));
 
   await delay(600, slow);
@@ -247,7 +247,7 @@ export async function getLatestMessage(threadId: string): Promise<ThreadMessage 
 
 async function getLatestMessageCached(threadId: string, slow: boolean): Promise<ThreadMessage | null> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.detail(threadId));
 
   await delay(1000, slow);
@@ -265,7 +265,7 @@ export async function getEarlierMessages(threadId: string): Promise<ThreadMessag
 
 async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.detail(threadId));
 
   await delay(1800, slow);
@@ -285,7 +285,7 @@ export async function getContacts(): Promise<Participant[]> {
 
 async function getContactsForUser(userId: string): Promise<Participant[]> {
   'use cache';
-  cacheLife('hours');
+  cacheLife('max');
   cacheTag(threadTags.list(userId));
 
   return prisma.user.findMany({
