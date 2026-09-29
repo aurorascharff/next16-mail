@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
+import { ComposeButton } from '@/features/thread/components/compose-button';
 import { SelectionProvider } from '@/features/thread/components/selection';
 import {
   ThreadList,
@@ -17,19 +18,22 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   });
 
   return (
-    <div className="flex h-full flex-col" data-thread-list>
-      <Suspense fallback={<ThreadListSkeleton />}>
-        {query.then(({ mailbox, page }) => (
-          <SelectionProvider list={`${mailbox}:${page}`}>
-            <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
-            <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <AnimatedSuspense fallback={<ThreadRowsSkeleton />} key={`${mailbox}:${page}`}>
-                <ThreadList mailbox={mailbox} page={page} />
-              </AnimatedSuspense>
-            </div>
-          </SelectionProvider>
-        ))}
-      </Suspense>
-    </div>
+    <>
+      <div className="flex h-full flex-col" data-thread-list>
+        <Suspense fallback={<ThreadListSkeleton />}>
+          {query.then(({ mailbox, page }) => (
+            <SelectionProvider list={`${mailbox}:${page}`}>
+              <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
+              <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+                <AnimatedSuspense fallback={<ThreadRowsSkeleton />} key={`${mailbox}:${page}`}>
+                  <ThreadList mailbox={mailbox} page={page} />
+                </AnimatedSuspense>
+              </div>
+            </SelectionProvider>
+          ))}
+        </Suspense>
+      </div>
+      <ComposeButton variant="fab" />
+    </>
   );
 }
