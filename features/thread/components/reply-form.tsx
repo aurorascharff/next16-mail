@@ -1,7 +1,7 @@
 'use client';
 
 import { Send } from 'lucide-react';
-import { useState } from 'react';
+import { useActionState } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
 import { Button } from '@/components/ui/button';
@@ -11,24 +11,19 @@ import { AddressFields } from './address-fields';
 import { submitOnCommandEnter } from './submit-on-command-enter';
 import type { Participant } from '../types/thread';
 
-export function ReplyForm({ contacts, threadId, to }: { contacts: Participant[]; threadId: string; to: string }) {
-  const [error, setError] = useState<string | null>(null);
-  const [draft, setDraft] = useState(0);
+const INITIAL = { error: null as string | null, sent: 0 };
 
-  async function send(formData: FormData) {
+export function ReplyForm({ contacts, threadId, to }: { contacts: Participant[]; threadId: string; to: string }) {
+  const [{ error, sent }, send] = useActionState(async (state: typeof INITIAL, formData: FormData) => {
     const result = await sendReply(formData);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-    setError(null);
-    setDraft(current => current + 1);
+    if (!result.ok) return { ...state, error: result.error };
     actionToast('Reply sent', { label: 'Undo', run: () => unsendMessage(result.messageId) });
-  }
+    return { error: null, sent: state.sent + 1 };
+  }, INITIAL);
 
   return (
     <Boundary label="ReplyForm" asChild>
-      <form action={send} className="mt-8 flex flex-col gap-3" data-testid="reply-form" key={draft}>
+      <form action={send} className="mt-8 flex flex-col gap-3" data-testid="reply-form" key={sent}>
         <input name="threadId" type="hidden" value={threadId} />
         <label className="sr-only" htmlFor={`reply-${threadId}`}>
           Reply

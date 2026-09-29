@@ -1,7 +1,7 @@
 'use client';
 
 import { Send } from 'lucide-react';
-import { useState } from 'react';
+import { useActionState } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
 import { Button } from '@/components/ui/button';
@@ -23,17 +23,13 @@ export function ComposeForm({
   onDiscard: () => void;
 }) {
   const { close } = useCompose();
-  const [error, setError] = useState<string | null>(null);
-
-  async function send(formData: FormData) {
+  const [error, send] = useActionState(async (_: string | null, formData: FormData) => {
     const result = await composeMessage(formData);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
+    if (!result.ok) return result.error;
     close();
     actionToast('Message sent', { label: 'Undo', run: () => unsendMessage(result.messageId) });
-  }
+    return null;
+  }, null);
 
   return (
     <Boundary label="ComposeForm" asChild>
