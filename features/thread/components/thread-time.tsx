@@ -1,6 +1,7 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import { Boundary } from '@/components/internal/boundary';
 import { formatFullDate, formatListDate } from '@/lib/utils';
 
 function subscribeToMinute(callback: () => void) {
@@ -16,8 +17,10 @@ export function ThreadTime({ className, iso }: { className?: string; iso: string
   );
 
   return (
-    <time className={className} dateTime={iso} suppressHydrationWarning title={formatFullDate(new Date(iso))}>
-      {label}
-    </time>
+    <Boundary label="ThreadTime">
+      <time className={className} dateTime={iso} suppressHydrationWarning title={formatFullDate(new Date(iso))}>
+        {label}
+      </time>
+    </Boundary>
   );
 }

@@ -207,6 +207,47 @@ body:has([data-account-switch][data-pending]) [data-mail-main] {
   animation: none;
 }
 
+/* Client Component boundaries (demo): toggled by the `boundary-mode` class on <html>. In @layer base so
+   Tailwind position utilities win and the outline never moves the element it marks. */
+@layer base {
+  html.boundary-mode [data-component] {
+    position: relative;
+    border-radius: 6px;
+  }
+
+  html.boundary-mode :is([data-component], [data-sonner-toast])::before {
+    content: attr(data-component);
+    position: absolute;
+    top: 0;
+    left: 0.5rem;
+    z-index: 9999;
+    border-radius: 0 0 4px 4px;
+    background: var(--color-accent);
+    padding: 1px 6px;
+    color: white;
+    font-family: var(--font-geist-mono), monospace;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  html.boundary-mode [data-component] [data-component]::before {
+    display: none;
+  }
+
+  html.boundary-mode [data-sonner-toast]::before {
+    content: 'Toast';
+  }
+}
+
+/* Unlayered: the outline has to beat `outline-none` utilities (Ariakit dialogs) and Sonner's own toast styles. */
+html.boundary-mode :is([data-component], [data-sonner-toast]) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*),
   ::view-transition-old(*),

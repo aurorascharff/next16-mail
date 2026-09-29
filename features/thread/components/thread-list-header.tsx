@@ -4,9 +4,16 @@ import { cn } from '@/lib/utils';
 import { listHref, type ListLocation } from '../thread-list-url';
 import type { Route } from 'next';
 
-export function ThreadListHeader({ leading, trailing }: { leading: React.ReactNode; trailing?: React.ReactNode }) {
+export function ThreadListHeader({
+  leading,
+  trailing,
+  ...props
+}: React.ComponentProps<'div'> & { leading: React.ReactNode; trailing?: React.ReactNode }) {
   return (
-    <div className="border-divider/70 dark:border-divider-dark/70 flex h-12 shrink-0 items-center justify-between gap-3 border-b bg-white px-4 sm:px-5 dark:bg-black">
+    <div
+      {...props}
+      className="border-divider/70 dark:border-divider-dark/70 flex h-12 shrink-0 items-center justify-between gap-3 border-b bg-white px-4 sm:px-5 dark:bg-black"
+    >
       <div className="flex min-w-0 items-center gap-3">{leading}</div>
       <div className="flex shrink-0 items-center gap-1">{trailing}</div>
     </div>

@@ -3,6 +3,7 @@
 import { Archive, ArchiveRestore, Check, Mail, MailOpen, Star, X } from 'lucide-react';
 import { createContext, use, useState, useTransition } from 'react';
 import { toast } from 'sonner';
+import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
 import { cn } from '@/lib/utils';
 import { markThreadsRead, moveThreads, starThreads } from '../thread-actions';
@@ -58,23 +59,25 @@ export function ThreadListToolbar({
   const { selected, setSelected } = useSelection();
   const count = selected.size;
   return (
-    <ThreadListHeader
-      leading={
-        <>
-          {selectAll}
-          {count > 0 ? <BulkActions mailbox={mailbox} /> : <ListTitle>{title}</ListTitle>}
-        </>
-      }
-      trailing={
-        count > 0 ? (
-          <RowButton label="Clear selection" onClick={() => setSelected(new Map())}>
-            <X className="size-4" />
-          </RowButton>
-        ) : (
-          pager
-        )
-      }
-    />
+    <Boundary label="ThreadListToolbar" asChild>
+      <ThreadListHeader
+        leading={
+          <>
+            {selectAll}
+            {count > 0 ? <BulkActions mailbox={mailbox} /> : <ListTitle>{title}</ListTitle>}
+          </>
+        }
+        trailing={
+          count > 0 ? (
+            <RowButton label="Clear selection" onClick={() => setSelected(new Map())}>
+              <X className="size-4" />
+            </RowButton>
+          ) : (
+            pager
+          )
+        }
+      />
+    </Boundary>
   );
 }
 
@@ -85,22 +88,24 @@ export function SelectAll({ threads }: { threads?: SelectableThread[] }) {
   const { selected, setSelected } = useSelection();
   const all = threads !== undefined && threads.length > 0 && threads.every(thread => selected.has(thread.id));
   return (
-    <button
-      aria-checked={all}
-      aria-label={all ? 'Clear selection' : 'Select all on this page'}
-      className={cn(
-        selectAllClass,
-        all
-          ? 'border-accent bg-accent text-white'
-          : 'border-gray/50 bg-card dark:bg-card-dark enabled:hover:border-gray text-transparent',
-      )}
-      disabled={!threads || threads.length === 0}
-      onClick={() => setSelected(all ? new Map() : new Map(threads?.map(thread => [thread.id, thread])))}
-      role="checkbox"
-      type="button"
-    >
-      <Check className="size-3" strokeWidth={3} />
-    </button>
+    <Boundary label="SelectAll">
+      <button
+        aria-checked={all}
+        aria-label={all ? 'Clear selection' : 'Select all on this page'}
+        className={cn(
+          selectAllClass,
+          all
+            ? 'border-accent bg-accent text-white'
+            : 'border-gray/50 bg-card dark:bg-card-dark enabled:hover:border-gray text-transparent',
+        )}
+        disabled={!threads || threads.length === 0}
+        onClick={() => setSelected(all ? new Map() : new Map(threads?.map(thread => [thread.id, thread])))}
+        role="checkbox"
+        type="button"
+      >
+        <Check className="size-3" strokeWidth={3} />
+      </button>
+    </Boundary>
   );
 }
 
