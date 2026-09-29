@@ -60,8 +60,10 @@ export async function ThreadHeader({ threadId }: { threadId: string }) {
 export function ThreadHeaderSkeleton() {
   return (
     <div aria-hidden>
-      <div className="flex h-7 items-center pt-4 sm:h-8">
-        <Skeleton className="h-6 w-3/5 max-w-xl" />
+      <div className="pt-4">
+        <div className="flex h-7 items-center sm:h-8">
+          <Skeleton className="h-6 w-3/5 max-w-xl" />
+        </div>
       </div>
       <div className="mt-6">
         <SenderRowSkeleton />
