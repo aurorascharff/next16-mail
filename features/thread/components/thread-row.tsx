@@ -128,7 +128,7 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
             <span className="relative z-20 flex shrink-0 items-center gap-1">
               {state.mailbox === 'sent' ? null : (
                 <RowButton
-                  className="invisible size-8 group-focus-within:visible group-hover:visible"
+                  className="invisible size-8 group-hover:visible group-has-[:focus-visible]:visible"
                   label={state.mailbox === 'archive' ? 'Move to inbox' : 'Archive'}
                   onClick={move}
                 >
@@ -140,7 +140,7 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
                 </RowButton>
               )}
               <RowButton
-                className="invisible size-8 group-focus-within:visible group-hover:visible"
+                className="invisible size-8 group-hover:visible group-has-[:focus-visible]:visible"
                 label={state.read ? 'Mark as unread' : 'Mark as read'}
                 onClick={toggleRead}
               >
@@ -148,7 +148,10 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
               </RowButton>
               <RowButton
                 active={state.starred}
-                className={cn('size-8', !state.starred && 'invisible group-focus-within:visible group-hover:visible')}
+                className={cn(
+                  'size-8',
+                  !state.starred && 'invisible group-hover:visible group-has-[:focus-visible]:visible',
+                )}
                 label={state.starred ? 'Remove star' : 'Star'}
                 onClick={star}
               >
