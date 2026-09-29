@@ -39,29 +39,21 @@ export function ThreadToolbarSkeleton() {
   );
 }
 
-export async function ThreadHeader({ children, threadId }: { children: React.ReactNode; threadId: string }) {
+export async function ThreadHeader({ threadId }: { threadId: string }) {
   const thread = await getThreadSummary(threadId);
 
   return (
-    <>
-      <header data-testid="thread-header">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
-          <h1 className="text-xl leading-7 font-semibold sm:text-2xl sm:leading-8">{thread.subject}</h1>
-          {thread.labels.map(label => (
-            <LabelChip key={label.id} label={label} size="md" />
-          ))}
-        </div>
-        <div className="mt-6">
-          <SenderRow
-            cc={thread.latest.cc}
-            date={thread.latest.sentAt}
-            from={thread.latest.from}
-            to={thread.latest.to}
-          />
-        </div>
-      </header>
-      <div className="mt-5">{children}</div>
-    </>
+    <header data-testid="thread-header">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
+        <h1 className="text-xl leading-7 font-semibold sm:text-2xl sm:leading-8">{thread.subject}</h1>
+        {thread.labels.map(label => (
+          <LabelChip key={label.id} label={label} size="md" />
+        ))}
+      </div>
+      <div className="mt-6">
+        <SenderRow cc={thread.latest.cc} date={thread.latest.sentAt} from={thread.latest.from} to={thread.latest.to} />
+      </div>
+    </header>
   );
 }
 

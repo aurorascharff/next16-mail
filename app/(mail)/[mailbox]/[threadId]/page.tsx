@@ -26,17 +26,16 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
     <div className="flex h-full flex-col">
       <Suspense fallback={<ThreadToolbarSkeleton />}>
         {query.then(({ backHref, threadId }) => (
-          <Suspense fallback={<ThreadToolbarSkeleton />}>
-            <ThreadToolbar backHref={backHref} threadId={threadId} />
-          </Suspense>
+          <ThreadToolbar backHref={backHref} threadId={threadId} />
         ))}
       </Suspense>
       <article className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 pb-24 sm:px-8">
         <div className="mx-auto w-full max-w-4xl">
-          <Suspense fallback={<ThreadHeaderSkeleton />}>
+          <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
             {query.then(({ threadId }) => (
-              <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
-                <ThreadHeader threadId={threadId}>
+              <>
+                <ThreadHeader threadId={threadId} />
+                <div className="mt-5">
                   <ErrorBoundary title="This conversation could not be loaded">
                     <AnimatedSuspense fallback={<LatestMessageSkeleton />}>
                       <LatestMessage threadId={threadId} />
@@ -45,10 +44,10 @@ export default function ThreadPage({ params }: PageProps<'/[mailbox]/[threadId]'
                       </AnimatedSuspense>
                     </AnimatedSuspense>
                   </ErrorBoundary>
-                </ThreadHeader>
-              </AnimatedSuspense>
+                </div>
+              </>
             ))}
-          </Suspense>
+          </AnimatedSuspense>
         </div>
       </article>
     </div>

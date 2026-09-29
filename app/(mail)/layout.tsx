@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { MailSidebar, MailSidebarContent } from '@/components/mail-sidebar';
 import { MailTopBar } from '@/components/mail-top-bar';
 import { MobileSidebar } from '@/components/mobile-sidebar';
-import { ComposeDock } from '@/features/thread/components/compose-dock';
+import { ComposePanel } from '@/features/thread/components/compose-panel';
 import { ComposeProvider } from '@/features/thread/providers/compose-provider';
 
 export default function MailLayout({ children }: LayoutProps<'/'>) {
@@ -23,7 +23,7 @@ export default function MailLayout({ children }: LayoutProps<'/'>) {
         </div>
       </MobileSidebar>
       <Suspense>
-        <ComposeDock />
+        <ComposePanel />
       </Suspense>
     </ComposeProvider>
   );
