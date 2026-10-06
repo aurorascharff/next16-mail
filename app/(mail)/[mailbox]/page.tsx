@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
 import { AnimatedSuspense } from '@/components/ui/animated-suspense';
 import { ComposeButton } from '@/features/thread/components/compose-button';
 import { SelectionProvider } from '@/features/thread/components/selection';
@@ -20,7 +19,7 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
   return (
     <>
       <div className="flex h-full flex-col" data-thread-list>
-        <Suspense fallback={<ThreadListSkeleton />}>
+        <AnimatedSuspense fallback={<ThreadListSkeleton />}>
           {query.then(({ mailbox, page }) => (
             <SelectionProvider list={`${mailbox}:${page}`}>
               <ThreadListHeaderFor mailbox={mailbox} page={page} title={MAILBOX_LABELS[mailbox]} />
@@ -34,7 +33,7 @@ export default function MailboxPage({ params, searchParams }: PageProps<'/[mailb
               </div>
             </SelectionProvider>
           ))}
-        </Suspense>
+        </AnimatedSuspense>
       </div>
       <ComposeButton variant="fab" />
     </>

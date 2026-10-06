@@ -239,7 +239,7 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
   };
 }
 
-// Message content. The components await `unstable_navigation()` before calling these, which keeps bodies out of
+// Message content. The components await `navigation()` before calling these, which keeps bodies out of
 // the App Shell and every prefetch while the cached result still serves the next visitor.
 export async function getLatestMessage(threadId: string): Promise<ThreadMessage | null> {
   return getLatestMessageCached(threadId, await isSlowEnabled());

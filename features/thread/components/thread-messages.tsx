@@ -1,11 +1,11 @@
-import { unstable_navigation } from 'next/cache';
+import { navigation } from 'next/cache';
 
 import { getContacts, getEarlierMessages, getLatestMessage } from '../thread-queries';
 import { Attachments, MessageText, MessageTextSkeleton, SenderRow, SenderRowSkeleton } from './message-body';
 import { ReplyForm } from './reply-form';
 
 export async function LatestMessage({ threadId }: { threadId: string }) {
-  await unstable_navigation();
+  await navigation();
   const [latest, contacts] = await Promise.all([getLatestMessage(threadId), getContacts()]);
   if (!latest) return null;
 
@@ -25,7 +25,7 @@ export function LatestMessageSkeleton() {
 }
 
 export async function EarlierMessages({ threadId }: { threadId: string }) {
-  await unstable_navigation();
+  await navigation();
   const earlier = await getEarlierMessages(threadId);
   if (earlier.length === 0) return null;
 

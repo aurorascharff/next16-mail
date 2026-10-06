@@ -4,7 +4,7 @@
 
 # Next 16 Mail "Stamp"
 
-A Gmail-style mail client that demonstrates [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation) in [Next.js 16.4](https://nextjs.org/blog/next-16-4), including the new [`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation) API.
+A Gmail-style mail client that demonstrates [Instant Navigations](https://nextjs.org/docs/app/guides/instant-navigation) in [Next.js 16.5](https://nextjs.org/), including the [`navigation()`](https://nextjs.org/docs/app/api-reference/functions/navigation) API.
 
 [**Live demo →**](https://next16-mail.vercel.app/)
 
@@ -28,19 +28,19 @@ The architecture follows the [Next.js App Architecture](https://github.com/auror
 
 Each read is cached and arrives at a different stage of a navigation.
 
-| Read                                  | How it is cached                                        | When it arrives                         |
-| ------------------------------------- | ------------------------------------------------------- | --------------------------------------- |
-| Mailbox links and unread counts       | `'use cache'` per account                               | In the App Shell                        |
-| One page of a mailbox                 | `'use cache'` per account, mailbox, and page            | With a mailbox or pager link's prefetch |
-| Subject, sender, labels, and toolbar  | `'use cache'` per thread and account                    | With a row's prefetch                   |
-| The latest message and the reply form | `'use cache'` per thread, after `unstable_navigation()` | On the navigation                       |
-| Earlier messages in the thread        | `'use cache'` per thread, after `unstable_navigation()` | On the navigation, below the latest one |
+| Read                                  | How it is cached                               | When it arrives                         |
+| ------------------------------------- | ---------------------------------------------- | --------------------------------------- |
+| Mailbox links and unread counts       | `'use cache'` per account                      | In the App Shell                        |
+| One page of a mailbox                 | `'use cache'` per account, mailbox, and page   | With a mailbox or pager link's prefetch |
+| Subject, sender, labels, and toolbar  | `'use cache'` per thread and account           | With a row's prefetch                   |
+| The latest message and the reply form | `'use cache'` per thread, after `navigation()` | On the navigation                       |
+| Earlier messages in the thread        | `'use cache'` per thread, after `navigation()` | On the navigation, below the latest one |
 
 Opening a thread shows its header first. The latest message and the reply form appear together, and earlier messages stream in below them.
 
 ## Getting started
 
-Stamp runs on SQLite locally and Postgres in production, on a Next.js 16.4 canary. Copy `.env.example` to `.env.local`, then:
+Stamp runs on SQLite locally and Postgres in production, on a Next.js 16.5 canary. Copy `.env.example` to `.env.local`, then:
 
 ```bash
 pnpm install
@@ -77,7 +77,7 @@ pnpm typecheck
 
 ## Stack
 
-- **[Next.js 16.4](https://nextjs.org/)** canary: App Router, Cache Components, Partial Prefetching, `navigation()`, Server Functions
+- **[Next.js 16.5](https://nextjs.org/)** canary: App Router, Cache Components, Partial Prefetching, `navigation()`, Server Functions
 - **[React 19.3](https://react.dev/)** with React Compiler: Suspense, View Transitions, `useOptimistic`
 - **[TypeScript](https://www.typescriptlang.org/)** and **[Tailwind CSS v4](https://tailwindcss.com/)**
 - **[Prisma 7](https://www.prisma.io/)** on SQLite locally and PostgreSQL in production
