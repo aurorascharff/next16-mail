@@ -10,23 +10,25 @@ const icons: Record<Mailbox, LucideIcon> = { archive: Archive, inbox: Inbox, sen
 const linkClass =
   'group flex h-10 items-center gap-3 rounded-lg px-3 text-base tracking-tight transition-colors not-aria-[current=page]:hover:bg-card dark:not-aria-[current=page]:hover:bg-card-dark aria-[current=page]:bg-accent/10 aria-[current=page]:text-accent aria-[current=page]:dark:bg-accent/15 aria-[current=page]:font-bold aria-[current=page]:[&_svg]:stroke-[2.5]';
 
-export async function MailboxNav() {
+type Props = { prefetch?: boolean | 'auto' | null };
+
+export async function MailboxNav({ prefetch = true }: Props) {
   const counts = await getMailboxCounts();
-  return <MailboxNavShell counts={counts} />;
+  return <MailboxNavShell counts={counts} prefetch={prefetch} />;
 }
 
-export function MailboxNavSkeleton() {
-  return <MailboxNavShell counts={null} />;
+export function MailboxNavSkeleton({ prefetch = true }: Props) {
+  return <MailboxNavShell counts={null} prefetch={prefetch} />;
 }
 
-function MailboxNavShell({ counts }: { counts: MailboxCounts | null }) {
+function MailboxNavShell({ counts, prefetch }: { counts: MailboxCounts | null; prefetch: Props['prefetch'] }) {
   return (
     <nav aria-label="Mailboxes" className="flex flex-col gap-0.5">
       {MAILBOXES.map(mailbox => {
         const Icon = icons[mailbox];
         const count = counts?.[mailbox] ?? 0;
         return (
-          <NavLink className={linkClass} href={`/${mailbox}`} key={mailbox} prefetch={true}>
+          <NavLink className={linkClass} href={`/${mailbox}`} key={mailbox} prefetch={prefetch}>
             <Icon aria-hidden className="size-5 shrink-0" />
             <span className="flex-1">{MAILBOX_LABELS[mailbox]}</span>
             {count > 0 ? (

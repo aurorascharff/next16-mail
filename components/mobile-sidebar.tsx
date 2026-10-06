@@ -19,7 +19,7 @@ export function MobileSidebar({ children, sidebar }: { children: ReactNode; side
           backdrop={<div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] md:hidden" />}
           className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-3rem))] flex-col border-r pt-[max(1rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)] shadow-2xl outline-none md:hidden"
           hideOnInteractOutside
-          onClick={event => {
+          onClickCapture={event => {
             if ((event.target as HTMLElement).closest('a[href]')) store.hide();
           }}
           store={store}
