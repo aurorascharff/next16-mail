@@ -1,36 +1,24 @@
-import Link from 'next/link';
 import { HoverPrefetchLink } from '@/components/ui/hover-prefetch-link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLabels } from '../thread-queries';
 import type { Route } from 'next';
 
-export async function LabelNav({ intentPrefetch = true }: { intentPrefetch?: boolean }) {
+export async function LabelNav() {
   const labels = await getLabels();
 
   return (
     <nav aria-label="Labels" className="flex flex-col gap-0.5">
       <p className="text-gray flex h-9 items-center px-3 text-sm font-semibold tracking-tight">Labels</p>
-      {labels.map(label => {
-        const href = `/search?q=${encodeURIComponent(label.name)}` as Route;
-        const children = (
-          <>
-            <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: label.color }} />
-            {label.name}
-          </>
-        );
-        const props = {
-          children,
-          className:
-            'hover:bg-card dark:hover:bg-card-dark flex h-9 items-center gap-3 rounded-lg px-3 text-sm tracking-tight transition-colors',
-          href,
-        };
-
-        return intentPrefetch ? (
-          <HoverPrefetchLink {...props} key={label.id} />
-        ) : (
-          <Link {...props} key={label.id} prefetch="auto" />
-        );
-      })}
+      {labels.map(label => (
+        <HoverPrefetchLink
+          className="hover:bg-card dark:hover:bg-card-dark flex h-9 items-center gap-3 rounded-lg px-3 text-sm tracking-tight transition-colors"
+          href={`/search?q=${encodeURIComponent(label.name)}` as Route}
+          key={label.id}
+        >
+          <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: label.color }} />
+          {label.name}
+        </HoverPrefetchLink>
+      ))}
     </nav>
   );
 }
