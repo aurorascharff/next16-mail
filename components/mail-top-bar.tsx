@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { MobileSidebarTrigger } from '@/components/mobile-sidebar';
 import { BrandMark } from '@/components/ui/brand-mark';
 import { GitHubIcon } from '@/components/ui/github-icon';
@@ -23,7 +24,9 @@ export function MailTopBar() {
         </IconButton>
       </div>
       <div className="min-w-0 flex-1 md:max-w-2xl">
-        <SearchForm />
+        <Suspense fallback={<div aria-hidden className="bg-card dark:bg-card-dark h-10 w-full rounded-lg" />}>
+          <SearchForm />
+        </Suspense>
       </div>
     </header>
   );

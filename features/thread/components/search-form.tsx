@@ -1,7 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useId, useLayoutEffect, useRef, useTransition } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import type { Route } from 'next';
@@ -11,20 +11,23 @@ function searchHref(query: string) {
 }
 
 export function SearchForm() {
+  const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const [isPending, startTransition] = useTransition();
+  const query = searchParams.get('q') ?? '';
 
   useLayoutEffect(() => {
     const input = inputRef.current;
     if (!input) return;
-    input.value = new URLSearchParams(window.location.search).get('q') ?? '';
-    if (window.location.pathname === '/search') {
+    input.value = query;
+    if (pathname === '/search') {
       input.focus();
       input.setSelectionRange(input.value.length, input.value.length);
     }
-  }, []);
+  }, [pathname, query]);
 
   return (
     <Boundary label="SearchForm">
