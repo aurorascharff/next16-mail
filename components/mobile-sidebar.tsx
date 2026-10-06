@@ -2,7 +2,8 @@
 
 import * as Ariakit from '@ariakit/react';
 import { Menu, X } from 'lucide-react';
-import { createContext, use, type ReactNode } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { createContext, Suspense, use, useEffect, useRef, type ReactNode } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { IconButton } from '@/components/ui/icon-button';
 
@@ -14,14 +15,14 @@ export function MobileSidebar({ children, sidebar }: { children: ReactNode; side
   return (
     <MobileSidebarContext value={store}>
       {children}
+      <Suspense>
+        <MobileSidebarRouteCloser store={store} />
+      </Suspense>
       <Boundary label="MobileSidebar" asChild>
         <Ariakit.Dialog
           backdrop={<div className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] md:hidden" />}
           className="border-divider bg-surface dark:border-divider-dark dark:bg-surface-dark fixed inset-y-0 left-0 z-50 flex w-[min(20rem,calc(100vw-3rem))] flex-col border-r pt-[max(1rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)] shadow-2xl outline-none md:hidden"
           hideOnInteractOutside
-          onClick={event => {
-            if ((event.target as HTMLElement).closest('a[href]')) store.hide();
-          }}
           store={store}
           unmountOnHide
         >
@@ -37,6 +38,22 @@ export function MobileSidebar({ children, sidebar }: { children: ReactNode; side
       </Boundary>
     </MobileSidebarContext>
   );
+}
+
+function MobileSidebarRouteCloser({ store }: { store: Ariakit.DialogStore }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const location = `${pathname}?${searchParams.toString()}`;
+  const previousLocation = useRef(location);
+
+  useEffect(() => {
+    const previous = previousLocation.current;
+    previousLocation.current = location;
+
+    if (previous !== location) store.hide();
+  }, [location, store]);
+
+  return null;
 }
 
 export function MobileSidebarTrigger({ className }: { className?: string }) {
