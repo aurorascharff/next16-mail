@@ -8,6 +8,7 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await page.goto('/inbox');
     const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Reading pane explorations' });
     await expect(row).toBeVisible();
+    await page.context().addCookies([{ name: 'stamp-slow', url: page.url(), value: '1' }]);
 
     await instant(page, async () => {
       await row.getByRole('link').click();
@@ -23,8 +24,17 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     });
 
     await expect(page.getByTestId('thread-latest').filter(visible)).toContainText('Agreed on both.');
+    await expect(page.getByTestId('earlier-message').filter(visible)).toHaveCount(0);
     await expect(page.getByTestId('earlier-message').filter(visible)).toHaveCount(2);
     await expect(page.getByRole('list', { name: 'Attachments' }).filter(visible)).toContainText('reading-pane-c.png');
+
+    await instant(page, async () => {
+      await page.getByRole('link', { name: 'Back to list' }).click();
+      await page.waitForURL(url => url.pathname === '/inbox');
+      await expect(
+        page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Reading pane explorations' }),
+      ).toBeVisible();
+    });
   });
 
   test('a reply becomes the latest message and the previous one moves down', async ({ page }) => {

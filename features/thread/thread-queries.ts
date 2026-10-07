@@ -309,7 +309,7 @@ async function getEarlierMessagesCached(threadId: string, slow: boolean): Promis
   cacheLife('max');
   cacheTag(threadTags.detail(threadId));
 
-  await delay(1800, slow);
+  await delay(3000, slow);
   const messages = await prisma.message.findMany({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },

@@ -1,13 +1,13 @@
 'use client';
 
 import { Archive, ArchiveRestore, ArrowLeft, Star } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { startTransition, useOptimistic, useTransition } from 'react';
 import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { actionToast } from '@/components/ui/action-toast';
 import { IconButton } from '@/components/ui/icon-button';
-import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { cn } from '@/lib/utils';
 import { moveThread, toggleStar } from '../thread-actions';
 import type { Route } from 'next';
@@ -74,13 +74,14 @@ export function ArchiveButton({
 export function BackToList({ href }: { href: Route }) {
   return (
     <Boundary label="BackToList" asChild>
-      <PrefetchLink
+      <Link
         aria-label="Back to list"
         className="text-gray hover:bg-card dark:hover:bg-card-dark inline-flex size-9 shrink-0 items-center justify-center rounded-full transition-colors hover:text-black dark:hover:text-white"
         href={href}
+        prefetch={true}
       >
         <ArrowLeft className="size-5" />
-      </PrefetchLink>
+      </Link>
     </Boundary>
   );
 }
