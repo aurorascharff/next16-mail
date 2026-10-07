@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 };
 
 const description =
-  'A Gmail-style mail client demo exploring Cache Components, Partial Prefetching, and the navigation() API with Next.js 16.4.';
+  'A Gmail-style mail client demo exploring Cache Components, Partial Prefetching, and the navigation() API with Next.js 16.5.';
 
 export const metadata: Metadata = {
   applicationName: 'Stamp',

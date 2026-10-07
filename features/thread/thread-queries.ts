@@ -7,7 +7,7 @@ import { verifyUser } from '@/features/user/user-queries';
 import { prisma, usesSqlite } from '@/lib/db';
 import { delay } from '@/lib/utils';
 import { threadTags } from './thread-cache';
-import { MAILBOXES, PAGE_SIZE, type Mailbox } from './thread-mailboxes';
+import { PAGE_SIZE, type Mailbox } from './thread-mailboxes';
 import type { Label, MailboxCounts, Participant, ThreadListItem, ThreadMessage, ThreadSummary } from './types/thread';
 
 const participantSelect = { email: true, id: true, name: true } as const;
@@ -239,7 +239,7 @@ export async function getThreadSummary(threadId: string): Promise<ThreadSummary>
 async function getThreadSummaryForUser(threadId: string, userId: string, slow: boolean): Promise<ThreadSummary> {
   'use cache';
   cacheLife('max');
-  cacheTag(threadTags.detail(threadId), threadTags.list(userId));
+  cacheTag(threadTags.detail(threadId), threadTags.state(userId, threadId));
 
   await delay(600, slow);
   const thread = await prisma.thread.findUnique({
@@ -283,10 +283,11 @@ async function getThreadSummaryForUser(threadId: string, userId: string, slow: b
 // Message content. The components await `navigation()` before calling these, which keeps bodies out of
 // the App Shell and every prefetch while the cached result still serves the next visitor.
 export async function getLatestMessage(threadId: string): Promise<ThreadMessage | null> {
-  return getLatestMessageCached(threadId, await isSlowEnabled());
+  const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
+  return getLatestMessageCached(threadId, user.id, slow);
 }
 
-async function getLatestMessageCached(threadId: string, slow: boolean): Promise<ThreadMessage | null> {
+async function getLatestMessageCached(threadId: string, userId: string, slow: boolean): Promise<ThreadMessage | null> {
   'use cache';
   cacheLife('max');
   cacheTag(threadTags.detail(threadId));
@@ -295,16 +296,17 @@ async function getLatestMessageCached(threadId: string, slow: boolean): Promise<
   const message = await prisma.message.findFirst({
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
-    where: { threadId },
+    where: { thread: { states: { some: { userId } } }, threadId },
   });
   return message ? toMessage(message) : null;
 }
 
 export async function getEarlierMessages(threadId: string): Promise<ThreadMessage[]> {
-  return getEarlierMessagesCached(threadId, await isSlowEnabled());
+  const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
+  return getEarlierMessagesCached(threadId, user.id, slow);
 }
 
-async function getEarlierMessagesCached(threadId: string, slow: boolean): Promise<ThreadMessage[]> {
+async function getEarlierMessagesCached(threadId: string, userId: string, slow: boolean): Promise<ThreadMessage[]> {
   'use cache';
   cacheLife('max');
   cacheTag(threadTags.detail(threadId));
@@ -314,7 +316,7 @@ async function getEarlierMessagesCached(threadId: string, slow: boolean): Promis
     include: messageInclude,
     orderBy: { sentAt: 'desc' },
     skip: 1,
-    where: { threadId },
+    where: { thread: { states: { some: { userId } } }, threadId },
   });
   return messages.map(toMessage);
 }
@@ -342,8 +344,6 @@ async function getContactsForUser(userId: string): Promise<Participant[]> {
     },
   });
 }
-
-export { MAILBOXES };
 
 export async function getLabels(): Promise<Label[]> {
   'use cache';

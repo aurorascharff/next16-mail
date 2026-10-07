@@ -10,54 +10,98 @@ import { resolveRecipients, splitAddresses } from './thread-recipients';
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
+const threadIdSchema = z.string().trim().min(1).max(100);
+const threadIdsSchema = z.array(threadIdSchema).min(1).max(100);
+const mailboxSchema = z.enum(['inbox', 'archive']);
+
+function invalidAction(): ActionResult {
+  return { error: 'That action is invalid.', ok: false };
+}
+
+function updateThreadState(userId: string, threadIds: string[]) {
+  updateTag(threadTags.list(userId));
+  for (const threadId of threadIds) updateTag(threadTags.state(userId, threadId));
+}
+
 export async function toggleStar(threadId: string, starred: boolean): Promise<ActionResult> {
   const user = await verifyUser();
-  const state = await prisma.threadState.findUnique({ where: { userId_threadId: { threadId, userId: user.id } } });
+  const parsed = z.object({ starred: z.boolean(), threadId: threadIdSchema }).safeParse({ starred, threadId });
+  if (!parsed.success) return invalidAction();
+  const state = await prisma.threadState.findUnique({
+    where: { userId_threadId: { threadId: parsed.data.threadId, userId: user.id } },
+  });
   if (!state) return { error: 'That conversation could not be found.', ok: false };
 
-  await prisma.threadState.update({ data: { starred }, where: { userId_threadId: { threadId, userId: user.id } } });
-  updateTag(threadTags.list(user.id));
+  await prisma.threadState.update({
+    data: { starred: parsed.data.starred },
+    where: { userId_threadId: { threadId: parsed.data.threadId, userId: user.id } },
+  });
+  updateThreadState(user.id, [parsed.data.threadId]);
   return { ok: true };
 }
 
 export async function moveThread(threadId: string, mailbox: 'inbox' | 'archive'): Promise<ActionResult> {
   const user = await verifyUser();
-  const state = await prisma.threadState.findUnique({ where: { userId_threadId: { threadId, userId: user.id } } });
+  const parsed = z.object({ mailbox: mailboxSchema, threadId: threadIdSchema }).safeParse({ mailbox, threadId });
+  if (!parsed.success) return invalidAction();
+  const state = await prisma.threadState.findUnique({
+    where: { userId_threadId: { threadId: parsed.data.threadId, userId: user.id } },
+  });
   if (!state) return { error: 'That conversation could not be found.', ok: false };
 
-  await prisma.threadState.update({ data: { mailbox }, where: { userId_threadId: { threadId, userId: user.id } } });
-  updateTag(threadTags.list(user.id));
+  await prisma.threadState.update({
+    data: { mailbox: parsed.data.mailbox },
+    where: { userId_threadId: { threadId: parsed.data.threadId, userId: user.id } },
+  });
+  updateThreadState(user.id, [parsed.data.threadId]);
   return { ok: true };
 }
 
 export async function moveThreads(threadIds: string[], mailbox: 'inbox' | 'archive'): Promise<ActionResult> {
   const user = await verifyUser();
-  await prisma.threadState.updateMany({ data: { mailbox }, where: { threadId: { in: threadIds }, userId: user.id } });
-  updateTag(threadTags.list(user.id));
+  const parsed = z.object({ mailbox: mailboxSchema, threadIds: threadIdsSchema }).safeParse({ mailbox, threadIds });
+  if (!parsed.success) return invalidAction();
+  await prisma.threadState.updateMany({
+    data: { mailbox: parsed.data.mailbox },
+    where: { threadId: { in: parsed.data.threadIds }, userId: user.id },
+  });
+  updateThreadState(user.id, parsed.data.threadIds);
   return { ok: true };
 }
 
 export async function starThreads(threadIds: string[], starred: boolean): Promise<ActionResult> {
   const user = await verifyUser();
-  await prisma.threadState.updateMany({ data: { starred }, where: { threadId: { in: threadIds }, userId: user.id } });
-  updateTag(threadTags.list(user.id));
+  const parsed = z.object({ starred: z.boolean(), threadIds: threadIdsSchema }).safeParse({ starred, threadIds });
+  if (!parsed.success) return invalidAction();
+  await prisma.threadState.updateMany({
+    data: { starred: parsed.data.starred },
+    where: { threadId: { in: parsed.data.threadIds }, userId: user.id },
+  });
+  updateThreadState(user.id, parsed.data.threadIds);
   return { ok: true };
 }
 
 export async function markThreadsRead(threadIds: string[], read: boolean): Promise<ActionResult> {
   const user = await verifyUser();
-  await prisma.threadState.updateMany({ data: { read }, where: { threadId: { in: threadIds }, userId: user.id } });
-  updateTag(threadTags.list(user.id));
+  const parsed = z.object({ read: z.boolean(), threadIds: threadIdsSchema }).safeParse({ read, threadIds });
+  if (!parsed.success) return invalidAction();
+  await prisma.threadState.updateMany({
+    data: { read: parsed.data.read },
+    where: { threadId: { in: parsed.data.threadIds }, userId: user.id },
+  });
+  updateThreadState(user.id, parsed.data.threadIds);
   return { ok: true };
 }
 
 export async function markThreadRead(threadId: string): Promise<ActionResult> {
   const user = await verifyUser();
+  const parsed = threadIdSchema.safeParse(threadId);
+  if (!parsed.success) return invalidAction();
   const { count } = await prisma.threadState.updateMany({
     data: { read: true },
-    where: { read: false, threadId, userId: user.id },
+    where: { read: false, threadId: parsed.data, userId: user.id },
   });
-  if (count > 0) updateTag(threadTags.list(user.id));
+  if (count > 0) updateThreadState(user.id, [parsed.data]);
   return { ok: true };
 }
 
