@@ -31,7 +31,14 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await page.goto('/inbox');
     const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' });
     await expect(row).not.toHaveAttribute('data-read', '');
+    const markReadRequest = page.waitForRequest(
+      request =>
+        request.method() === 'POST' &&
+        new URL(request.url()).pathname === '/inbox' &&
+        request.postData()?.includes('thr-hover-hook') === true,
+    );
     await row.getByRole('link').click();
+    await markReadRequest;
     await page.waitForURL(url => url.pathname === '/inbox/thr-hover-hook');
     await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
     await page.getByRole('link', { name: 'Back to list' }).click();
