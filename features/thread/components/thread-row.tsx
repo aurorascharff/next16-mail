@@ -8,7 +8,7 @@ import { actionToast } from '@/components/ui/action-toast';
 import { PrefetchLink } from '@/components/ui/prefetch-link';
 import { UserAvatar } from '@/features/user/components/user-avatar';
 import { cn } from '@/lib/utils';
-import { markThreadRead, markThreadsRead, moveThread, toggleStar } from '../thread-actions';
+import { markThreadsRead, moveThread, toggleStar } from '../thread-actions';
 import { LabelChip } from './label-chip';
 import { RowButton } from './row-button';
 import { useRowSelection } from './selection';
@@ -37,15 +37,6 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
     startTransition(async () => {
       setState({ ...state, read: !state.read });
       const result = await markThreadsRead([thread.id], !state.read);
-      if (!result.ok) toast.error(result.error);
-    });
-  }
-
-  function open() {
-    if (state.read) return;
-    startTransition(async () => {
-      setState({ ...state, read: true });
-      const result = await markThreadRead(thread.id);
       if (!result.ok) toast.error(result.error);
     });
   }
@@ -86,7 +77,6 @@ export function ThreadRow({ href, mailbox, thread }: { href: Route; mailbox?: Ma
           aria-label={thread.subject}
           className="focus-visible:ring-accent/40 absolute inset-0 z-10 outline-none focus-visible:ring-2 focus-visible:ring-inset"
           href={href}
-          onNavigate={open}
         />
         <button
           aria-checked={selected}

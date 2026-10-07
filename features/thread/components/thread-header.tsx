@@ -16,7 +16,7 @@ export async function ThreadToolbar({ backHref, threadId }: { backHref: Route; t
 
   return (
     <div className={toolbarClass} data-testid="thread-toolbar" style={{ viewTransitionName: 'thread-toolbar' }}>
-      {!thread.read ? <MarkThreadRead threadId={threadId} /> : null}
+      <MarkThreadRead threadId={threadId} />
       <BackToList href={backHref} />
       <span className="bg-divider dark:bg-divider-dark mx-1 h-5 w-px" />
       <ArchiveButton backHref={backHref} threadId={thread.id} threadMailbox={thread.mailbox} />

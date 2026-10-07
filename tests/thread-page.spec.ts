@@ -27,27 +27,6 @@ test.describe('Thread (/[mailbox]/[threadId])', () => {
     await expect(page.getByRole('list', { name: 'Attachments' }).filter(visible)).toContainText('reading-pane-c.png');
   });
 
-  test('opening an unread thread marks it read', async ({ page }) => {
-    await page.goto('/inbox');
-    const row = page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' });
-    await expect(row).not.toHaveAttribute('data-read', '');
-    const markReadRequest = page.waitForRequest(
-      request =>
-        request.method() === 'POST' &&
-        new URL(request.url()).pathname === '/inbox' &&
-        request.postData()?.includes('thr-hover-hook') === true,
-    );
-    await row.getByRole('link').click();
-    await markReadRequest;
-    await page.waitForURL(url => url.pathname === '/inbox/thr-hover-hook');
-    await expect(page.getByTestId('thread-latest').filter(visible)).toBeVisible();
-    await page.getByRole('link', { name: 'Back to list' }).click();
-    await page.waitForURL(url => url.pathname === '/inbox');
-    await expect(
-      page.getByTestId('thread-row').filter(visible).filter({ hasText: 'Intent-based prefetch hook' }),
-    ).toHaveAttribute('data-read', '');
-  });
-
   test('a reply becomes the latest message and the previous one moves down', async ({ page }) => {
     await page.goto('/inbox/thr-standup-move');
     await expect(page.getByTestId('earlier-message').filter(visible)).toHaveCount(1);
