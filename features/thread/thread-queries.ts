@@ -66,6 +66,7 @@ async function getMailboxCountsForUser(userId: string, slow: boolean): Promise<M
 
 /** The rows of one mailbox. Keyed on the URL, so a mailbox link resolves it in a per-link prefetch. */
 export type ThreadPage = { threads: ThreadListItem[]; total: number };
+export type LabelThreadPage = ThreadPage & { label: Label };
 
 export async function getThreads(mailbox: Mailbox, page: number): Promise<ThreadPage> {
   const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
@@ -97,6 +98,46 @@ async function getThreadsForUser(userId: string, mailbox: Mailbox, page: number,
     prisma.thread.count({ where }),
   ]);
   return { threads: threads.map(thread => toListItem(thread, userId)), total };
+}
+
+export async function getLabelThreads(labelId: string, page: number): Promise<LabelThreadPage> {
+  const [user, slow] = await Promise.all([verifyUser(), isSlowEnabled()]);
+  return getLabelThreadsForUser(user.id, labelId, page, slow);
+}
+
+async function getLabelThreadsForUser(
+  userId: string,
+  labelId: string,
+  page: number,
+  slow: boolean,
+): Promise<LabelThreadPage> {
+  'use cache';
+  cacheLife('max');
+  cacheTag(threadTags.labels, threadTags.list(userId));
+
+  await delay(500, slow);
+  const where = { labels: { some: { id: labelId } }, states: { some: { userId } } };
+  const [label, threads, total] = await Promise.all([
+    prisma.label.findUnique({ where: { id: labelId } }),
+    prisma.thread.findMany({
+      include: {
+        labels: true,
+        messages: {
+          include: { attachments: { select: { id: true } }, from: { select: participantSelect } },
+          orderBy: { sentAt: 'asc' },
+        },
+        states: { where: { userId } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      where,
+    }),
+    prisma.thread.count({ where }),
+  ]);
+  if (!label) notFound();
+
+  return { label, threads: threads.map(thread => toListItem(thread, userId)), total };
 }
 
 export async function searchThreads(query: string): Promise<ThreadListItem[]> {

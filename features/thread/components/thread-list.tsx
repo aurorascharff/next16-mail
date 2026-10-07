@@ -3,11 +3,12 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { PAGE_SIZE, type Mailbox } from '../thread-mailboxes';
-import { getThreads, searchThreads, type ThreadPage } from '../thread-queries';
-import { SelectAll, ThreadListToolbar } from './selection';
+import { getLabelThreads, getThreads, searchThreads, type ThreadPage } from '../thread-queries';
+import { SelectAll, SelectionProvider, ThreadListToolbar } from './selection';
 import { ListTitle, Pager, ThreadListHeader } from './thread-list-header';
 import { ThreadRow } from './thread-row';
 import type { ListLocation } from '../thread-list-url';
+import type { ThreadListItem } from '../types/thread';
 import type { Route } from 'next';
 
 type ListProps = { mailbox?: Mailbox; page: number; q?: string };
@@ -66,21 +67,55 @@ export async function ThreadList(props: ListProps) {
     const copy = props.mailbox ? emptyCopy[props.mailbox] : { body: undefined, title: 'No results' };
     return <EmptyState body={copy.body} className="m-3" title={copy.title} />;
   }
+  return <ThreadRows hrefFor={thread => threadHref(props, thread.id)} mailbox={props.mailbox} threads={threads} />;
+}
+
+function threadHref(props: ListProps, threadId: string) {
+  return (
+    props.mailbox ? `/${props.mailbox}/${threadId}` : `/search/${threadId}?q=${encodeURIComponent(props.q ?? '')}`
+  ) as Route;
+}
+
+function ThreadRows({
+  hrefFor,
+  mailbox,
+  threads,
+}: {
+  hrefFor: (thread: ThreadListItem) => Route;
+  mailbox?: Mailbox;
+  threads: ThreadListItem[];
+}) {
   return (
     <ul aria-label="Conversations" className="flex flex-col" data-testid="thread-rows">
       {threads.map(thread => (
-        <ThreadRow
-          href={
-            (props.mailbox
-              ? `/${props.mailbox}/${thread.id}`
-              : `/search/${thread.id}?q=${encodeURIComponent(props.q ?? '')}`) as Route
-          }
-          key={thread.id}
-          mailbox={props.mailbox}
-          thread={thread}
-        />
+        <ThreadRow href={hrefFor(thread)} key={thread.id} mailbox={mailbox} thread={thread} />
       ))}
     </ul>
+  );
+}
+
+export async function LabelThreadList({ labelId, page }: { labelId: string; page: number }) {
+  const { label, threads, total } = await getLabelThreads(labelId, page);
+  const base = `/label/${encodeURIComponent(label.id)}`;
+
+  return (
+    <SelectionProvider list={`label:${label.id}:${page}`}>
+      <ThreadListToolbar
+        pager={<Pager count={threads.length} list={{ base, page }} pageSize={PAGE_SIZE} total={total} />}
+        selectAll={<SelectAll threads={threads.map(({ id, read, starred }) => ({ id, read, starred }))} />}
+        title={label.name}
+      />
+      <div
+        className="thread-results min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-y-contain"
+        key={`${label.id}:${page}`}
+      >
+        {total === 0 ? (
+          <EmptyState body="Conversations with this label show up here." className="m-3" title="No conversations" />
+        ) : (
+          <ThreadRows hrefFor={thread => `${base}/${thread.id}` as Route} threads={threads} />
+        )}
+      </div>
+    </SelectionProvider>
   );
 }
 

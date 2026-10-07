@@ -12,7 +12,7 @@ export async function LabelNav() {
       {labels.map(label => (
         <HoverPrefetchLink
           className="hover:bg-card dark:hover:bg-card-dark flex h-9 items-center gap-3 rounded-lg px-3 text-sm tracking-tight transition-colors"
-          href={`/search?q=${encodeURIComponent(label.name)}` as Route}
+          href={`/label/${encodeURIComponent(label.id)}` as Route}
           key={label.id}
         >
           <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: label.color }} />

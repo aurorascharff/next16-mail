@@ -12,7 +12,7 @@ test.describe('Mobile sidebar', () => {
 
     await openNavigation.evaluate(button => (button as HTMLButtonElement).click());
     await design.click();
-    await page.waitForURL(url => url.pathname === '/search' && url.searchParams.get('q') === 'Design');
+    await page.waitForURL(url => url.pathname === '/label/design');
     await expect(heading).toHaveCount(0);
 
     await openNavigation.evaluate(button => (button as HTMLButtonElement).click());
@@ -30,8 +30,9 @@ test.describe('Mobile sidebar', () => {
     await expect(heading).toBeVisible();
 
     await design.click();
-    await page.waitForURL(url => url.pathname === '/search' && url.searchParams.get('q') === 'Design');
+    await page.waitForURL(url => url.pathname === '/label/design');
     await expect(heading).toHaveCount(0);
-    await expect(page.getByRole('searchbox', { name: 'Search mail' })).toHaveValue('Design');
+    await expect(page.getByRole('searchbox', { name: 'Search mail' })).toHaveValue('');
+    await expect(page.getByRole('searchbox', { name: 'Search mail' })).not.toBeFocused();
   });
 });

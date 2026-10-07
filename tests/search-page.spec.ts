@@ -3,17 +3,6 @@ import { expect, test } from '@playwright/test';
 const visible = { visible: true };
 
 test.describe('Search (/search)', () => {
-  test('label navigation syncs the query into the search field', async ({ page }) => {
-    await page.goto('/inbox');
-    await page.getByRole('navigation', { name: 'Labels' }).getByRole('link', { name: 'Design' }).click();
-    await page.waitForURL(url => url.pathname === '/search' && url.searchParams.get('q') === 'Design');
-    await expect(page.getByRole('searchbox', { name: 'Search mail' })).toHaveValue('Design');
-
-    await page.getByRole('navigation', { name: 'Mailboxes' }).getByRole('link', { name: /Inbox/ }).click();
-    await page.waitForURL(url => url.pathname === '/inbox');
-    await expect(page.getByRole('searchbox', { name: 'Search mail' })).toHaveValue('');
-  });
-
   test('typing in the search box navigates, keeps focus, and streams matching rows', async ({ page }) => {
     await page.goto('/inbox');
     const box = page.getByRole('searchbox', { name: 'Search mail' }).filter(visible);
