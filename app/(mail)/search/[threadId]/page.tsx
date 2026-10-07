@@ -30,7 +30,7 @@ export default function SearchThreadPage({ params, searchParams }: PageProps<'/s
           <ThreadToolbar backHref={backHref} threadId={threadId} />
         ))}
       </Suspense>
-      <article className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 pb-24 sm:px-8">
+      <article className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 pb-24 [scrollbar-gutter:stable] sm:px-8">
         <div className="mx-auto w-full max-w-4xl">
           <AnimatedSuspense fallback={<ThreadHeaderSkeleton />}>
             {query.then(({ threadId }) => (

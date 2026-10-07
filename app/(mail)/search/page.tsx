@@ -29,7 +29,7 @@ export default function SearchPage({ searchParams }: PageProps<'/search'>) {
                   }
                 />
               )}
-              <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+              <div className="thread-results min-h-0 flex-1 overflow-y-auto overscroll-y-contain [scrollbar-gutter:stable]">
                 {q ? <ThreadList page={1} q={q} /> : <EmptyState className="m-3" title="Search your mail" />}
               </div>
             </SelectionProvider>
