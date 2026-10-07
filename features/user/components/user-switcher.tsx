@@ -4,6 +4,7 @@ import * as Ariakit from '@ariakit/react';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
+import { toast } from 'sonner';
 import { Boundary } from '@/components/internal/boundary';
 import { cn } from '@/lib/utils';
 import { switchUser } from '../user-actions';
@@ -22,7 +23,11 @@ export function UserSwitcher({ accounts, currentUserId }: { accounts: User[]; cu
     if (id === optimisticId) return;
     startTransition(async () => {
       setOptimisticId(id);
-      await switchUser(id);
+      const result = await switchUser(id);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       router.push('/inbox');
     });
   }

@@ -3,7 +3,7 @@
 import * as Ariakit from '@ariakit/react';
 import { Menu, X } from 'lucide-react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { createContext, Suspense, use, useEffect, useRef, type ReactNode } from 'react';
+import { createContext, Suspense, use, useEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { Boundary } from '@/components/internal/boundary';
 import { IconButton } from '@/components/ui/icon-button';
 
@@ -11,12 +11,13 @@ const MobileSidebarContext = createContext<Ariakit.DialogStore | null>(null);
 
 export function MobileSidebar({ children, sidebar }: { children: ReactNode; sidebar: ReactNode }) {
   const store = Ariakit.useDialogStore();
+  const previousLocationRef = useRef<string | null>(null);
 
   return (
     <MobileSidebarContext value={store}>
       {children}
       <Suspense>
-        <MobileSidebarRouteCloser store={store} />
+        <MobileSidebarRouteCloser previousLocationRef={previousLocationRef} store={store} />
       </Suspense>
       <Boundary label="MobileSidebar" asChild>
         <Ariakit.Dialog
@@ -40,18 +41,23 @@ export function MobileSidebar({ children, sidebar }: { children: ReactNode; side
   );
 }
 
-function MobileSidebarRouteCloser({ store }: { store: Ariakit.DialogStore }) {
+function MobileSidebarRouteCloser({
+  previousLocationRef,
+  store,
+}: {
+  previousLocationRef: RefObject<string | null>;
+  store: Ariakit.DialogStore;
+}) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const location = `${pathname}?${searchParams.toString()}`;
-  const previousLocation = useRef(location);
 
   useEffect(() => {
-    const previous = previousLocation.current;
-    previousLocation.current = location;
+    const previous = previousLocationRef.current;
+    previousLocationRef.current = location;
 
-    if (previous !== location) store.hide();
-  }, [location, store]);
+    if (previous !== null && previous !== location) store.hide();
+  }, [location, previousLocationRef, store]);
 
   return null;
 }

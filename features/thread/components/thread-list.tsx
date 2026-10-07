@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -30,44 +29,32 @@ async function loadPage({ mailbox, page, q }: ListProps): Promise<ThreadPage> {
   return { threads, total: threads.length };
 }
 
-// The header sits outside the rows boundary; only its two data-dependent controls wait for the rows.
-export function ThreadListHeaderFor({ title, ...props }: ListProps & { title: string }) {
-  return (
-    <ThreadListToolbar
-      mailbox={props.mailbox}
-      pager={
-        <Suspense>
-          <PagerFor {...props} />
-        </Suspense>
-      }
-      selectAll={
-        <Suspense fallback={<SelectAll />}>
-          <SelectAllFor {...props} />
-        </Suspense>
-      }
-      title={title}
-    />
-  );
-}
-
-async function SelectAllFor(props: ListProps) {
-  const { threads } = await loadPage(props);
-  return <SelectAll threads={threads.map(({ id, read, starred }) => ({ id, read, starred }))} />;
-}
-
-async function PagerFor(props: ListProps) {
+export async function ThreadList({ title, ...props }: ListProps & { title: string }) {
   const { threads, total } = await loadPage(props);
   const pageSize = props.mailbox ? PAGE_SIZE : Math.max(total, 1);
-  return <Pager count={threads.length} list={locationOf(props)} pageSize={pageSize} total={total} />;
-}
+  const list = props.mailbox ? `${props.mailbox}:${props.page}` : (props.q ?? '');
+  const empty = props.mailbox ? emptyCopy[props.mailbox] : { body: undefined, title: 'No results' };
 
-export async function ThreadList(props: ListProps) {
-  const { threads, total } = await loadPage(props);
-  if (total === 0) {
-    const copy = props.mailbox ? emptyCopy[props.mailbox] : { body: undefined, title: 'No results' };
-    return <EmptyState body={copy.body} className="m-3" title={copy.title} />;
-  }
-  return <ThreadRows hrefFor={thread => threadHref(props, thread.id)} mailbox={props.mailbox} threads={threads} />;
+  return (
+    <SelectionProvider list={list}>
+      <ThreadListToolbar
+        mailbox={props.mailbox}
+        pager={<Pager count={threads.length} list={locationOf(props)} pageSize={pageSize} total={total} />}
+        selectAll={<SelectAll threads={threads.map(({ id, read, starred }) => ({ id, read, starred }))} />}
+        title={title}
+      />
+      <div
+        className="thread-results min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-y-contain"
+        key={list}
+      >
+        {total === 0 ? (
+          <EmptyState body={empty.body} className="m-3" title={empty.title} />
+        ) : (
+          <ThreadRows hrefFor={thread => threadHref(props, thread.id)} mailbox={props.mailbox} threads={threads} />
+        )}
+      </div>
+    </SelectionProvider>
+  );
 }
 
 function threadHref(props: ListProps, threadId: string) {
@@ -121,17 +108,24 @@ export async function LabelThreadList({ labelId, page }: { labelId: string; page
 
 export function ThreadListSkeleton({ count = 6, title = '' }: { count?: number; title?: string }) {
   return (
-    <div aria-hidden>
-      <ThreadListHeader
-        leading={
-          <>
-            <SelectAll />
-            <ListTitle>{title}</ListTitle>
-          </>
-        }
-      />
-      <ThreadRowsSkeleton count={count} />
-    </div>
+    <>
+      <div aria-hidden>
+        <ThreadListHeader
+          leading={
+            <>
+              <SelectAll />
+              <ListTitle>{title}</ListTitle>
+            </>
+          }
+        />
+      </div>
+      <div
+        aria-hidden
+        className="thread-results min-h-0 flex-1 [scrollbar-gutter:stable] overflow-y-auto overscroll-y-contain"
+      >
+        <ThreadRowsSkeleton count={count} />
+      </div>
+    </>
   );
 }
 
